@@ -45,7 +45,7 @@ struct HistoryScreen: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
-                if !history.isEmpty {
+                if history.isEmpty {
                     EmptyHistoryView(isPresented: $isPresented)
                 } else {
                     ScrollView {
