@@ -1,7 +1,9 @@
 import SwiftUI
-import MessageUI
+import RevenueCat
+import RevenueCatUI
 
 struct ProfileScreen: View {
+    @EnvironmentObject var purchaseVM: PurchaseViewModel
     @Binding var isPresented: Bool
     @State private var showSettings = false
     
@@ -43,6 +45,9 @@ struct ProfileScreen: View {
 
 // Free Credits Card
 struct CreditCardView: View {
+    @EnvironmentObject var purchaseVM: PurchaseViewModel
+    @State private var showPaywall = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -51,7 +56,7 @@ struct CreditCardView: View {
                     .foregroundColor(.white)
                 Spacer()
                 Button(action: {
-                    // Upgrade action here
+                    showPaywall = true
                 }) {
                     Text("Upgrade")
                         .fontWeight(.semibold)
@@ -60,6 +65,11 @@ struct CreditCardView: View {
                         .background(Color.white)
                         .foregroundColor(.black)
                         .clipShape(Capsule())
+                }
+                .fullScreenCover(isPresented: $showPaywall) {
+                    purchaseVM.refreshPurchaseStatus()
+                } content: {
+                    PaywallView()
                 }
             }
             Divider().background(Color.white.opacity(0.1))

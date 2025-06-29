@@ -6,12 +6,23 @@
 //
 
 import SwiftUI
+import RevenueCat
 
 @main
 struct voicelyApp: App {
+    
+    init() {
+        Purchases.configure(
+            with: Configuration.Builder(withAPIKey: "appl_HvoyfCcPNsFvyReUbXgmoTSbOWx")
+                .with(storeKitVersion: .storeKit2)
+                .build()
+        )
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(PurchaseViewModel.shared)
         }
     }
 }

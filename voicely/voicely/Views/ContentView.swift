@@ -7,8 +7,11 @@
 
 import SwiftUI
 import AVFoundation
+import RevenueCat
+import RevenueCatUI
 
 struct ContentView: View {
+    @EnvironmentObject var purchaseVM: PurchaseViewModel
     @StateObject var viewModel = MainViewModel(selectedVoice: Voice.default)
     @FocusState private var isTextFieldFocused: Bool
     @State private var showHistory = false
