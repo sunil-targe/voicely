@@ -1,5 +1,41 @@
 import SwiftUI
 
+struct EmptyHistoryView: View {
+    @Binding var isPresented: Bool
+    var body: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "waveform")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 64, height: 64)
+                .foregroundColor(.white.opacity(0.18))
+            Text("No Voices Yet")
+                .font(.title2).fontWeight(.bold)
+                .foregroundColor(.white.opacity(0.9))
+            Text("Your generated voices will appear here.")
+                .font(.body)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+            Button(action: {
+                isPresented = false
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles").imageScale(.medium)
+                        .padding(.leading)
+                    Text("Generate your first voice")
+                        .fontWeight(.semibold)
+                        .padding(.trailing)
+                        .padding(.vertical, 14)
+                }
+                .foregroundColor(.black)
+                .background(Color.white)
+                .cornerRadius(14)
+            }
+            .padding(.top, 8)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
 struct HistoryScreen: View {
     @Binding var isPresented: Bool
     let history: [HistoryItem]
@@ -9,42 +45,46 @@ struct HistoryScreen: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(history) { item in
-                            Button(action: {
-                                selectedItem = item
-                                withAnimation { showPlayer = true }
-                            }) {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack {
-                                        Circle().fill(item.voice.color.color).frame(width: 24, height: 24)
-                                        Text(item.voice.name)
+                if !history.isEmpty {
+                    EmptyHistoryView(isPresented: $isPresented)
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 16) {
+                            ForEach(history) { item in
+                                Button(action: {
+                                    selectedItem = item
+                                    withAnimation { showPlayer = true }
+                                }) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Circle().fill(item.voice.color.color).frame(width: 24, height: 24)
+                                            Text(item.voice.name)
+                                                .foregroundColor(.white)
+                                                .font(.subheadline)
+                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                        )
+                                        Text(item.text)
                                             .foregroundColor(.white)
-                                            .font(.subheadline)
+                                            .font(.title3)
+                                            .multilineTextAlignment(.leading)
+                                            .lineLimit(2)
+                                        Text("\(item.date, formatter: dateFormatter) · Text To Speech")
+                                            .foregroundColor(.gray)
+                                            .font(.caption)
                                     }
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 5)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                                    )
-                                    Text(item.text)
-                                        .foregroundColor(.white)
-                                        .font(.title3)
-                                        .multilineTextAlignment(.leading)
-                                        .lineLimit(2)
-                                    Text("\(item.date, formatter: dateFormatter) · Text To Speech")
-                                        .foregroundColor(.gray)
-                                        .font(.caption)
+                                    .padding(.horizontal)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
-                                .padding(.horizontal)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                Divider()
                             }
-                            Divider()
                         }
+                        .padding(.top)
                     }
-                    .padding(.top)
                 }
                 
                 // PlayerView overlay
@@ -66,7 +106,7 @@ struct HistoryScreen: View {
                     .zIndex(2)
                 }
             }
-            .navigationTitle("Generations")
+            .navigationTitle("History")
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
