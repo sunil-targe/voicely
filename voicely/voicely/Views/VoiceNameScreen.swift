@@ -58,7 +58,12 @@ struct VoiceNameScreen: View {
                 }
                 if viewModel.showSelectButton, let tempVoice = tempSelectedVoice {
                     Button(action: {
-                        selectedVoice = tempVoice
+                        // Preserve filter values from previous selection
+                        var newVoice = tempVoice
+                        newVoice.emotion = selectedVoice.emotion
+                        newVoice.language = selectedVoice.language
+                        newVoice.channel = selectedVoice.channel
+                        selectedVoice = newVoice
                         isPresented = false
                     }) {
                         Text("Select")
