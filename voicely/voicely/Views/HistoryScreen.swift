@@ -43,6 +43,9 @@ struct HistoryScreen: View {
     @State private var showPlayer: Bool = false
     @State private var isEditing = false
     @State private var selectedIDs = Set<UUID>()
+    @State private var recentlyDeleted: [HistoryItem] = []
+    @State private var showUndoBanner = false
+    @State private var undoTimer: Timer? = nil
 
     var body: some View {
         NavigationView {
@@ -105,10 +108,20 @@ struct HistoryScreen: View {
                     }
                     if isEditing && !selectedIDs.isEmpty {
                         Button(action: {
+                            // Store deleted items for undo
+                            recentlyDeleted = history.filter { selectedIDs.contains($0.id) }
                             history.removeAll { selectedIDs.contains($0.id) }
                             HistoryStorage.save(history)
                             selectedIDs.removeAll()
                             isEditing = false
+                            // Show undo banner
+                            showUndoBanner = true
+                            // Start timer to auto-dismiss
+                            undoTimer?.invalidate()
+                            undoTimer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: false) { _ in
+                                showUndoBanner = false
+                                recentlyDeleted = []
+                            }
                         }) {
                             Text("Delete (\(selectedIDs.count))")
                                 .fontWeight(.semibold)
@@ -142,19 +155,49 @@ struct HistoryScreen: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .zIndex(2)
                 }
+                
+                // Undo Snackbar/Banner
+                if showUndoBanner && !recentlyDeleted.isEmpty {
+                    HStack {
+                        Text("Deleted \(recentlyDeleted.count) item\(recentlyDeleted.count > 1 ? "s" : "")")
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button(action: {
+                            // Undo deletion
+                            history.insert(contentsOf: recentlyDeleted, at: 0)
+                            HistoryStorage.save(history)
+                            recentlyDeleted = []
+                            showUndoBanner = false
+                            undoTimer?.invalidate()
+                        }) {
+                            Text("Undo")
+                                .fontWeight(.bold)
+                                .foregroundColor(.yellow)
+                        }
+                    }
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(14)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(2)
+                }
             }
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
-                        isEditing.toggle()
-                        if !isEditing { selectedIDs.removeAll() }
-                    }) {
-                        Text(isEditing ? "Done" : "Edit")
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .padding(.leading, 6)
+                if !history.isEmpty {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(action: {
+                            isEditing.toggle()
+                            if !isEditing { selectedIDs.removeAll() }
+                        }) {
+                            Text(isEditing ? "Done" : "Edit")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding(.leading, 6)
+                        }
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
