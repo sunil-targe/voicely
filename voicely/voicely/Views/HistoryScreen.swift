@@ -38,9 +38,11 @@ struct EmptyHistoryView: View {
 }
 struct HistoryScreen: View {
     @Binding var isPresented: Bool
-    let history: [HistoryItem]
+    @State var history: [HistoryItem]
     @State private var selectedItem: HistoryItem? = nil
     @State private var showPlayer: Bool = false
+    @State private var isEditing = false
+    @State private var selectedIDs = Set<UUID>()
 
     var body: some View {
         NavigationView {
@@ -52,38 +54,73 @@ struct HistoryScreen: View {
                         VStack(alignment: .leading, spacing: 16) {
                             ForEach(history) { item in
                                 Button(action: {
-                                    selectedItem = item
-                                    withAnimation { showPlayer = true }
-                                }) {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        HStack {
-                                            Circle().fill(item.voice.color.color).frame(width: 24, height: 24)
-                                            Text(item.voice.name)
-                                                .foregroundColor(.white)
-                                                .font(.subheadline)
+                                    if isEditing {
+                                        if selectedIDs.contains(item.id) {
+                                            selectedIDs.remove(item.id)
+                                        } else {
+                                            selectedIDs.insert(item.id)
                                         }
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 5)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                                        )
-                                        Text(item.text)
-                                            .foregroundColor(.white)
-                                            .font(.title3)
-                                            .multilineTextAlignment(.leading)
-                                            .lineLimit(2)
-                                        Text("\(item.date, formatter: dateFormatter) · Text To Speech")
-                                            .foregroundColor(.gray)
-                                            .font(.caption)
+                                    } else {
+                                        selectedItem = item
+                                        withAnimation { showPlayer = true }
                                     }
-                                    .padding(.horizontal)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }) {
+                                    HStack(alignment: .center, spacing: 0) {
+                                        if isEditing {
+                                            Image(systemName: selectedIDs.contains(item.id) ? "checkmark.circle.fill" : "circle")
+                                                .foregroundColor(selectedIDs.contains(item.id) ? .blue : .gray)
+                                                .font(.title2)
+                                                .padding(.leading)
+                                        }
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            HStack {
+                                                Circle().fill(item.voice.color.color).frame(width: 24, height: 24)
+                                                Text(item.voice.name)
+                                                    .foregroundColor(.white)
+                                                    .font(.subheadline)
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 5)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                            )
+                                            Text(item.text)
+                                                .foregroundColor(.white)
+                                                .font(.title3)
+                                                .multilineTextAlignment(.leading)
+                                                .lineLimit(2)
+                                            Text("\(item.date, formatter: dateFormatter) · Text To Speech")
+                                                .foregroundColor(.gray)
+                                                .font(.caption)
+                                        }
+                                        .padding(.horizontal)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
                                 }
                                 Divider()
                             }
                         }
                         .padding(.top)
+                    }
+                    if isEditing && !selectedIDs.isEmpty {
+                        Button(action: {
+                            history.removeAll { selectedIDs.contains($0.id) }
+                            HistoryStorage.save(history)
+                            selectedIDs.removeAll()
+                            isEditing = false
+                        }) {
+                            Text("Delete (\(selectedIDs.count))")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 32)
+                                .padding(.vertical, 12)
+                                .background(Color.red)
+                                .cornerRadius(14)
+                                .padding(.bottom, 24)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
                 
@@ -109,6 +146,17 @@ struct HistoryScreen: View {
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        isEditing.toggle()
+                        if !isEditing { selectedIDs.removeAll() }
+                    }) {
+                        Text(isEditing ? "Done" : "Edit")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .padding(.leading, 6)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         isPresented = false
