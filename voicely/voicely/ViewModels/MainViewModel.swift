@@ -12,7 +12,16 @@ class MainViewModel: ObservableObject {
     private let speechService = SpeechService()
     
     init(selectedVoice: Voice) {
-        self.selectedVoice = selectedVoice
+        // Load last selection if available
+        let last = AppStorageManager.shared.loadVoiceSelection()
+        var initialVoice = selectedVoice
+        if let voiceID = last.voiceID, let match = Voice.all.first(where: { $0.voice_id == voiceID }) {
+            initialVoice = match
+        }
+        if let emotion = last.emotion { initialVoice.emotion = emotion }
+        if let language = last.language { initialVoice.language = language }
+        if let channel = last.channel { initialVoice.channel = channel }
+        self.selectedVoice = initialVoice
         self.history = HistoryStorage.load()
     }
     
@@ -72,6 +81,16 @@ class MainViewModel: ObservableObject {
             print("Failed to download or save audio: \(error)")
             return nil
         }
+    }
+
+    // Save selection whenever selectedVoice or its properties change
+    func updateVoiceSelection() {
+        AppStorageManager.shared.saveVoiceSelection(
+            voiceID: selectedVoice.voice_id,
+            emotion: selectedVoice.emotion,
+            language: selectedVoice.language,
+            channel: selectedVoice.channel
+        )
     }
 }
 

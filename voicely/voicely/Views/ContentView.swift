@@ -81,6 +81,9 @@ struct ContentView: View {
                         }
                         .sheet(isPresented: $showVoice) {
                             VoiceNameScreen(isPresented: $showVoice, selectedVoice: $viewModel.selectedVoice)
+                                .onDisappear {
+                                    viewModel.updateVoiceSelection()
+                                }
                         }
                         Button(action: { showFilter = true }) {
                             ZStack {
@@ -97,6 +100,9 @@ struct ContentView: View {
                                 isPresented: $showFilter,
                                 selectedVoice: $viewModel.selectedVoice
                             )
+                            .onDisappear {
+                                viewModel.updateVoiceSelection()
+                            }
                         }
                         
                         Spacer(minLength: 1)
