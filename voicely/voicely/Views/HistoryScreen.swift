@@ -71,7 +71,7 @@ struct HistoryScreen: View {
                                     HStack(alignment: .center, spacing: 0) {
                                         if isEditing {
                                             Image(systemName: selectedIDs.contains(item.id) ? "checkmark.circle.fill" : "circle")
-                                                .foregroundColor(selectedIDs.contains(item.id) ? .blue : .gray)
+                                                .foregroundColor(selectedIDs.contains(item.id) ? .white : .gray)
                                                 .font(.title2)
                                                 .padding(.leading)
                                         }
