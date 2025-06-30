@@ -212,7 +212,7 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showHistory) {
-                HistoryScreen(isPresented: $showHistory, history: viewModel.history)
+                HistoryScreen(isPresented: $showHistory, history: $viewModel.history)
             }
             .sheet(isPresented: $showProfile) {
                 ProfileScreen(isPresented: $showProfile)

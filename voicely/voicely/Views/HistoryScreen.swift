@@ -38,7 +38,7 @@ struct EmptyHistoryView: View {
 }
 struct HistoryScreen: View {
     @Binding var isPresented: Bool
-    @State var history: [HistoryItem]
+    @Binding var history: [HistoryItem]
     @State private var selectedItem: HistoryItem? = nil
     @State private var showPlayer: Bool = false
     @State private var isEditing = false
@@ -206,6 +206,6 @@ private let dateFormatter: DateFormatter = {
             channel: "mono"
         )
     ]
-    return HistoryScreen(isPresented: .constant(true), history: sampleHistory)
+    return HistoryScreen(isPresented: .constant(true), history: .constant(sampleHistory))
 }
 #endif 
