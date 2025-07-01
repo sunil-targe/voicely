@@ -19,9 +19,10 @@ struct ContentView: View {
     @State private var showVoice = false
     @State private var showFilter = false
     @State private var showPlayerView = false
+    @State private var showPaywall = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 // Main input area
                 TextField("Start typing here...", text: $viewModel.inputText, axis: .vertical)
@@ -30,6 +31,12 @@ struct ContentView: View {
                     .cornerRadius(12)
                     .font(.title2)
                     .fontWeight(.semibold)
+                    .tint(Color(red: 0.98, green: 0.67, blue: 0.53))
+                    .onChange(of: viewModel.inputText) { newValue in
+                        if newValue.count > 5000 {
+                            viewModel.inputText = String(newValue.prefix(5000))
+                        }
+                    }
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             isTextFieldFocused = true
@@ -108,11 +115,15 @@ struct ContentView: View {
                         Spacer(minLength: 1)
                         // Generate button
                         Button(action: {
-                            viewModel.generateSpeech(
-                                emotion: viewModel.selectedVoice.emotion,
-                                channel: viewModel.selectedVoice.channel,
-                                languageBoost: viewModel.selectedVoice.language
-                            )
+                            if purchaseVM.isPremium {
+                                viewModel.generateSpeech(
+                                    emotion: viewModel.selectedVoice.emotion,
+                                    channel: viewModel.selectedVoice.channel,
+                                    languageBoost: viewModel.selectedVoice.language
+                                )
+                            } else {
+                                showPaywall = true
+                            }
                         }) {
                             if viewModel.isLoading {
                                 ProgressView()
@@ -127,7 +138,7 @@ struct ContentView: View {
                                         .fontWeight(.semibold)
                                         .padding(.vertical, 8)
                                         .padding(.trailing)
-
+                                    
                                 }
                                 .background(viewModel.inputText.count > 0 ? Color.white : Color(.systemGray4))
                                 .foregroundColor(viewModel.inputText.count > 0 ? .black : .gray)
@@ -158,7 +169,6 @@ struct ContentView: View {
                 }
                 .background(.ultraThinMaterial)
             }
-            .navigationTitle("Voicely")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -201,9 +211,14 @@ struct ContentView: View {
                     HStack(spacing: 0) {
                         Menu {
                             Section {
-                                Button("Random story") {
-                                    if let story = Constants.stories.randomElement() {
-                                        viewModel.inputText = story
+//                                Button("Random story") {
+//                                    if let story = Constants.stories.randomElement() {
+//                                        viewModel.inputText = story
+//                                    }
+//                                }
+                                Button("Birthday Wish") {
+                                    if let wish = Constants.birthdayWishes.randomElement() {
+                                        viewModel.inputText = wish
                                     }
                                 }
                                 Button("Silly joke") {
@@ -211,35 +226,53 @@ struct ContentView: View {
                                         viewModel.inputText = joke
                                     }
                                 }
+                                Menu("Bedtime Stories") {
+                                    Button("English") {
+                                        if let englishStories = Constants.nightStories["English"],
+                                           let story = englishStories.randomElement() {
+                                            viewModel.inputText = story
+                                        }
+                                    }
+                                    Button("हिंदी") {
+                                        if let hindiStories = Constants.nightStories["Hindi"],
+                                           let story = hindiStories.randomElement() {
+                                            viewModel.inputText = story
+                                        }
+                                    }
+                                }
                             } header: {
                                 Text("Get Started with")
                             }
                         } label: {
                             HStack {
-                                Text("Voicely")
+                                Text(purchaseVM.isPremium ? "Voicely Pro" : "Voicely")
                                     .font(.headline)
                                     .foregroundColor(.white)
                                 Image(systemName: "chevron.forward")
                                     .imageScale(.small)
                                     .foregroundColor(.gray)
-
                             }
                         }
                     }
                     .animation(.easeInOut, value: viewModel.inputText.count > 10)
                 }
             }
+            .background(Color.black.ignoresSafeArea())
             .sheet(isPresented: $showHistory) {
                 HistoryScreen(isPresented: $showHistory, history: $viewModel.history)
             }
             .sheet(isPresented: $showProfile) {
                 ProfileScreen(isPresented: $showProfile)
             }
-            .background(Color.black.ignoresSafeArea())
+            .fullScreenCover(isPresented: $showPaywall) {
+                purchaseVM.refreshPurchaseStatus()
+            } content: {
+                PaywallView()
+            }
         }
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView().environmentObject(PurchaseViewModel.shared)
 }

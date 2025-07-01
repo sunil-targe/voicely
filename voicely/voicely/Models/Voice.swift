@@ -15,7 +15,7 @@ struct Voice: Identifiable, Equatable, Codable {
     let color: ColorCodable
     let voice_id: String
     var emotion: String = "auto"
-    var language: String = "None"
+    var language: String = "Automatic"
     var channel: String = "mono"
     
     static let `default` = Voice(id: UUID(), name: "Wise Woman", description: "Wise, mature, and gentle", color: ColorCodable(color: Color(red: 0.85, green: 0.80, blue: 0.92)), voice_id: "Wise_Woman")

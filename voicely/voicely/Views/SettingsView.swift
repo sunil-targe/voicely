@@ -23,9 +23,15 @@ struct SettingsView: View {
                 List {
                     Section {
                         SettingsRow(icon: "paperplane.fill", label: "Contact Us", setting: .contactUs)
-                        SettingsRow(icon: "square.and.arrow.up.fill", label: "Invite Friends", setting: .inviteFriends)
+                        SettingsRow(icon: "square.and.arrow.up.fill", label: "Sharing is Caring 💖", setting: .inviteFriends)
+                    } footer: {
+                        Text("📢 Share Voicely in your group chats — you never know who might love it! 🎧✨ It could be just what someone needs 🚀")
                     }
-                    .listRowBackground(Color(.secondarySystemBackground))
+                    
+                    Section {
+                        PrivacyAndTermsView(icon: "apps.iphone", label: "What is Voicely?", linkString: "appDescription")
+                    }
+                    
                     Section {
                         PrivacyAndTermsView(icon: "lock.doc.fill", label: "Terms of Use", linkString: "terms")
                         PrivacyAndTermsView(icon: "doc.badge.gearshape.fill", label: "Privacy Policy", linkString: "privacy")
@@ -36,9 +42,7 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
-                    .listRowBackground(Color(.secondarySystemBackground))
                 }
-                .listStyle(InsetGroupedListStyle())
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -54,6 +58,7 @@ struct SettingsView: View {
                 }
             }
         }
+        .tint(Color(red: 0.98, green: 0.67, blue: 0.53))
     }
 }
 
@@ -76,7 +81,6 @@ struct PrivacyAndTermsView: View {
                     .fontWeight(.semibold)
                 Spacer()
             }
-            .padding(.vertical, 8)
         }
     }
 }
@@ -115,13 +119,12 @@ struct SettingsRow: View {
                     .fontWeight(.semibold)
                 Spacer()
             }
-            .padding(.vertical, 8)
         }
         .sheet(isPresented: $isShowingMailView, content: {
             MailView(isShowing: self.$isShowingMailView, result: self.$result)
         })
         .sheet(isPresented: $showShareSheet, content: {
-            ShareSheet(activityItems: ["Check out Voicely app! 👇\nhttps://apps.apple.com/app/id6746755399"])
+            ShareSheet(activityItems: ["Check out Voicely app! 👇\nhttps://apps.apple.com/app/id6747742724"])
                 .presentationDetents([.medium, .large])
         })
     }

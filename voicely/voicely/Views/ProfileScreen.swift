@@ -11,8 +11,8 @@ struct ProfileScreen: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
-                    // Free Credits Card
-                    CreditCardView()
+                    MembershipCardView()
+                    FAQSection()
                 }
             }
             .navigationTitle("My Profile")
@@ -43,7 +43,54 @@ struct ProfileScreen: View {
     }
 }
 
-// Free Credits Card
+// MembershipCardView Card
+struct MembershipCardView: View {
+    @EnvironmentObject var purchaseVM: PurchaseViewModel
+    @State private var showPaywall = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text(purchaseVM.isPremium ? "Premium" : "Free")
+                    .font(.title2).fontWeight(.bold)
+                    .foregroundColor(.white)
+                Spacer()
+                if purchaseVM.isPremium {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(.white)
+                } else {
+                    Button(action: {
+                        showPaywall = true
+                    }) {
+                        Text("Upgrade")
+                            .font(.headline)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 6)
+                            .background(Color.white)
+                            .foregroundColor(.black)
+                            .clipShape(Capsule())
+                    }
+                    .fullScreenCover(isPresented: $showPaywall) {
+                        purchaseVM.refreshPurchaseStatus()
+                    } content: {
+                        PaywallView()
+                    }
+                }
+                
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground).opacity(0.7))
+        .cornerRadius(20)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+        )
+        .padding([.horizontal, .top])
+    }
+}
+
+// TBD
 struct CreditCardView: View {
     @EnvironmentObject var purchaseVM: PurchaseViewModel
     @State private var showPaywall = false
@@ -133,8 +180,76 @@ struct CreditCardView: View {
     }
 }
 
+
+struct FAQSection: View {
+    @EnvironmentObject var purchaseVM: PurchaseViewModel
+    @State private var isExpanded = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            // Header Button
+            Button(action: {
+                withAnimation {
+                    isExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: "questionmark.bubble.fill")
+                        .imageScale(.small)
+                    Text("Frequently Asked Questions")
+                        .font(.headline)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .imageScale(.small)
+                }
+                .foregroundStyle(.white.opacity(0.9))
+                .padding()
+            }
+
+            // Content
+            if isExpanded {
+                VStack(alignment: .leading) {
+                    Text("What is Voicely?").font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.9))
+                    Text("Voicely is a text-to-speech app powered by the Minimax-02-HD AI model.")
+                        .font(.subheadline)
+                        .foregroundColor(Color(.systemGray))
+                    Divider()
+                    Text("Use Cases:").font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.9))
+                    Text("For content creators (i.e. “influencers”):\n🎙️ Generate voices in various formats\n\n👪 For parents:\n📖 Generates random nighttime stories to put their kids to sleep\n\n🌍 For others:\n🎧 Fun and educational voiceovers for presentations, videos, etc.").font(.subheadline)
+                        .foregroundColor(Color(.systemGray))
+                    Divider()
+                    Text("What is the USP?")
+                        .foregroundStyle(.white.opacity(0.9))
+                        .font(.subheadline)
+                    Text("💸 Cheaper than all other text-to-speech services 🤷‍♂️.")
+                        .font(.subheadline)
+                        .foregroundColor(Color(.systemGray))
+                    if !purchaseVM.isPremium {
+                        Divider()
+                        Text("🎁 A Special Gift for You!\n✨ Unlock 7 Days of Premium Access — Absolutely FREE! 🚀 Don’t miss it!")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.9))
+                    }
+                }
+                .padding([.horizontal, .bottom])
+                .foregroundColor(.white)
+            }
+        }
+        .background(Color(.secondarySystemBackground).opacity(0.7))
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+        )
+        .padding(.horizontal)
+    }
+}
+
 #if DEBUG
 #Preview {
-    ProfileScreen(isPresented: .constant(true))
+    ProfileScreen(isPresented: .constant(true)).environmentObject(PurchaseViewModel.shared)
 }
 #endif
+

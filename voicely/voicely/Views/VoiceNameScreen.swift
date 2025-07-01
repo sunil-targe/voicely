@@ -1,9 +1,12 @@
 import SwiftUI
+import AVFoundation
 
 class VoiceNameViewModel: ObservableObject {
     @Published var voices: [Voice] = Voice.all
     @Published var selectedVoice: Voice?
     @Published var showSelectButton: Bool = false
+    @Published var currentlyPlayingVoiceID: String? = nil
+    private var audioPlayer: AVAudioPlayer?
     
     init() {
         selectedVoice = voices.first
@@ -12,6 +15,27 @@ class VoiceNameViewModel: ObservableObject {
     func selectVoice(_ voice: Voice) {
         selectedVoice = voice
         showSelectButton = true
+    }
+    
+    func playPreview(for voice: Voice) {
+        stopPreview()
+        guard let url = Bundle.main.url(forResource: voice.voice_id, withExtension: "mp3") else {
+            print("Preview audio not found for \(voice.voice_id)")
+            return
+        }
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.play()
+            currentlyPlayingVoiceID = voice.voice_id
+        } catch {
+            print("Failed to play preview: \(error)")
+        }
+    }
+    
+    func stopPreview() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+        currentlyPlayingVoiceID = nil
     }
 }
 
@@ -30,6 +54,7 @@ struct VoiceNameScreen: View {
                             Button(action: {
                                 tempSelectedVoice = voice
                                 viewModel.showSelectButton = true
+                                viewModel.playPreview(for: voice)
                             }) {
                                 HStack(spacing: 16) {
                                     Circle()
@@ -44,6 +69,11 @@ struct VoiceNameScreen: View {
                                             .foregroundColor(Color(.systemGray3))
                                     }
                                     Spacer()
+                                    // Preview playing indicator
+                                    if viewModel.currentlyPlayingVoiceID == voice.voice_id {
+                                        Image(systemName: "waveform")
+                                            .foregroundColor(.yellow)
+                                    }
                                     if (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == voice.voice_id {
                                         Image(systemName: "checkmark.circle.fill")
                                             .foregroundColor(.white)
@@ -65,6 +95,7 @@ struct VoiceNameScreen: View {
                         newVoice.channel = selectedVoice.channel
                         selectedVoice = newVoice
                         isPresented = false
+                        viewModel.stopPreview()
                     }) {
                         Text("Select")
                             .fontWeight(.semibold)
@@ -85,6 +116,7 @@ struct VoiceNameScreen: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         isPresented = false
+                        viewModel.stopPreview()
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
                             .foregroundColor(.white)
@@ -94,6 +126,9 @@ struct VoiceNameScreen: View {
             }
             .onAppear {
                 tempSelectedVoice = selectedVoice
+            }
+            .onDisappear {
+                viewModel.stopPreview()
             }
         }
     }

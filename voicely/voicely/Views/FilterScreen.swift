@@ -28,10 +28,10 @@ struct FilterScreen: View {
                 VStack(spacing: 0) {
                     // Emotion section
                     FilterRow(title: "Emotion", value: selectedVoice.emotion.capitalized, onTap: { activePicker = .emotion })
-                    Divider().background(Color(.systemGray5))
+                    Divider()
                     // Language section
                     FilterRow(title: "Language Boost", value: selectedVoice.language, onTap: { activePicker = .language })
-                    Divider().background(Color(.systemGray5))
+                    Divider()
                     // Channel section
                     FilterRow(title: "Channel", value: selectedVoice.channel, onTap: { activePicker = .channel })
                 }
@@ -108,14 +108,15 @@ struct FilterRow: View {
                         .foregroundColor(.white)
                         .font(.headline)
                     Text(value.capitalized)
-                        .foregroundColor(Color(.systemGray2))
+                        .foregroundColor(Color(.systemGray3))
+                        .font(.subheadline)
                         .font(.subheadline)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundColor(Color(.systemGray2))
+                    .foregroundColor(Color(.systemGray3))
             }
-            .padding(.vertical)
+            .padding(.vertical, 10)
             .padding(.horizontal)
         }
     }

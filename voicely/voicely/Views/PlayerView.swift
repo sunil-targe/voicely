@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import MediaPlayer
 
 // Helper class for KVO observation
 class PlayerItemStatusObserver: NSObject, ObservableObject {
@@ -41,6 +42,7 @@ struct PlayerView: View {
     @State private var showShareSheet = false
     @State private var playerStatus: AVPlayerItem.Status = .unknown
     @StateObject private var statusObserver = PlayerItemStatusObserver()
+    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var activityItems: [Any] = []
@@ -115,12 +117,21 @@ struct PlayerView: View {
         .padding(.horizontal)
         .onAppear(perform: setupPlayer)
         .onDisappear(perform: cleanupPlayer)
+        .onReceive(mediaPlayerManager.$isPlaying) { newValue in
+            isPlaying = newValue
+        }
+        .onReceive(mediaPlayerManager.$currentTime) { newValue in
+            currentTime = newValue
+        }
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text("Playback Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
         }
     }
 
     private func setupPlayer() {
+        // Configure audio session for background playback
+        AudioSessionManager.shared.configureAudioSession()
+        
         // Determine the correct URL to use
         var resolvedURL = audioURL
         if let filename = localAudioFilename {
@@ -173,7 +184,11 @@ struct PlayerView: View {
                     currentTime = time.seconds
                     if let duration = player.currentItem?.duration.seconds, currentTime >= duration {
                         isPlaying = false
+                        // Update media player manager
+                        mediaPlayerManager.pause()
                     }
+                    // Update media player manager
+                    mediaPlayerManager.updateDuration(duration)
                 }
 
                 if item.status == .readyToPlay {
@@ -198,9 +213,26 @@ struct PlayerView: View {
             print("Player not ready or duration invalid.")
             return
         }
+        
+        // Configure media player manager
+        mediaPlayerManager.configurePlayer(player, title: text, voiceName: voice.name)
+        mediaPlayerManager.updateDuration(item.asset.duration.seconds)
+        
+        // Start Dynamic Island activity if available
+        if #available(iOS 16.1, *) {
+            DynamicIslandManager.shared.startActivity(
+                title: text,
+                voiceName: voice.name,
+                isPlaying: true,
+                currentTime: 0,
+                duration: item.asset.duration.seconds
+            )
+        }
+        
         player.play()
         isPlaying = true
         duration = item.asset.duration.seconds
+        mediaPlayerManager.play()
     }
 
     private func cleanupPlayer() {
@@ -209,6 +241,18 @@ struct PlayerView: View {
             timeObserver = nil
         }
         statusObserver.invalidate()
+        
+        // Clean up media player manager
+        mediaPlayerManager.cleanup()
+        
+        // End Dynamic Island activity
+        if #available(iOS 16.1, *) {
+            DynamicIslandManager.shared.endActivity()
+        }
+        
+        // Deactivate audio session
+        AudioSessionManager.shared.deactivateAudioSession()
+        
         player?.pause()
         player = nil
     }
@@ -217,6 +261,16 @@ struct PlayerView: View {
         guard let player = player, player.currentItem?.status == .readyToPlay else { return }
         if isPlaying {
             player.pause()
+            mediaPlayerManager.pause()
+            
+            // Update Dynamic Island
+            if #available(iOS 16.1, *) {
+                DynamicIslandManager.shared.updateActivity(
+                    isPlaying: false,
+                    currentTime: currentTime,
+                    duration: duration
+                )
+            }
         } else {
             // If playback finished, reset to beginning
             if currentTime >= duration {
@@ -226,6 +280,16 @@ struct PlayerView: View {
                 player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
             }
             player.play()
+            mediaPlayerManager.play()
+            
+            // Update Dynamic Island
+            if #available(iOS 16.1, *) {
+                DynamicIslandManager.shared.updateActivity(
+                    isPlaying: true,
+                    currentTime: currentTime,
+                    duration: duration
+                )
+            }
         }
         isPlaying.toggle()
     }
@@ -234,6 +298,16 @@ struct PlayerView: View {
         guard let player = player else { return }
         if editing == false {
             player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
+            mediaPlayerManager.seek(to: currentTime)
+            
+            // Update Dynamic Island
+            if #available(iOS 16.1, *) {
+                DynamicIslandManager.shared.updateActivity(
+                    isPlaying: isPlaying,
+                    currentTime: currentTime,
+                    duration: duration
+                )
+            }
         }
     }
 
