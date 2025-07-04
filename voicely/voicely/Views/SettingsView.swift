@@ -11,6 +11,7 @@ import MessageUI
 enum Settings {
     case contactUs
     case inviteFriends
+    case rateUs
 }
 
 struct SettingsView: View {
@@ -30,6 +31,7 @@ struct SettingsView: View {
                     
                     Section {
                         PrivacyAndTermsView(icon: "apps.iphone", label: "What is Voicely?", linkString: "appDescription")
+                        SettingsRow(icon: "star.fill", label: "Rate Voicely ⭐️", setting: .rateUs)
                     }
                     
                     Section {
@@ -45,7 +47,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
@@ -105,6 +107,11 @@ struct SettingsRow: View {
                 }
             case .inviteFriends:
                 self.showShareSheet.toggle()
+            case .rateUs:
+                let url = URL(string: "itms-apps://itunes.apple.com/app/id6747742724?action=write-review")!
+                if UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                }
             @unknown default:
                 break
             }
