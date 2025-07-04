@@ -90,6 +90,9 @@ struct ContentView: View {
                             VoiceNameScreen(isPresented: $showVoice, selectedVoice: $viewModel.selectedVoice)
                                 .onDisappear {
                                     viewModel.updateVoiceSelection()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        RatingPromptManager.shared.requestReviewIfAppropriate()
+                                    }
                                 }
                         }
                         Button(action: { showFilter = true }) {
