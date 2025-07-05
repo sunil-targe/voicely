@@ -18,6 +18,7 @@ struct voicelyApp: App {
                 .with(storeKitVersion: .storeKit2)
                 .build()
         )
+        Amplitude.instance().initializeApiKey("8eff21a771f52d4deab93b7da58d6a89")
     }
     
     var body: some Scene {
