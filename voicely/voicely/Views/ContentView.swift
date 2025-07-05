@@ -182,7 +182,7 @@ struct ContentView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        if viewModel.inputText.count > 10 {
+                        if viewModel.inputText.count > 3 {
                             Button(action: {
                                 viewModel.inputText = ""
                             }) {
@@ -256,7 +256,7 @@ struct ContentView: View {
                             }
                         }
                     }
-                    .animation(.easeInOut, value: viewModel.inputText.count > 10)
+                    .animation(.easeInOut, value: viewModel.inputText.count > 3)
                 }
             }
             .background(Color.black.ignoresSafeArea())

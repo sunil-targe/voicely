@@ -7,6 +7,7 @@
 
 import SwiftUI
 import RevenueCat
+import Amplitude
 
 @main
 struct voicelyApp: App {

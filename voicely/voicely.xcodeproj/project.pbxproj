@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		387F2D712E1126E900BA8681 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 387F2D702E1126E900BA8681 /* RevenueCat */; };
 		387F2D732E1126E900BA8681 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 387F2D722E1126E900BA8681 /* RevenueCatUI */; };
+		38A57AF52E18F8F70082F442 /* Amplitude in Frameworks */ = {isa = PBXBuildFile; productRef = 38A57AF42E18F8F70082F442 /* Amplitude */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38A57AF52E18F8F70082F442 /* Amplitude in Frameworks */,
 				387F2D732E1126E900BA8681 /* RevenueCatUI in Frameworks */,
 				387F2D712E1126E900BA8681 /* RevenueCat in Frameworks */,
 			);
@@ -87,6 +89,7 @@
 			packageProductDependencies = (
 				387F2D702E1126E900BA8681 /* RevenueCat */,
 				387F2D722E1126E900BA8681 /* RevenueCatUI */,
+				38A57AF42E18F8F70082F442 /* Amplitude */,
 			);
 			productName = voicely;
 			productReference = 387F29DF2E0BC11500BA8681 /* voicely.app */;
@@ -118,6 +121,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				387F2D6F2E1126E900BA8681 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+				38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 387F29E02E0BC11500BA8681 /* Products */;
@@ -375,6 +379,14 @@
 				minimumVersion = 5.30.0;
 			};
 		};
+		38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/amplitude/Amplitude-iOS";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -387,6 +399,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 387F2D6F2E1126E900BA8681 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCatUI;
+		};
+		38A57AF42E18F8F70082F442 /* Amplitude */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */;
+			productName = Amplitude;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

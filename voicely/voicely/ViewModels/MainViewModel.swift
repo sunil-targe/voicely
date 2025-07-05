@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import Amplitude
 
 class MainViewModel: ObservableObject {
     @Published var inputText: String = ""
@@ -54,6 +55,16 @@ class MainViewModel: ObservableObject {
                         self?.history.insert(item, at: 0)
                         HistoryStorage.save(self?.history ?? [])
                         RatingPromptManager.shared.requestReviewIfAppropriate()
+                        Amplitude.instance().logEvent(
+                            "event_voice_generated",
+                            withEventProperties: [
+                                "voice_id": self?.selectedVoice.voice_id ?? "",
+                                "emotion": emotion,
+                                "languageBoost": languageBoost,
+                                "channel": channel,
+                                "input_text_length": self?.inputText.count ?? 0
+                            ]
+                        )
                     }
                 }
             case .failure(let error):
