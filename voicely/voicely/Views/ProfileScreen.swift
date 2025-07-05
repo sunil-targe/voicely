@@ -23,7 +23,7 @@ struct ProfileScreen: View {
                         isPresented = false
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
-                            .foregroundColor(.white)
+                            .foregroundColor(.gray)
                             .padding(.trailing, 6)
                     }
                 }
@@ -31,8 +31,8 @@ struct ProfileScreen: View {
                     Button(action: {
                         showSettings = true
                     }) {
-                        Image(systemName: "line.3.horizontal")
-                            .foregroundColor(.white.opacity(0.8))
+                        Image("ic_menu")
+                            .foregroundColor(.gray)
                     }
                 }
             }
@@ -51,9 +51,19 @@ struct MembershipCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text(purchaseVM.isPremium ? "Premium" : "Free")
-                    .font(.title2).fontWeight(.bold)
-                    .foregroundColor(.white)
+                if purchaseVM.isPremium {
+                    Text("Premium")
+                        .font(.title2).fontWeight(.bold)
+                        .foregroundColor(.white)
+                } else {
+                    HStack {
+                        Text("Free")
+                            .font(.title2).fontWeight(.bold)
+                            .foregroundColor(.white)
+                        Image("ic_gift")
+                    }
+                }
+                
                 Spacer()
                 if purchaseVM.isPremium {
                     Image(systemName: "checkmark")

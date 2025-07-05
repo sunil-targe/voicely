@@ -45,7 +45,7 @@ struct FilterScreen: View {
                         isPresented = false
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
-                            .foregroundColor(.white)
+                            .foregroundColor(.gray)
                             .padding(.trailing, 6)
                     }
                 }
@@ -108,13 +108,13 @@ struct FilterRow: View {
                         .foregroundColor(.white)
                         .font(.headline)
                     Text(value.capitalized)
-                        .foregroundColor(Color(.systemGray3))
+                        .foregroundColor(Color(.systemGray2))
                         .font(.subheadline)
                         .font(.subheadline)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundColor(Color(.systemGray3))
+                    .foregroundColor(Color(.systemGray2))
             }
             .padding(.vertical, 10)
             .padding(.horizontal)

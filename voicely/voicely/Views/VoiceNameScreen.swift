@@ -66,7 +66,7 @@ struct VoiceNameScreen: View {
                                             .foregroundColor(.white)
                                         Text(voice.description)
                                             .font(.subheadline)
-                                            .foregroundColor(Color(.systemGray3))
+                                            .foregroundColor(Color(.systemGray2))
                                     }
                                     Spacer()
                                     // Preview playing indicator
@@ -119,7 +119,7 @@ struct VoiceNameScreen: View {
                         viewModel.stopPreview()
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
-                            .foregroundColor(.white)
+                            .foregroundColor(.gray)
                             .padding(.trailing, 6)
                     }
                 }

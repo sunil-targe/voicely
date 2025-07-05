@@ -99,7 +99,9 @@ struct PlayerView: View {
                         let fileURL = docs.appendingPathComponent(filename)
                         if FileManager.default.fileExists(atPath: fileURL.path) {
                             ShareLink(item: fileURL) {
-                                Image(systemName: "square.and.arrow.up")
+                                Image("ic_share")
+                                    .resizable()
+                                    .padding(6)
                                     .foregroundColor(.black)
                                     .frame(width: 32, height: 32)
                                     .background(Circle().fill(Color.white))

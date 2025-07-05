@@ -176,9 +176,8 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showHistory = true }) {
-                        Image(systemName: "clock.arrow.circlepath").imageScale(.large)
+                        Image("ic_list")
                             .foregroundStyle(.gray)
-                            .padding(.leading, 6)
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -204,7 +203,7 @@ struct ContentView: View {
                         Button(action: {
                             showProfile = true
                         }) {
-                            Image(systemName: "person.crop.circle")
+                            Image("ic_user")
                                 .foregroundStyle(.gray)
                                 .padding(.trailing, 6)
                         }
