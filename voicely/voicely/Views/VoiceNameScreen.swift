@@ -19,6 +19,10 @@ class VoiceNameViewModel: ObservableObject {
     
     func playPreview(for voice: Voice) {
         stopPreview()
+        
+        // Configure audio session for preview playback
+        AudioSessionManager.shared.configureAudioSession()
+        
         guard let url = Bundle.main.url(forResource: voice.voice_id, withExtension: "mp3") else {
             print("Preview audio not found for \(voice.voice_id)")
             return
