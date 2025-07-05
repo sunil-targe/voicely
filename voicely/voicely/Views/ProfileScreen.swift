@@ -62,7 +62,7 @@ struct MembershipCardView: View {
                     Button(action: {
                         showPaywall = true
                     }) {
-                        Text("Upgrade")
+                        Text("Try Free")
                             .font(.headline)
                             .padding(.horizontal, 18)
                             .padding(.vertical, 6)
