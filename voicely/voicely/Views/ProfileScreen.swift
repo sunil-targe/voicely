@@ -62,7 +62,7 @@ struct MembershipCardView: View {
                         Text("Free")
                             .font(.title2).fontWeight(.bold)
                             .foregroundColor(.white)
-                        Image("ic_gift")
+//                        Image("ic_gift")
                     }
                 }
                 
@@ -76,7 +76,7 @@ struct MembershipCardView: View {
                         OnboardingViewModel.shared.trackPaywallShown(source: "profile_button")
                         showPaywall = true
                     }) {
-                        Text("Try Free")
+                        Text("Upgrade")
                             .font(.headline)
                             .padding(.horizontal, 18)
                             .padding(.vertical, 6)
