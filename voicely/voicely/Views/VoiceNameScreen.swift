@@ -48,49 +48,34 @@ struct VoiceNameScreen: View {
     @Binding var selectedVoice: Voice
     @StateObject private var viewModel = VoiceNameViewModel()
     @State private var tempSelectedVoice: Voice?
+    
     var body: some View {
         NavigationView {
             VStack(alignment: .leading, spacing: 0) {
-                // Voice list
+                // Voice grid
                 ScrollView {
-                    VStack(spacing: 0) {
+                    LazyVGrid(columns: [
+                        GridItem(.flexible(), spacing: 6),
+                        GridItem(.flexible(), spacing: 6)
+                    ], spacing: 6) {
                         ForEach(viewModel.voices) { voice in
-                            Button(action: {
-                                playHapticFeedback()
-                                tempSelectedVoice = voice
-                                viewModel.showSelectButton = true
-                                viewModel.playPreview(for: voice)
-                            }) {
-                                HStack(spacing: 16) {
-                                    Circle()
-                                        .fill(voice.color.color)
-                                        .frame(width: 48, height: 48)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(voice.name)
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-                                        Text(voice.description)
-                                            .font(.subheadline)
-                                            .foregroundColor(Color(.systemGray2))
-                                    }
-                                    Spacer()
-                                    // Preview playing indicator
-                                    if viewModel.currentlyPlayingVoiceID == voice.voice_id {
-                                        Image(systemName: "waveform")
-                                            .foregroundColor(.yellow)
-                                    }
-                                    if (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == voice.voice_id {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.white)
-                                    }
+                            VoiceGridItem(
+                                voice: voice,
+                                isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == voice.voice_id,
+                                isPlaying: viewModel.currentlyPlayingVoiceID == voice.voice_id,
+                                onTap: {
+                                    playHapticFeedback()
+                                    tempSelectedVoice = voice
+                                    viewModel.showSelectButton = true
+                                    viewModel.playPreview(for: voice)
                                 }
-                                .padding(.vertical, 10)
-                                .padding(.horizontal)
-                                .background(Color.clear)
-                            }
+                            )
                         }
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 10)
                 }
+                
                 if viewModel.showSelectButton, let tempVoice = tempSelectedVoice {
                     Button(action: {
                         playHapticFeedback()
@@ -111,7 +96,7 @@ struct VoiceNameScreen: View {
                             .foregroundColor(.black)
                             .cornerRadius(16)
                             .padding(.horizontal)
-                            .padding(.bottom, 16)
+                            .padding(.vertical, 10)
                     }
                     .transition(.move(edge: .bottom))
                 }
@@ -138,6 +123,67 @@ struct VoiceNameScreen: View {
                 viewModel.stopPreview()
             }
         }
+    }
+}
+
+struct VoiceGridItem: View {
+    let voice: Voice
+    let isSelected: Bool
+    let isPlaying: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            ZStack {
+                Color(.secondarySystemBackground)
+                    .cornerRadius(12)
+                VStack(spacing: 12) {
+                    // Voice Circle with Waveform - 1:1 aspect ratio
+                    ZStack {
+                        Circle()
+                            .fill(voice.color.color)
+                            .frame(width: 90, height: 90)
+                        
+                        if isPlaying {
+                            Image(systemName: "waveform")
+                                .font(.title)
+                                .foregroundColor(.white)
+                        } else {
+                            Image(systemName: "mic.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                        }
+                        
+                        // Selection indicator
+                        if isSelected {
+                            Circle()
+                                .stroke(Color.white, lineWidth: 3)
+                                .frame(width: 96, height: 96)
+                        }
+                    }
+                    
+                    // Voice Name and Description
+                    VStack(spacing: 3) {
+                        Text(voice.name)
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                        
+                        Text(voice.description)
+                            .font(.caption)
+                            .foregroundColor(Color(.systemGray2))
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                    }
+                }
+                .padding(.vertical)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .aspectRatio(1, contentMode: .fit)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

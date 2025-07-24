@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dream of Flying</title>
+    <style>
+        body {
+            background: #e3f2fd;
+            font-family: 'Georgia', 'Palatino', 'Times New Roman', serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            color: #1a237e;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(33, 150, 243, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(156, 39, 176, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(103, 58, 183, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(33, 150, 243, 0.1);
+            position: relative;
+        }
+        
+        .title {
+            font-family: 'Marker Felt', 'Chalkboard', 'Comic Sans MS', cursive, sans-serif;
+            color: #2196f3;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(33, 150, 243, 0.2);
+            background: linear-gradient(135deg, #42a5f5, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+        }
+        
+        .illustration svg {
+            max-width: 300px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(33, 150, 243, 0.3));
+        }
+        
+        .story-content {
+            font-size: 1.1em;
+            text-align: justify;
+            margin-top: 30px;
+        }
+        
+        .story-content p {
+            margin-bottom: 20px;
+            text-indent: 2em;
+        }
+        
+        .story-content p:first-letter {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2196f3;
+            float: left;
+            line-height: 0.8;
+            margin-right: 8px;
+            margin-top: 4px;
+            text-shadow: 2px 2px 4px rgba(33, 150, 243, 0.3);
+        }
+        
+        .dialogue {
+            font-style: italic;
+            color: #1a237e;
+            background: linear-gradient(135deg, #e8f4fd, #f3e5f5);
+            padding: 15px 20px;
+            border-left: 4px solid #42a5f5;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            position: relative;
+        }
+        
+        .dialogue:before {
+            content: '"';
+            color: #42a5f5;
+            font-size: 3em;
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            font-family: 'Georgia', serif;
+        }
+        
+        .dialogue:after {
+            content: '"';
+            color: #42a5f5;
+            font-size: 3em;
+            position: absolute;
+            right: -10px;
+            bottom: -30px;
+            font-family: 'Georgia', serif;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #e3f2fd;
+                color: #1a237e;
+            }
+            .container {
+                background: rgba(255, 255, 255, 0.9);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            .title {
+                font-size: 2em;
+            }
+            .story-content {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="illustration">
+            <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                <!-- Dreamy sky background -->
+                <defs>
+                    <radialGradient id="skyGradient" cx="50%" cy="30%" r="70%">
+                        <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#bbdefb;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:#90caf9;stop-opacity:0.6" />
+                    </radialGradient>
+                    <linearGradient id="cloudGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#fff" />
+                        <stop offset="100%" style="stop-color:#f5f5f5" />
+                    </linearGradient>
+                    <linearGradient id="childGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffb74d" />
+                        <stop offset="100%" style="stop-color:#ffa726" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- Sky background -->
+                <rect x="0" y="0" width="400" height="300" fill="url(#skyGradient)"/>
+                
+                <!-- Floating clouds -->
+                <ellipse cx="100" cy="80" rx="25" ry="15" fill="url(#cloudGradient)" opacity="0.8"/>
+                <ellipse cx="120" cy="75" rx="20" ry="12" fill="url(#cloudGradient)" opacity="0.8"/>
+                <ellipse cx="300" cy="60" rx="30" ry="18" fill="url(#cloudGradient)" opacity="0.7"/>
+                <ellipse cx="320" cy="55" rx="25" ry="15" fill="url(#cloudGradient)" opacity="0.7"/>
+                
+                <!-- Flying child -->
+                <!-- Body -->
+                <ellipse cx="200" cy="160" rx="15" ry="20" fill="url(#childGradient)"/>
+                
+                <!-- Head -->
+                <circle cx="200" cy="130" r="12" fill="url(#childGradient)"/>
+                
+                <!-- Eyes -->
+                <circle cx="197" cy="128" r="2" fill="#000"/>
+                <circle cx="203" cy="128" r="2" fill="#000"/>
+                
+                <!-- Smile -->
+                <path d="M 195 135 Q 200 140 205 135" stroke="#000" stroke-width="1" fill="none"/>
+                
+                <!-- Arms spread like wings -->
+                <ellipse cx="175" cy="150" rx="8" ry="15" fill="url(#childGradient)" transform="rotate(-30 175 150)"/>
+                <ellipse cx="225" cy="150" rx="8" ry="15" fill="url(#childGradient)" transform="rotate(30 225 150)"/>
+                
+                <!-- Legs -->
+                <ellipse cx="195" cy="185" rx="6" ry="12" fill="url(#childGradient)"/>
+                <ellipse cx="205" cy="185" rx="6" ry="12" fill="url(#childGradient)"/>
+                
+                <!-- Hair -->
+                <path d="M 188 120 Q 200 110 212 120" stroke="#8d6e63" stroke-width="3" fill="none"/>
+                <path d="M 190 118 Q 200 108 210 118" stroke="#8d6e63" stroke-width="2" fill="none"/>
+                
+                <!-- Magical sparkles around the child -->
+                <circle cx="180" cy="140" r="2" fill="#fff" opacity="0.8"/>
+                <circle cx="220" cy="145" r="1.5" fill="#fff" opacity="0.7"/>
+                <circle cx="190" cy="120" r="1" fill="#fff" opacity="0.9"/>
+                <circle cx="210" cy="125" r="1.5" fill="#fff" opacity="0.6"/>
+                <circle cx="200" cy="100" r="2" fill="#fff" opacity="0.8"/>
+                
+                <!-- Dream bubbles -->
+                <circle cx="150" cy="100" r="8" fill="#e8f4fd" opacity="0.6" stroke="#42a5f5" stroke-width="1"/>
+                <circle cx="250" cy="90" r="6" fill="#e8f4fd" opacity="0.6" stroke="#42a5f5" stroke-width="1"/>
+                <circle cx="180" cy="70" r="4" fill="#e8f4fd" opacity="0.6" stroke="#42a5f5" stroke-width="1"/>
+                
+                <!-- Sun -->
+                <circle cx="350" cy="50" r="15" fill="#ffeb3b" opacity="0.8"/>
+                <circle cx="350" cy="50" r="10" fill="#fff" opacity="0.9"/>
+            </svg>
+        </div>
+        
+        <div class="title">The Dream of Flying</div>
+        
+        <div class="story-content">
+            <p>Every night, as the stars began to twinkle in the dark sky, little Emma would lie in her bed and dream the most wonderful dream. She would close her eyes and imagine herself floating up, up, up into the clouds, where she could fly like a bird and dance with the wind.</p>
+            
+            <p>In her dreams, Emma would spread her arms wide like wings and soar through the sky. She would fly past fluffy white clouds that looked like giant cotton balls, and wave hello to the birds as they flew by. The wind would tickle her face and make her hair dance around her head like a golden halo.</p>
+            
+            <div class="dialogue">"I wish I could really fly," Emma would whisper to her stuffed bunny, Mr. Fluffles, as she drifted off to sleep each night.</div>
+            
+            <p>One magical evening, as Emma was falling asleep, she felt something extraordinary happening. Her bed began to glow with a soft, blue light, and suddenly, she felt lighter than air! Emma opened her eyes and discovered that she was actually floating above her bed, just like in her dreams!</p>
+            
+            <p>At first, Emma was a little scared, but then she remembered all the wonderful flying dreams she had had. She took a deep breath and slowly moved her arms up and down, just like she had practiced in her imagination. To her amazement, she began to rise higher and higher!</p>
+            
+            <div class="dialogue">"I'm really flying!" Emma giggled with joy as she floated around her room, touching the ceiling and spinning in circles.</div>
+            
+            <p>Emma flew out her window and into the night sky. The stars seemed to twinkle extra brightly just for her, and the moon smiled down like a friendly face. She flew over her neighborhood, waving to the sleeping houses below, and soared up to dance with the clouds.</p>
+            
+            <p>As she flew, Emma discovered that she could control her flight by thinking about where she wanted to go. She could go fast like a shooting star or slow like a gentle breeze. She could even do loops and spins that made her laugh with pure happiness.</p>
+            
+            <div class="dialogue">"This is the most amazing thing ever!" Emma shouted to the night sky, her voice echoing through the clouds.</div>
+            
+            <p>Emma flew all night long, exploring the world from above. She saw the city lights twinkling like earthbound stars, and she watched the first rays of sunlight paint the sky with beautiful colors. When morning came, she gently floated back to her room and landed softly on her bed.</p>
+            
+            <p>When Emma woke up the next morning, she wasn't sure if her flying adventure had been real or just a dream. But she knew one thing for certain—her dreams had taught her that anything was possible if she believed in herself.</p>
+            
+            <div class="dialogue">"Maybe I can't fly in the daytime," Emma thought with a smile, "but in my dreams, I can soar anywhere I want!"</div>
+            
+            <p>From that night on, Emma's dreams became even more magical, and she knew that her imagination was the most powerful flying machine of all. She would always remember that night when her dreams came true, and she learned that the best adventures happen when you believe in the impossible.</p>
+        </div>
+    </div>
+</body>
+</html>

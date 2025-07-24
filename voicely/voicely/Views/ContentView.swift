@@ -2,292 +2,263 @@
 //  ContentView.swift
 //  voicely
 //
-//  Created by Sunil Targe on 2025/6/25.
+//  Created by Sunil Targe on 2025/7/26.
 //
 
 import SwiftUI
-import AVFoundation
-import RevenueCat
-import RevenueCatUI
+import DesignSystem
 
 struct ContentView: View {
     @EnvironmentObject var purchaseVM: PurchaseViewModel
-    @StateObject var viewModel = MainViewModel(selectedVoice: Voice.default)
-    @FocusState private var isTextFieldFocused: Bool
-    @State private var showHistory = false
+    @EnvironmentObject var mainVM: MainViewModel
     @State private var showProfile = false
-    @State private var showVoice = false
-    @State private var showFilter = false
-    @State private var showPlayerView = false
-    @State private var showPaywall = false
+    @State private var selectedStory: Story?
+    @State private var showVoiceName = false
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                // Main input area
-                TextField("Start typing here...", text: $viewModel.inputText, axis: .vertical)
-                    .focused($isTextFieldFocused)
-                    .padding(.horizontal)
-                    .cornerRadius(12)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .tint(Color(red: 0.98, green: 0.67, blue: 0.53))
-                    .onChange(of: viewModel.inputText) { newValue in
-                        if newValue.count > 5000 {
-                            viewModel.inputText = String(newValue.prefix(5000))
-                        }
-                    }
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            isTextFieldFocused = true
-                        }
-                    }
-                Spacer()
-                // Player view if audio is generated
-                if showPlayerView, let audioURL = viewModel.generatedAudioURL, let localAudioFilename = viewModel.generatedLocalAudioFilename {
-                    PlayerView(
-                        text: viewModel.inputText,
-                        voice: viewModel.selectedVoice,
-                        audioURL: audioURL,
-                        localAudioFilename: localAudioFilename,
-                        onClose: {
-                            withAnimation {
-                                showPlayerView = false
-                                viewModel.generatedAudioURL = nil
-                                viewModel.generatedLocalAudioFilename = nil
-                            }
-                        }
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(1)
-                }
-                // Bottom action bar
-                VStack(spacing: 0) {
-                    Divider()
-                    HStack(alignment: .center) {
-                        Button(action: { 
-                            playHapticFeedback()
-                            showVoice = true 
-                        }) {
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(viewModel.selectedVoice.color.color)
-                                    .frame(width: 24, height: 24)
-                                Text(viewModel.selectedVoice.name)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.white)
-                                Divider()
-                                    .foregroundStyle(.white.opacity(0.1))
-                                    .frame(height: 20)
-                                Image(systemName: "chevron.down").imageScale(.small)
-                                    .foregroundStyle(.white.opacity(0.1))
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                            )
-                        }
-                        .sheet(isPresented: $showVoice) {
-                            VoiceNameScreen(isPresented: $showVoice, selectedVoice: $viewModel.selectedVoice)
-                                .onDisappear {
-                                    viewModel.updateVoiceSelection()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        RatingPromptManager.shared.requestReviewIfAppropriate()
-                                    }
-                                }
-                        }
-                        Button(action: { 
-                            playHapticFeedback()
-                            showFilter = true 
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(.white)
-                                    .frame(width: 32, height: 32)
-                                Image(systemName: "waveform")
-                                    .imageScale(.small)
-                                    .foregroundStyle(.black)
-                            }
-                        }
-                        .sheet(isPresented: $showFilter) {
-                            FilterScreen(
-                                isPresented: $showFilter,
-                                selectedVoice: $viewModel.selectedVoice
-                            )
-                            .onDisappear {
-                                viewModel.updateVoiceSelection()
-                            }
-                        }
-                        
-                        Spacer(minLength: 1)
-                        // Generate button
-                        Button(action: {
-                            playHapticFeedback()
-                            if purchaseVM.isPremium {
-                                viewModel.generateSpeech(
-                                    emotion: viewModel.selectedVoice.emotion,
-                                    channel: viewModel.selectedVoice.channel,
-                                    languageBoost: viewModel.selectedVoice.language
-                                )
-                            } else {
-                                // Track paywall shown event
-                                OnboardingViewModel.shared.trackPaywallShown(source: "generate_button")
-                                showPaywall = true
-                            }
-                        }) {
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .frame(width: 24, height: 24)
-                                    .padding(.horizontal)
-                            } else {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "sparkles").imageScale(.medium)
-                                        .padding(.leading)
-                                    Text("Generate")
-                                        .fontWeight(.semibold)
-                                        .padding(.vertical, 8)
-                                        .padding(.trailing)
-                                    
-                                }
-                                .background(viewModel.inputText.count > 0 ? Color.white : Color(.systemGray4))
-                                .foregroundColor(viewModel.inputText.count > 0 ? .black : .gray)
-                                .cornerRadius(14)
-                            }
-                        }
-                        .disabled(viewModel.inputText.isEmpty || viewModel.isLoading)
-                        .onChange(of: viewModel.generatedAudioURL) { newValue in
-                            if newValue != nil && viewModel.generatedLocalAudioFilename != nil {
-                                withAnimation {
-                                    showPlayerView = true
-                                }
-                                isTextFieldFocused = false // Dismiss keyboard
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    // Character count bar
+        NavigationView {
+            VStack(spacing: 0) {
+                ScrollView(.vertical, showsIndicators: false) {
                     HStack {
-                        Text("\(viewModel.inputText.count) characters")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Button(action: {
+                            showVoiceName = true
+                        }) {
+                            HStack(spacing: 20) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text("Voice")
+                                            .font(.title3)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white)
+                                        Image(systemName: "mic.fill")
+                                    }
+                                    Text(mainVM.selectedVoice.name)
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.gray)
+                                }
+                                Image(systemName: "chevron.forward")
+                            }
+                            .padding(.horizontal, 30)
+                            .padding(.vertical)
+                        }
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(Capsule())
                         Spacer()
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 4)
+                    .padding()
+                    VStack(spacing: 6){
+                        HeaderTitle(
+                            text: "Stories 📖",
+                            actionIcon: Image(systemName: "chevron.forward"),
+                            color: .white
+                        ) {
+                            // all stories action
+                        }
+                        .padding(.horizontal, 20)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(Story.allStories) { story in
+                                    StoryCard(story: story)
+                                        .onTapGesture {
+                                            selectedStory = story
+                                        }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                    }
+                    
+
+                    // Action Buttons Grid
+                    VStack(spacing: 6) {
+                        HeaderTitle(
+                            text: "Import your own story",
+                            icon: Image(systemName: "plus.circle.fill"),
+                            color: .white
+                        )
+                        .padding(.top, 30)
+                        
+                        LazyVGrid(columns: [
+                            GridItem(.flexible(), spacing: 10),
+                            GridItem(.flexible(), spacing: 10)
+                        ], spacing: 10) {
+                            NavigationLink(
+                                destination: MainView()
+                                    .environmentObject(purchaseVM)
+                                    .environmentObject(mainVM)
+                            ) {
+                                ActionButton(icon: "textformat", title: "Write text")
+                            }
+                            
+                            NavigationLink(destination: AnyView(ScanTextView())) {
+                                ActionButton(icon: "viewfinder", title: "Scan text")
+                            }
+                            
+                            NavigationLink(destination: AnyView(PasteLinkView())) {
+                                ActionButton(icon: "globe", title: "Paste a link")
+                            }
+                            
+                            NavigationLink(destination: AnyView(UploadFileView())) {
+                                ActionButton(icon: "doc.fill", title: "Upload a file")
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    Spacer()
                 }
-                .background(.ultraThinMaterial)
             }
-            .navigationBarTitleDisplayMode(.inline)
+            .background(Color(.systemBackground))
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { 
-                        playHapticFeedback()
-                        showHistory = true 
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        showProfile = true
                     }) {
-                        Image("ic_list")
+                        Image("ic_user")
                             .foregroundStyle(.gray)
+                            .padding(.trailing, 6)
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        if viewModel.inputText.count > 3 {
-                            Button(action: {
-                                playHapticFeedback()
-                                viewModel.inputText = ""
-                            }) {
-                                Text("Clear")
-                                    .font(.caption)
-                                    .foregroundColor(Color(red: 0.98, green: 0.67, blue: 0.53))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color(red: 0.98, green: 0.67, blue: 0.53).opacity(0.2))
-                                    .cornerRadius(20)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color(red: 0.98, green: 0.67, blue: 0.53).opacity(0.3), lineWidth: 1)
-                                    )
-                            }
-                            .transition(.scale.combined(with: .opacity))
-                        }
-                        Button(action: {
-                            showProfile = true
-                        }) {
-                            Image("ic_user")
-                                .foregroundStyle(.gray)
-                                .padding(.trailing, 6)
-                        }
-                    }
-                }
-                ToolbarItem(placement: .principal) {
-                    HStack(spacing: 0) {
-                        Menu {
-                            Section {
-//                                Button("Random story") {
-//                                    if let story = Constants.stories.randomElement() {
-//                                        viewModel.inputText = story
-//                                    }
-//                                }
-                                Button("Birthday Wish") {
-                                    if let wish = Constants.birthdayWishes.randomElement() {
-                                        viewModel.inputText = wish
-                                    }
-                                }
-                                Button("Silly joke") {
-                                    if let joke = Constants.jokes.randomElement() {
-                                        viewModel.inputText = joke
-                                    }
-                                }
-                                Menu("Bedtime Stories") {
-                                    Button("English") {
-                                        if let englishStories = Constants.nightStories["English"],
-                                           let story = englishStories.randomElement() {
-                                            viewModel.inputText = story
-                                        }
-                                    }
-                                    Button("हिंदी") {
-                                        if let hindiStories = Constants.nightStories["Hindi"],
-                                           let story = hindiStories.randomElement() {
-                                            viewModel.inputText = story
-                                        }
-                                    }
-                                }
-                            } header: {
-                                Text("Get Started with")
-                            }
-                        } label: {
-                            HStack {
-                                Text(purchaseVM.isPremium ? "Voicely Pro" : "Voicely")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                Image(systemName: "chevron.forward")
-                                    .imageScale(.small)
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    }
-                    .animation(.easeInOut, value: viewModel.inputText.count > 3)
-                }
-            }
-            .background(Color.black.ignoresSafeArea())
-            .sheet(isPresented: $showHistory) {
-                HistoryScreen(isPresented: $showHistory, history: $viewModel.history)
             }
             .sheet(isPresented: $showProfile) {
                 ProfileScreen(isPresented: $showProfile)
             }
-            .fullScreenCover(isPresented: $showPaywall) {
-                purchaseVM.refreshPurchaseStatus()
-            } content: {
-                PaywallView()
+            .sheet(isPresented: $showVoiceName) {
+                VoiceNameScreen(isPresented: $showVoiceName, selectedVoice: $mainVM.selectedVoice)
+                    .onDisappear {
+                        mainVM.updateVoiceSelection()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            RatingPromptManager.shared.requestReviewIfAppropriate()
+                        }
+                    }
             }
-                }
+            .fullScreenCover(item: $selectedStory) { story in
+                BookPageView(story: story)
+            }
+        }
+        .tint(.gray)
+    }
+}
+
+struct ActionButton: View {
+    let icon: String
+    let title: String
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(.white)
+            
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 100)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+}
+
+struct StoryCard: View {
+    let story: Story
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            VStack {
+                // Story Image with 2:3 aspect ratio
+                Image(story.thumbnailImageName)
+                    .resizable()
+                    .aspectRatio(2/3, contentMode: .fit)
+                    .padding(.horizontal, 6)
+                    .frame(width: 120)
+                    .clipped()
+                    .cornerRadius(8)
+                Spacer()
+            }
+            VStack {
+                // Story Title at bottom
+                Text(story.name)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.5)
+                    .padding(.horizontal, 4)
+                    .offset(y: 4)
+            }
+            .padding(.vertical)
+        }
+        .frame(width: 120, height: 200)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }
 
 #Preview {
-    ContentView().environmentObject(PurchaseViewModel.shared)
+    ContentView()
+        .environmentObject(PurchaseViewModel.shared)
+        .environmentObject(MainViewModel(selectedVoice: Voice.default))
+}
+
+// Destination Views for NavigationLinks
+struct WriteTextView: View {
+    var body: some View {
+        VStack {
+            Text("Write Text")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding()
+            
+            Spacer()
+        }
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct ScanTextView: View {
+    var body: some View {
+        VStack {
+            Text("Scan Text")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding()
+            
+            Spacer()
+        }
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct PasteLinkView: View {
+    var body: some View {
+        VStack {
+            Text("Paste Link")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding()
+            
+            Spacer()
+        }
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct UploadFileView: View {
+    var body: some View {
+        VStack {
+            Text("Upload File")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding()
+            
+            Spacer()
+        }
+        .navigationBarTitleDisplayMode(.inline)
+    }
 }

@@ -46,81 +46,149 @@ struct PlayerView: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var activityItems: [Any] = []
+    @State private var playbackSpeed: Double = 1.0
+    
+    @State private var showFullText = false
 
     var body: some View {
-        ZStack {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text(text)
-                        .font(.title3)
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                        .padding(.top, 6)
-                    Spacer()
-                    Button(action: {
-                        playHapticFeedback()
-                        withAnimation {
-                            onClose?()
-                        }
-                    }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.white)
-                            .frame(width: 32, height: 32)
-                    }
-                }
-                // Progress bar
-                HStack {
-                    Text(timeString(currentTime))
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                    Slider(value: $currentTime, in: 0...duration, onEditingChanged: sliderChanged)
-                        .accentColor(.white)
-                    Text(timeString(duration))
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                }
-                .padding(.vertical, 2)
-                HStack(spacing: 16) {
-                    HStack(spacing: 8) {
-                        Circle().fill(voice.color.color).frame(width: 24, height: 24)
-                        Text(voice.name)
-                            .foregroundColor(.white)
-                            .font(.subheadline)
-                    }
-                    Spacer()
-                    Button(action: {
-                        playHapticFeedback()
-                        togglePlay()
-                    }) {
-                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                            .foregroundColor(.black)
-                            .frame(width: 32, height: 32)
-                            .background(Circle().fill(Color.white))
-                    }
-                    .disabled(playerStatus != .readyToPlay)
-                    if let filename = localAudioFilename {
-                        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                        let fileURL = docs.appendingPathComponent(filename)
-                        if FileManager.default.fileExists(atPath: fileURL.path) {
-                            ShareLink(item: fileURL) {
-                                Image("ic_share")
-                                    .resizable()
-                                    .padding(6)
-                                    .foregroundColor(.black)
-                                    .frame(width: 32, height: 32)
-                                    .background(Circle().fill(Color.white))
-                            }
+        VStack(spacing: 0) {
+            Divider()
+            // Title and close button
+            HStack {
+                // Share button
+                if let filename = localAudioFilename {
+                    let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    let fileURL = docs.appendingPathComponent(filename)
+                    if FileManager.default.fileExists(atPath: fileURL.path) {
+                        ShareLink(item: fileURL) {
+                            Image("ic_share")
+                                .resizable()
+                                .padding(6)
+                                .foregroundColor(.gray)
+                                .frame(width: 32, height: 32)
                         }
                     }
                 }
-                .padding(.bottom, 6)
+                
+                // title
+                Spacer()
+                Button(action: {
+                    playHapticFeedback()
+                    withAnimation {
+                        showFullText.toggle() // action
+                    }
+                }) {
+                    HStack {
+                        Text(String(text.prefix(15)) + "…")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.gray)
+                            .font(.caption)
+                    }
+                }
+                Spacer()
+                
+                // Close button
+                Button(action: {
+                    playHapticFeedback()
+                    withAnimation {
+                        onClose?()
+                    }
+                }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.gray)
+                        .frame(width: 32, height: 32)
+                }
             }
-            .padding(.horizontal)
-            .padding(.vertical, 16)
-            .background(.ultraThinMaterial)
-            .cornerRadius(14)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            
+            // Progress bar at top
+            HStack {
+                Text(timeString(currentTime))
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                
+                Slider(value: $currentTime, in: 0...duration, onEditingChanged: sliderChanged)
+                    .accentColor(.blue)
+                
+                Text(timeString(duration))
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            
+            
+            
+            // Main controls
+            HStack(spacing: 30) {
+                // Voice icon (bottom left)
+                Circle()
+                    .fill(voice.color.color)
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "mic.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                    )
+                
+                // Rewind 10s
+                VStack(spacing: 4) {
+                    Button(action: {
+                        playHapticFeedback()
+                        seekBackward()
+                    }) {
+                        Image(systemName: "gobackward.10")
+                            .foregroundColor(.white)
+                            .font(.title2)
+                    }
+                }
+                
+                // Play/Pause button (center)
+                Button(action: {
+                    playHapticFeedback()
+                    togglePlay()
+                }) {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .frame(width: 60, height: 60)
+                        .background(Circle().fill(Color.blue))
+                }
+                .disabled(playerStatus != .readyToPlay)
+                
+                // Fast forward 10s
+                VStack(spacing: 4) {
+                    Button(action: {
+                        playHapticFeedback()
+                        seekForward()
+                    }) {
+                        Image(systemName: "goforward.10")
+                            .foregroundColor(.white)
+                            .font(.title2)
+                    }
+                }
+                
+                // Speed control (bottom right)
+                Button(action: {
+                    playHapticFeedback()
+                    togglePlaybackSpeed()
+                }) {
+                    Text(speedText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Color.gray.opacity(0.3)))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
         }
-        .padding(.horizontal)
+        .background(Color(.secondarySystemBackground))
         .onAppear(perform: setupPlayer)
         .onDisappear(perform: cleanupPlayer)
         .onReceive(mediaPlayerManager.$isPlaying) { newValue in
@@ -132,6 +200,48 @@ struct PlayerView: View {
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text("Playback Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
         }
+        .sheet(isPresented: $showFullText) {
+            PreviewText(text: text, isPresenting: $showFullText)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+    
+    private var speedText: String {
+        return String(format: "%.1fx", playbackSpeed)
+    }
+    
+    private func togglePlaybackSpeed() {
+        switch playbackSpeed {
+        case 0.5:
+            playbackSpeed = 1.0
+        case 1.0:
+            playbackSpeed = 1.5
+        case 1.5:
+            playbackSpeed = 2.0
+        case 2.0:
+            playbackSpeed = 0.5
+        default:
+            playbackSpeed = 1.0
+        }
+        
+        player?.rate = Float(playbackSpeed)
+    }
+    
+    private func seekForward() {
+        guard let player = player else { return }
+        let newTime = min(currentTime + 10, duration)
+        player.seek(to: CMTime(seconds: newTime, preferredTimescale: 600))
+        currentTime = newTime
+        mediaPlayerManager.seek(to: newTime)
+    }
+    
+    private func seekBackward() {
+        guard let player = player else { return }
+        let newTime = max(currentTime - 10, 0)
+        player.seek(to: CMTime(seconds: newTime, preferredTimescale: 600))
+        currentTime = newTime
+        mediaPlayerManager.seek(to: newTime)
     }
 
     private func setupPlayer() {
@@ -236,6 +346,7 @@ struct PlayerView: View {
         }
         
         player.play()
+        player.rate = Float(playbackSpeed)
         isPlaying = true
         duration = item.asset.duration.seconds
         mediaPlayerManager.play()
@@ -286,6 +397,7 @@ struct PlayerView: View {
                 player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
             }
             player.play()
+            player.rate = Float(playbackSpeed)
             mediaPlayerManager.play()
             
             // Update Dynamic Island
@@ -323,6 +435,59 @@ struct PlayerView: View {
         let min = intSec / 60
         let sec = intSec % 60
         return String(format: "%02d:%02d", min, sec)
+    }
+}
+
+struct PreviewText: View {
+    let text: String
+    @Binding var isPresenting: Bool
+    @State private var isCopied = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                // Close button
+                Button(action: {
+                    playHapticFeedback()
+                    withAnimation {
+                        isPresenting = false
+                    }
+                }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.gray)
+                        .frame(width: 32, height: 32)
+                }
+            }
+            .padding([.horizontal, .top])
+            ScrollView {
+                Text(text)
+                    .font(.title3)
+                    .minimumScaleFactor(0.8)
+                    .textSelection(.enabled)
+                    .padding(.horizontal)
+            }
+            Button(action: {
+                UIPasteboard.general.string = text
+                isCopied = true
+                playHapticFeedback()
+
+                // Reset back to "Copy" after 1.5 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    isCopied = false
+                }
+            }) {
+                Text(isCopied ? "Copied" : "Copy")
+                    .fontWeight(.semibold)
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+            }
+            .padding()
+        }
     }
 }
 

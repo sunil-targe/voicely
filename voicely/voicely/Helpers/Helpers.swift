@@ -1,5 +1,6 @@
 import SwiftUI
 import CommonCrypto
+import WebKit
 
 #if canImport(UIKit)
 extension View {
@@ -20,6 +21,27 @@ func playHapticFeedback() {
     guard hapticFeedback else { return }
     let impactHeavy = UIImpactFeedbackGenerator(style: .soft)
     impactHeavy.impactOccurred()
+}
+
+struct WebView: UIViewRepresentable {
+  @Binding var text: String
+   
+  func makeUIView(context: Context) -> WKWebView {
+    return WKWebView()
+  }
+   
+  func updateUIView(_ uiView: WKWebView, context: Context) {
+      uiView.backgroundColor = .clear
+      uiView.isOpaque = false
+      
+      if let htmlPath = Bundle.main.path(forResource: text, ofType: "html") {
+          let url = URL(fileURLWithPath: htmlPath)
+          let request = URLRequest(url: url)
+          uiView.load(request)
+      } else {
+          debugPrint("Error: HTML file not found.")
+      }
+  }
 }
 
 extension Color {

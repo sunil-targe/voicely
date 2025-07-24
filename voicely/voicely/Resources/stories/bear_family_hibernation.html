@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bear Family's Hibernation</title>
+    <style>
+        body {
+            background: #f5f1e8;
+            font-family: 'Georgia', 'Palatino', 'Times New Roman', serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            color: #2c1810;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(160, 82, 45, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(210, 180, 140, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(139, 69, 19, 0.1);
+            position: relative;
+        }
+        
+        .title {
+            font-family: 'Marker Felt', 'Chalkboard', 'Comic Sans MS', cursive, sans-serif;
+            color: #8b4513;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.2);
+            background: linear-gradient(135deg, #d2691e, #cd853f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+        }
+        
+        .illustration svg {
+            max-width: 300px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(139, 69, 19, 0.3));
+        }
+        
+        .story-content {
+            font-size: 1.1em;
+            text-align: justify;
+            margin-top: 30px;
+        }
+        
+        .story-content p {
+            margin-bottom: 20px;
+            text-indent: 2em;
+        }
+        
+        .story-content p:first-letter {
+            font-size: 3em;
+            font-weight: bold;
+            color: #8b4513;
+            float: left;
+            line-height: 0.8;
+            margin-right: 8px;
+            margin-top: 4px;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
+        }
+        
+        .dialogue {
+            font-style: italic;
+            color: #2f4f4f;
+            background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
+            padding: 15px 20px;
+            border-left: 4px solid #4682b4;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            position: relative;
+        }
+        
+        .dialogue:before {
+            content: '"';
+            color: #4682b4;
+            font-size: 3em;
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            font-family: 'Georgia', serif;
+        }
+        
+        .dialogue:after {
+            content: '"';
+            color: #4682b4;
+            font-size: 3em;
+            position: absolute;
+            right: -10px;
+            bottom: -30px;
+            font-family: 'Georgia', serif;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #f5f1e8;
+                color: #2c1810;
+            }
+            .container {
+                background: rgba(255, 255, 255, 0.9);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            .title {
+                font-size: 2em;
+            }
+            .story-content {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="illustration">
+            <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                <!-- Cozy cave background -->
+                <defs>
+                    <radialGradient id="caveGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#8b4513;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:#2c1810;stop-opacity:0.8" />
+                    </radialGradient>
+                    <linearGradient id="bearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#8b4513" />
+                        <stop offset="100%" style="stop-color:#654321" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- Cave entrance -->
+                <ellipse cx="200" cy="150" rx="180" ry="120" fill="url(#caveGradient)" stroke="#654321" stroke-width="3"/>
+                
+                <!-- Mama Bear -->
+                <ellipse cx="160" cy="180" rx="25" ry="20" fill="url(#bearGradient)"/>
+                <ellipse cx="160" cy="160" rx="15" ry="12" fill="url(#bearGradient)"/>
+                <circle cx="155" cy="155" r="3" fill="#000"/>
+                <circle cx="165" cy="155" r="3" fill="#000"/>
+                <ellipse cx="160" cy="160" rx="4" ry="2" fill="#8b4513"/>
+                
+                <!-- Baby Bear 1 -->
+                <ellipse cx="200" cy="190" rx="15" ry="12" fill="url(#bearGradient)"/>
+                <ellipse cx="200" cy="175" rx="10" ry="8" fill="url(#bearGradient)"/>
+                <circle cx="198" cy="172" r="2" fill="#000"/>
+                <circle cx="202" cy="172" r="2" fill="#000"/>
+                
+                <!-- Baby Bear 2 -->
+                <ellipse cx="240" cy="185" rx="12" ry="10" fill="url(#bearGradient)"/>
+                <ellipse cx="240" cy="175" rx="8" ry="6" fill="url(#bearGradient)"/>
+                <circle cx="238" cy="173" r="2" fill="#000"/>
+                <circle cx="242" cy="173" r="2" fill="#000"/>
+                
+                <!-- Sleeping Z's -->
+                <text x="280" y="120" font-family="Arial" font-size="20" fill="#4682b4" opacity="0.7">Z</text>
+                <text x="290" y="110" font-family="Arial" font-size="16" fill="#4682b4" opacity="0.5">Z</text>
+                <text x="300" y="100" font-family="Arial" font-size="14" fill="#4682b4" opacity="0.3">Z</text>
+                
+                <!-- Cozy bedding -->
+                <ellipse cx="200" cy="200" rx="100" ry="20" fill="#f4a460" opacity="0.8"/>
+                <ellipse cx="200" cy="195" rx="90" ry="15" fill="#deb887" opacity="0.9"/>
+            </svg>
+        </div>
+        
+        <div class="title">The Bear Family's Hibernation</div>
+        
+        <div class="story-content">
+            <p>Deep in the heart of the forest, where the trees stood tall and the air grew crisp with the coming winter, lived a loving bear family. Mama Bear, with her warm brown fur and gentle eyes, had two adorable cubs who were just learning about the ways of the forest.</p>
+            
+            <p>As the days grew shorter and the nights grew longer, Mama Bear knew it was time to prepare for their long winter sleep. "Come, my little ones," she said with a gentle voice, "it's time to find our cozy cave for hibernation."</p>
+            
+            <div class="dialogue">"Mama, what's hibernation?" asked the smaller cub, snuggling close to her warm fur.</div>
+            
+            <p>Mama Bear smiled and explained, "Hibernation is like a very long, cozy nap that we take during winter. While we sleep, the snow will cover the forest, and when we wake up in spring, everything will be fresh and new again."</p>
+            
+            <p>Together, they found a perfect cave nestled between two large rocks. The entrance was just the right size, and inside, it was dry and warm. Mama Bear showed her cubs how to gather soft leaves and moss to make comfortable beds.</p>
+            
+            <div class="dialogue">"Look, Mama! I found the softest moss ever!" exclaimed the bigger cub, proudly showing his discovery.</div>
+            
+            <p>As they arranged their cozy sleeping area, the cubs learned about all the preparations that went into hibernation. Mama Bear taught them how to eat extra food in the fall to build up their energy reserves, and how to find the perfect spot that would stay warm throughout the winter.</p>
+            
+            <p>When everything was ready, the bear family snuggled together in their warm cave. The cubs felt safe and comfortable, surrounded by their mother's love and the gentle rhythm of her breathing. Outside, the first snowflakes began to fall, covering the forest in a blanket of white.</p>
+            
+            <div class="dialogue">"Goodnight, my precious ones," whispered Mama Bear. "Dream of spring flowers and warm sunshine."</div>
+            
+            <p>And so, the bear family drifted into their peaceful winter sleep, their hearts full of love and their dreams full of the beautiful spring that awaited them. The forest around them grew quiet, and the snow continued to fall, creating a magical winter wonderland that would keep them safe and warm until the sun returned to wake them from their long, cozy nap.</p>
+        </div>
+    </div>
+</body>
+</html>

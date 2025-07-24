@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Forest Friends and the Storm</title>
+    <style>
+        body {
+            background: #e8f5e8;
+            font-family: 'Georgia', 'Palatino', 'Times New Roman', serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            color: #2e7d32;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(76, 175, 80, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 195, 74, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(104, 159, 56, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(76, 175, 80, 0.1);
+            position: relative;
+        }
+        
+        .title {
+            font-family: 'Marker Felt', 'Chalkboard', 'Comic Sans MS', cursive, sans-serif;
+            color: #4caf50;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(76, 175, 80, 0.2);
+            background: linear-gradient(135deg, #66bb6a, #81c784);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+        }
+        
+        .illustration svg {
+            max-width: 300px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3));
+        }
+        
+        .story-content {
+            font-size: 1.1em;
+            text-align: justify;
+            margin-top: 30px;
+        }
+        
+        .story-content p {
+            margin-bottom: 20px;
+            text-indent: 2em;
+        }
+        
+        .story-content p:first-letter {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4caf50;
+            float: left;
+            line-height: 0.8;
+            margin-right: 8px;
+            margin-top: 4px;
+            text-shadow: 2px 2px 4px rgba(76, 175, 80, 0.3);
+        }
+        
+        .dialogue {
+            font-style: italic;
+            color: #1b5e20;
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            padding: 15px 20px;
+            border-left: 4px solid #66bb6a;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            position: relative;
+        }
+        
+        .dialogue:before {
+            content: '"';
+            color: #66bb6a;
+            font-size: 3em;
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            font-family: 'Georgia', serif;
+        }
+        
+        .dialogue:after {
+            content: '"';
+            color: #66bb6a;
+            font-size: 3em;
+            position: absolute;
+            right: -10px;
+            bottom: -30px;
+            font-family: 'Georgia', serif;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #e8f5e8;
+                color: #2e7d32;
+            }
+            .container {
+                background: rgba(255, 255, 255, 0.9);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            .title {
+                font-size: 2em;
+            }
+            .story-content {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="illustration">
+            <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                <!-- Forest background -->
+                <defs>
+                    <radialGradient id="forestGradient" cx="50%" cy="70%" r="60%">
+                        <stop offset="0%" style="stop-color:#4caf50;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:#2e7d32;stop-opacity:0.8" />
+                    </radialGradient>
+                    <linearGradient id="treeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#4caf50" />
+                        <stop offset="100%" style="stop-color:#388e3c" />
+                    </linearGradient>
+                    <linearGradient id="squirrelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#8d6e63" />
+                        <stop offset="100%" style="stop-color:#6d4c41" />
+                    </linearGradient>
+                    <linearGradient id="rabbitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#f5f5f5" />
+                        <stop offset="100%" style="stop-color:#e0e0e0" />
+                    </linearGradient>
+                    <linearGradient id="owlGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#795548" />
+                        <stop offset="100%" style="stop-color:#5d4037" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- Forest background -->
+                <rect x="0" y="0" width="400" height="300" fill="url(#forestGradient)"/>
+                
+                <!-- Trees -->
+                <ellipse cx="100" cy="80" rx="25" ry="40" fill="url(#treeGradient)"/>
+                <ellipse cx="300" cy="90" rx="30" ry="45" fill="url(#treeGradient)"/>
+                <ellipse cx="200" cy="70" rx="20" ry="35" fill="url(#treeGradient)"/>
+                
+                <!-- Tree trunks -->
+                <rect x="90" y="120" width="20" height="80" fill="#8d6e63"/>
+                <rect x="290" y="135" width="20" height="65" fill="#8d6e63"/>
+                <rect x="190" y="105" width="20" height="95" fill="#8d6e63"/>
+                
+                <!-- Squirrel -->
+                <ellipse cx="120" cy="160" rx="8" ry="6" fill="url(#squirrelGradient)"/>
+                <ellipse cx="120" cy="150" rx="6" ry="5" fill="url(#squirrelGradient)"/>
+                <circle cx="118" cy="148" r="1" fill="#000"/>
+                <circle cx="122" cy="148" r="1" fill="#000"/>
+                <ellipse cx="120" cy="152" rx="2" ry="1" fill="#8d6e63"/>
+                <!-- Squirrel tail -->
+                <ellipse cx="130" cy="155" rx="6" ry="8" fill="url(#squirrelGradient)"/>
+                
+                <!-- Rabbit -->
+                <ellipse cx="280" cy="170" rx="10" ry="8" fill="url(#rabbitGradient)"/>
+                <ellipse cx="280" cy="160" rx="6" ry="5" fill="url(#rabbitGradient)"/>
+                <circle cx="278" cy="158" r="1" fill="#000"/>
+                <circle cx="282" cy="158" r="1" fill="#000"/>
+                <ellipse cx="280" cy="162" rx="2" ry="1" fill="#f5f5f5"/>
+                <!-- Rabbit ears -->
+                <ellipse cx="275" cy="150" rx="2" ry="8" fill="url(#rabbitGradient)"/>
+                <ellipse cx="285" cy="150" rx="2" ry="8" fill="url(#rabbitGradient)"/>
+                
+                <!-- Owl in tree -->
+                <ellipse cx="200" cy="140" rx="8" ry="10" fill="url(#owlGradient)"/>
+                <ellipse cx="200" cy="130" rx="6" ry="5" fill="url(#owlGradient)"/>
+                <circle cx="198" cy="128" r="1.5" fill="#000"/>
+                <circle cx="202" cy="128" r="1.5" fill="#000"/>
+                <ellipse cx="200" cy="132" rx="2" ry="1" fill="#795548"/>
+                <!-- Owl wings -->
+                <ellipse cx="190" cy="135" rx="4" ry="6" fill="url(#owlGradient)" opacity="0.8"/>
+                <ellipse cx="210" cy="135" rx="4" ry="6" fill="url(#owlGradient)" opacity="0.8"/>
+                
+                <!-- Storm clouds -->
+                <ellipse cx="150" cy="50" rx="30" ry="15" fill="#78909c" opacity="0.7"/>
+                <ellipse cx="170" cy="45" rx="25" ry="12" fill="#78909c" opacity="0.7"/>
+                <ellipse cx="250" cy="60" rx="35" ry="18" fill="#78909c" opacity="0.6"/>
+                <ellipse cx="270" cy="55" rx="28" ry="15" fill="#78909c" opacity="0.6"/>
+                
+                <!-- Rain drops -->
+                <line x1="160" y1="70" x2="160" y2="85" stroke="#42a5f5" stroke-width="1" opacity="0.7"/>
+                <line x1="170" y1="65" x2="170" y2="80" stroke="#42a5f5" stroke-width="1" opacity="0.7"/>
+                <line x1="180" y1="72" x2="180" y2="87" stroke="#42a5f5" stroke-width="1" opacity="0.7"/>
+                <line x1="260" y1="80" x2="260" y2="95" stroke="#42a5f5" stroke-width="1" opacity="0.7"/>
+                <line x1="270" y1="75" x2="270" y2="90" stroke="#42a5f5" stroke-width="1" opacity="0.7"/>
+                <line x1="280" y1="82" x2="280" y2="97" stroke="#42a5f5" stroke-width="1" opacity="0.7"/>
+                
+                <!-- Safe shelter (hollow tree) -->
+                <ellipse cx="200" cy="200" rx="15" ry="25" fill="#8d6e63" opacity="0.8"/>
+                <ellipse cx="200" cy="200" rx="10" ry="20" fill="#4caf50" opacity="0.3"/>
+            </svg>
+        </div>
+        
+        <div class="title">The Forest Friends and the Storm</div>
+        
+        <div class="story-content">
+            <p>Deep in the heart of the enchanted forest, where the trees whispered secrets to each other and the sunlight danced through the leaves like golden ribbons, lived three best friends: Sammy the Squirrel, Rosie the Rabbit, and Oliver the Owl.</p>
+            
+            <p>Every day, the three friends would play together in their favorite spot—a cozy clearing surrounded by tall oak trees. Sammy would scamper up and down the branches, collecting acorns and showing off his climbing skills. Rosie would hop around the meadow, her fluffy white tail bouncing like a cotton ball, while Oliver would watch from his perch in the old maple tree, his wise eyes twinkling with friendship.</p>
+            
+            <div class="dialogue">"What a perfect day for playing!" Rosie would say, her whiskers twitching with excitement as she nibbled on fresh clover.</div>
+            
+            <p>But one afternoon, as the friends were having their usual picnic of berries and nuts, Oliver noticed something unusual in the sky. Dark clouds were gathering overhead, and the wind began to whisper warnings through the trees.</p>
+            
+            <p>"Friends," Oliver said with concern in his voice, "I think a big storm is coming. We need to find a safe place to shelter."</p>
+            
+            <div class="dialogue">"Oh no! What about our picnic?" Sammy asked, clutching his acorn collection tightly.</div>
+            
+            <p>Rosie looked around nervously, her ears twitching. "Where can we go? The storm looks really scary!"</p>
+            
+            <p>Oliver, being the wisest of the group, remembered an old hollow tree that would make the perfect shelter. "Follow me!" he called, spreading his wings and leading the way through the forest.</p>
+            
+            <p>The three friends hurried through the growing darkness, the wind getting stronger with each step. Sammy carried his precious acorns, Rosie hopped as fast as she could, and Oliver flew ahead to make sure the path was safe.</p>
+            
+            <div class="dialogue">"Hurry, friends! The rain is starting!" Oliver called from above, as the first drops began to fall.</div>
+            
+            <p>Just as the storm broke, the friends reached the hollow tree. It was perfect—dry, warm, and just big enough for all three of them. They squeezed inside together, and Oliver used his wings to help keep them warm.</p>
+            
+            <p>Outside, the storm raged with thunder and lightning, but inside their cozy shelter, the friends felt safe and protected. They shared Sammy's acorns and told stories to pass the time, their friendship growing stronger with each shared moment.</p>
+            
+            <div class="dialogue">"I'm so glad we're all together," Rosie said, snuggling close to her friends. "The storm doesn't seem so scary when we're safe with each other."</div>
+            
+            <p>As the storm began to calm, the friends peeked out of their shelter. The forest was glistening with raindrops, and a beautiful rainbow arched across the sky. The air smelled fresh and clean, and the sun was beginning to shine again.</p>
+            
+            <p>Together, the three friends emerged from their shelter, stronger and closer than ever. They had learned that true friendship means sticking together through both sunny days and stormy nights.</p>
+            
+            <div class="dialogue">"We make the best team!" Sammy declared, as they all hugged each other tightly.</div>
+            
+            <p>From that day on, the forest friends knew that no matter what challenges came their way, they would always face them together. Their friendship was as strong as the ancient trees that surrounded them, and as bright as the rainbow that had appeared after the storm.</p>
+        </div>
+    </div>
+</body>
+</html>

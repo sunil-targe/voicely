@@ -99,7 +99,8 @@ struct OnboardingView: View {
             .background(Color(.systemBackground))
         }
         .fullScreenCover(isPresented: $showMainApp) {
-            ContentView().environmentObject(PurchaseViewModel.shared)
+            ContentView()
+                .environmentObject(PurchaseViewModel.shared)
         }
     }
     
