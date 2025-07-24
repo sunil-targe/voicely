@@ -91,29 +91,6 @@ public enum Constants {
         """
     ]
     
-    // List of inappropriate words to filter
-    public static let jokes: [String] = [
-        "Why don't skeletons fight each other?\nBecause they don't have the guts!",
-        
-        "Why did the scarecrow win an award?\nBecause he was outstanding in his field!",
-        
-        "What do you call cheese that isn't yours?\nNacho cheese!",
-        
-        "Why can't your nose be 12 inches long?\nBecause then it would be a foot.",
-        
-        "What did the ocean say to the beach?\nNothing, it just waved.",
-        
-        "Why did the tomato blush?\nBecause it saw the salad dressing!",
-        
-        "What do you call a fish wearing a bowtie?\nSofishticated.",
-        
-        "How do you organize a space party?\nYou planet.",
-        
-        "What did one wall say to the other wall?\nI'll meet you at the corner!",
-        
-        "Why was the math book sad?\nBecause it had too many problems."
-    ]
-    
     public static let nightStories: [String: [String]] = [
         "English": [
             """
@@ -279,47 +256,5 @@ public enum Constants {
                 हर रात एक प्यारी चिड़िया आती और बच्चों के तकिये पर बैठकर गीत गाती। उसकी आवाज़ से सबको मीठी नींद आती। एक दिन वह नहीं आई, तो सब बच्चों ने उसे अपने दिल में बसा लिया।
                 """
         ]
-    ]
-    
-    public static let birthdayWishes: [String] = [
-        "🎉 Happy Birthday [name]! Hope your day’s full of love, laughs, and cake! 🎂✨",
-        
-        "🌟 Yo [name], happy freakin’ birthday! Wishing you fun, chill vibes, and good memories. 🎈💫",
-        
-        "🎊 Big bday hugs, [name]! Hope it’s sweet, sunny, and full of smiles. 🌈🎂",
-        
-        "🎂 Hey [name], it’s your day! Eat cake, be spoiled, and soak in the love. You deserve it all. ✨",
-        
-        "🎈 Happy Birthday [name]! You’re a whole vibe—hope today feels just as awesome as you. 💫",
-        
-        "🎊 [name], it’s party time! May your bday be fun, loud, and legendary. 🥳🌈",
-        
-        "🌟 Another lap around the sun, [name]! Hope this year’s your best one yet. 🎉✨",
-        
-        "🎂 [name], cheers to aging like fine wine! 🍷 Stay fabulous and keep killing it. 💫",
-        
-        "🎊 Happy Birthday, [name]! Keep shining and doing you. The world’s better with you in it. ✨",
-        
-        "🎉 [name], you’re not older—just cooler! 😎 Have a day full of love, snacks, and surprises. 🎁",
-        
-        "🌟 [name], wishing you a chill birthday with big laughs and bigger slices of cake! 🎂💫",
-        
-        "🎊 Hope today brings you the same joy you give everyone else, [name]! You rock. ✨",
-        
-        "🎂 [name], another year more awesome. Hope your birthday’s got all the good stuff! 🎈",
-        
-        "🎉 [name], sending good vibes, big hugs, and a whole cake your way! 🧁🌈",
-        
-        "🌟 [name], it's your day! Keep being amazing. Eat cake and dance a little too! 💃🕺",
-        
-        "🎊 Happy B-Day [name]! You deserve a day as cool and fun as you are! 🎉",
-        
-        "🎂 [name], it’s time to relax, get spoiled, and enjoy the heck out of your birthday! 🎁",
-        
-        "🎉 Hope your birthday’s filled with warm hugs, funny moments, and great food, [name]! 🌈",
-        
-        "🌟 [name], wishing you a simple, happy, and love-filled birthday. You matter. 💫",
-        
-        "🎊 Cheers to you, [name]! Another year of being awesome. Let’s celebrate YOU. 🎉"
     ]
 }
