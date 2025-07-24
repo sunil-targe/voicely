@@ -2,292 +2,319 @@
 //  ContentView.swift
 //  voicely
 //
-//  Created by Sunil Targe on 2025/6/25.
+//  Created by Sunil Targe on 2025/7/26.
 //
 
 import SwiftUI
+import DesignSystem
 import AVFoundation
-import RevenueCat
-import RevenueCatUI
 
 struct ContentView: View {
     @EnvironmentObject var purchaseVM: PurchaseViewModel
-    @StateObject var viewModel = MainViewModel(selectedVoice: Voice.default)
-    @FocusState private var isTextFieldFocused: Bool
-    @State private var showHistory = false
+    @EnvironmentObject var mainVM: MainViewModel
     @State private var showProfile = false
-    @State private var showVoice = false
-    @State private var showFilter = false
-    @State private var showPlayerView = false
-    @State private var showPaywall = false
+    @State private var selectedStory: Story?
+    @State private var showVoiceName = false
+    @State private var showUploadOptions = false
+    @State private var showDocumentPicker = false
+    @State private var showImagePicker = false
+    @State private var showCamera = false
+    @State private var extractedText = ""
+    @State private var isProcessing = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var showMainView = false
+    @State private var showCameraPermissionAlert = false
+    
+    private func checkCameraPermission() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            showCamera = true
+        case .denied, .restricted:
+            showCameraPermissionAlert = true
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        self.showCamera = true
+                    } else {
+                        self.showCameraPermissionAlert = true
+                    }
+                }
+            }
+        @unknown default:
+            showCameraPermissionAlert = true
+        }
+    }
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                // Main input area
-                TextField("Start typing here...", text: $viewModel.inputText, axis: .vertical)
-                    .focused($isTextFieldFocused)
-                    .padding(.horizontal)
-                    .cornerRadius(12)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .tint(Color(red: 0.98, green: 0.67, blue: 0.53))
-                    .onChange(of: viewModel.inputText) { newValue in
-                        if newValue.count > 5000 {
-                            viewModel.inputText = String(newValue.prefix(5000))
-                        }
-                    }
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            isTextFieldFocused = true
-                        }
-                    }
-                Spacer()
-                // Player view if audio is generated
-                if showPlayerView, let audioURL = viewModel.generatedAudioURL, let localAudioFilename = viewModel.generatedLocalAudioFilename {
-                    PlayerView(
-                        text: viewModel.inputText,
-                        voice: viewModel.selectedVoice,
-                        audioURL: audioURL,
-                        localAudioFilename: localAudioFilename,
-                        onClose: {
-                            withAnimation {
-                                showPlayerView = false
-                                viewModel.generatedAudioURL = nil
-                                viewModel.generatedLocalAudioFilename = nil
-                            }
-                        }
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(1)
-                }
-                // Bottom action bar
-                VStack(spacing: 0) {
-                    Divider()
-                    HStack(alignment: .center) {
-                        Button(action: { 
-                            playHapticFeedback()
-                            showVoice = true 
-                        }) {
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(viewModel.selectedVoice.color.color)
-                                    .frame(width: 24, height: 24)
-                                Text(viewModel.selectedVoice.name)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.white)
-                                Divider()
-                                    .foregroundStyle(.white.opacity(0.1))
-                                    .frame(height: 20)
-                                Image(systemName: "chevron.down").imageScale(.small)
-                                    .foregroundStyle(.white.opacity(0.1))
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                            )
-                        }
-                        .sheet(isPresented: $showVoice) {
-                            VoiceNameScreen(isPresented: $showVoice, selectedVoice: $viewModel.selectedVoice)
-                                .onDisappear {
-                                    viewModel.updateVoiceSelection()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        RatingPromptManager.shared.requestReviewIfAppropriate()
-                                    }
-                                }
-                        }
-                        Button(action: { 
-                            playHapticFeedback()
-                            showFilter = true 
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(.white)
-                                    .frame(width: 32, height: 32)
-                                Image(systemName: "waveform")
-                                    .imageScale(.small)
-                                    .foregroundStyle(.black)
-                            }
-                        }
-                        .sheet(isPresented: $showFilter) {
-                            FilterScreen(
-                                isPresented: $showFilter,
-                                selectedVoice: $viewModel.selectedVoice
-                            )
-                            .onDisappear {
-                                viewModel.updateVoiceSelection()
-                            }
-                        }
-                        
-                        Spacer(minLength: 1)
-                        // Generate button
+        NavigationView {
+            VStack(spacing: 0) {
+                ScrollView(.vertical, showsIndicators: false) {
+                    HStack {
                         Button(action: {
-                            playHapticFeedback()
-                            if purchaseVM.isPremium {
-                                viewModel.generateSpeech(
-                                    emotion: viewModel.selectedVoice.emotion,
-                                    channel: viewModel.selectedVoice.channel,
-                                    languageBoost: viewModel.selectedVoice.language
-                                )
-                            } else {
-                                // Track paywall shown event
-                                OnboardingViewModel.shared.trackPaywallShown(source: "generate_button")
-                                showPaywall = true
-                            }
+                            showVoiceName = true
                         }) {
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .frame(width: 24, height: 24)
-                                    .padding(.horizontal)
-                            } else {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "sparkles").imageScale(.medium)
-                                        .padding(.leading)
-                                    Text("Generate")
-                                        .fontWeight(.semibold)
-                                        .padding(.vertical, 8)
-                                        .padding(.trailing)
+                            HStack(spacing: 20) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text("Voice")
+                                            .font(.title3)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white)
+                                        Image(systemName: "beats.headphones")
+                                    }
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "mic.circle.fill")
+                                        Text(mainVM.selectedVoice.name)
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Capsule().fill(.indigo))
                                     
                                 }
-                                .background(viewModel.inputText.count > 0 ? Color.white : Color(.systemGray4))
-                                .foregroundColor(viewModel.inputText.count > 0 ? .black : .gray)
-                                .cornerRadius(14)
+                                Spacer()
+                                Image(systemName: "chevron.forward")
+                                    .foregroundStyle(.gray)
                             }
+                            .padding(.horizontal, 30)
+                            .padding(.vertical)
                         }
-                        .disabled(viewModel.inputText.isEmpty || viewModel.isLoading)
-                        .onChange(of: viewModel.generatedAudioURL) { newValue in
-                            if newValue != nil && viewModel.generatedLocalAudioFilename != nil {
-                                withAnimation {
-                                    showPlayerView = true
-                                }
-                                isTextFieldFocused = false // Dismiss keyboard
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    // Character count bar
-                    HStack {
-                        Text("\(viewModel.inputText.count) characters")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(15)
                         Spacer()
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 4)
-                }
-                .background(.ultraThinMaterial)
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { 
-                        playHapticFeedback()
-                        showHistory = true 
-                    }) {
-                        Image("ic_list")
-                            .foregroundStyle(.gray)
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        if viewModel.inputText.count > 3 {
-                            Button(action: {
-                                playHapticFeedback()
-                                viewModel.inputText = ""
-                            }) {
-                                Text("Clear")
-                                    .font(.caption)
-                                    .foregroundColor(Color(red: 0.98, green: 0.67, blue: 0.53))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color(red: 0.98, green: 0.67, blue: 0.53).opacity(0.2))
-                                    .cornerRadius(20)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color(red: 0.98, green: 0.67, blue: 0.53).opacity(0.3), lineWidth: 1)
-                                    )
-                            }
-                            .transition(.scale.combined(with: .opacity))
-                        }
-                        Button(action: {
-                            showProfile = true
-                        }) {
-                            Image("ic_user")
-                                .foregroundStyle(.gray)
-                                .padding(.trailing, 6)
-                        }
-                    }
-                }
-                ToolbarItem(placement: .principal) {
-                    HStack(spacing: 0) {
-                        Menu {
-                            Section {
-//                                Button("Random story") {
-//                                    if let story = Constants.stories.randomElement() {
-//                                        viewModel.inputText = story
-//                                    }
-//                                }
-                                Button("Birthday Wish") {
-                                    if let wish = Constants.birthdayWishes.randomElement() {
-                                        viewModel.inputText = wish
-                                    }
-                                }
-                                Button("Silly joke") {
-                                    if let joke = Constants.jokes.randomElement() {
-                                        viewModel.inputText = joke
-                                    }
-                                }
-                                Menu("Bedtime Stories") {
-                                    Button("English") {
-                                        if let englishStories = Constants.nightStories["English"],
-                                           let story = englishStories.randomElement() {
-                                            viewModel.inputText = story
-                                        }
-                                    }
-                                    Button("हिंदी") {
-                                        if let hindiStories = Constants.nightStories["Hindi"],
-                                           let story = hindiStories.randomElement() {
-                                            viewModel.inputText = story
-                                        }
-                                    }
-                                }
-                            } header: {
-                                Text("Get Started with")
-                            }
+                    .padding()
+                    VStack(spacing: 6) {
+                        NavigationLink {
+                            AllStoriesView(stories: Story.allStories)
                         } label: {
                             HStack {
-                                Text(purchaseVM.isPremium ? "Voicely Pro" : "Voicely")
-                                    .font(.headline)
+                                Text("Stories 📖")
+                                    .font(.title3)
+                                    .fontWeight(.bold)
                                     .foregroundColor(.white)
-                                Image(systemName: "chevron.forward")
-                                    .imageScale(.small)
-                                    .foregroundColor(.gray)
+                                
+                                Spacer()
+                                HStack {
+                                    Text("More")
+                                    Image(systemName: "chevron.forward")
+                                }
+                                .font(.callout)
+                                .foregroundColor(.gray)
                             }
+                            .padding(.horizontal, 20)
+                        }
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                // Add Story Card
+                                NavigationLink(
+                                    destination: MainView()
+                                        .environmentObject(purchaseVM)
+                                        .environmentObject(mainVM)
+                                ) {
+                                    AddStoryCard()
+                                }
+                                
+                                // Story Cards
+                                ForEach(Array(Story.allStories.prefix(3))) { story in
+                                    StoryCard(story: story)
+                                        .onTapGesture {
+                                            selectedStory = story
+                                        }
+                                }
+                            }
+                            .padding(.horizontal, 20)
                         }
                     }
-                    .animation(.easeInOut, value: viewModel.inputText.count > 3)
+                    
+
+                    // Action Buttons Grid
+                    VStack(spacing: 6) {
+                        HeaderTitle(
+                            text: "Import your own story",
+                            icon: Image(systemName: "plus.circle.fill"),
+                            color: .white
+                        )
+                        .padding(.top, 30)
+                        
+                        LazyVGrid(columns: [
+                            GridItem(.flexible(), spacing: 10),
+                            GridItem(.flexible(), spacing: 10),
+                            GridItem(.flexible(), spacing: 10)
+                        ], spacing: 10) {
+
+                            Button(action: {
+                                showUploadOptions = true
+                            }) {
+                                ActionButton(icon: "doc.fill", title: "Upload a file")
+                            }
+                            
+                            Button(action: {
+                                checkCameraPermission()
+                            }) {
+                                ActionButton(icon: "viewfinder", title: "Scan text")
+                            }
+                            
+                            NavigationLink(
+                                destination: PasteLinkView()
+                                    .environmentObject(mainVM)
+                            ) {
+                                ActionButton(icon: "link", title: "Paste a link")
+                            }
+                            
+                       
+                        }
+                    }
+                    .padding(.horizontal, 20)
+    
+                    Spacer()
                 }
             }
-            .background(Color.black.ignoresSafeArea())
-            .sheet(isPresented: $showHistory) {
-                HistoryScreen(isPresented: $showHistory, history: $viewModel.history)
+            .background(Color(.systemBackground))
+            .navigationTitle("Voicely")
+            .navigationBarTitleDisplayMode(.automatic)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        showProfile = true
+                    }) {
+                        Image("ic_user")
+                            .foregroundStyle(.gray)
+                            .padding(.trailing, 6)
+                    }
+                }
             }
             .sheet(isPresented: $showProfile) {
                 ProfileScreen(isPresented: $showProfile)
             }
-            .fullScreenCover(isPresented: $showPaywall) {
-                purchaseVM.refreshPurchaseStatus()
-            } content: {
-                PaywallView()
+            .sheet(isPresented: $showVoiceName) {
+                VoiceNameScreen(isPresented: $showVoiceName, selectedVoice: $mainVM.selectedVoice)
+                    .onDisappear {
+                        mainVM.updateVoiceSelection()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            RatingPromptManager.shared.requestReviewIfAppropriate()
+                        }
+                    }
             }
+            .fullScreenCover(item: $selectedStory) { story in
+                BookPageView(story: story)
+            }
+            .sheet(isPresented: $showUploadOptions) {
+                UploadOptionsSheet(
+                    showDocumentPicker: $showDocumentPicker,
+                    showImagePicker: $showImagePicker
+                )
+            }
+            .sheet(isPresented: $showDocumentPicker) {
+                DocumentPicker(
+                    extractedText: $extractedText,
+                    isProcessing: $isProcessing,
+                    showAlert: $showAlert,
+                    alertMessage: $alertMessage,
+                    showMainView: $showMainView
+                )
+            }
+            .sheet(isPresented: $showImagePicker) {
+                ImagePicker(
+                    extractedText: $extractedText,
+                    isProcessing: $isProcessing,
+                    showAlert: $showAlert,
+                    alertMessage: $alertMessage,
+                    showMainView: $showMainView
+                )
+            }
+            .sheet(isPresented: $showCamera) {
+                CameraPicker(
+                    extractedText: $extractedText,
+                    isProcessing: $isProcessing,
+                    showAlert: $showAlert,
+                    alertMessage: $alertMessage,
+                    showMainView: $showMainView,
+                    showPermissionAlert: $showCameraPermissionAlert
+                )
+            }
+            .fullScreenCover(isPresented: $showMainView) {
+                NavigationView {
+                    MainView()
+                        .onAppear {
+                            mainVM.inputText = extractedText
+                        }
                 }
+            }
+            .alert("Error", isPresented: $showAlert) {
+                Button("OK") { }
+            } message: {
+                Text(alertMessage)
+            }
+            .alert("Camera Permission Required", isPresented: $showCameraPermissionAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Settings") {
+                    if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(settingsUrl)
+                    }
+                }
+            } message: {
+                Text("Camera access is required to capture images for text extraction. Please enable camera access in Settings.")
+            }
+            .overlay {
+                if isProcessing {
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.5)
+                        
+                        Text("Extracting text from image...")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.8))
+                    .ignoresSafeArea()
+                }
+            }
+
+        }
+        .tint(.gray)
+    }
+}
+
+struct AddStoryCard: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            
+            // Plus Icon
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 40))
+            
+            // "Add Story" Text
+            Text("Write a Story")
+                .font(.caption)
+                .fontWeight(.medium)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+            
+            Spacer()
+        }
+        .foregroundColor(.white.opacity(0.7))
+        .frame(width: 120, height: 170)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 12)
+//                .stroke(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
+//        )
     }
 }
 
 #Preview {
-    ContentView().environmentObject(PurchaseViewModel.shared)
+    ContentView()
+        .environmentObject(PurchaseViewModel.shared)
+        .environmentObject(MainViewModel(selectedVoice: Voice.default))
 }

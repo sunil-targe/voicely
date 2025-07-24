@@ -61,7 +61,7 @@ struct SettingsView: View {
                 }
             }
         }
-        .tint(Color(red: 0.98, green: 0.67, blue: 0.53))
+        .tint(.indigo)
     }
 }
 

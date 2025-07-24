@@ -9,10 +9,10 @@ struct EmptyHistoryView: View {
                 .scaledToFit()
                 .frame(width: 64, height: 64)
                 .foregroundColor(.white.opacity(0.18))
-            Text("No Voices Yet")
+            Text("No Stories Yet")
                 .font(.title2).fontWeight(.bold)
                 .foregroundColor(.white.opacity(0.9))
-            Text("Your generated voices will appear here.")
+            Text("Your generated stories will appear here.")
                 .font(.body)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
@@ -23,7 +23,7 @@ struct EmptyHistoryView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "sparkles").imageScale(.medium)
                         .padding(.leading)
-                    Text("Generate your first voice")
+                    Text("Generate your first story")
                         .fontWeight(.semibold)
                         .padding(.trailing)
                         .padding(.vertical, 14)
@@ -78,26 +78,38 @@ struct HistoryScreen: View {
                                                 .padding(.leading)
                                         }
                                         VStack(alignment: .leading, spacing: 8) {
-                                            HStack {
-                                                Circle().fill(item.voice.color.color).frame(width: 24, height: 24)
-                                                Text(item.voice.name)
-                                                    .foregroundColor(.white)
-                                                    .font(.subheadline)
-                                            }
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 5)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 20)
-                                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                                            )
                                             Text(item.text)
                                                 .foregroundColor(.white)
                                                 .font(.title3)
                                                 .multilineTextAlignment(.leading)
                                                 .lineLimit(2)
-                                            Text("\(item.date, formatter: dateFormatter) · Text To Speech")
-                                                .foregroundColor(.gray)
-                                                .font(.caption)
+                                            HStack {
+                                                // selected voice
+                                                HStack {
+                                                    Circle().fill(item.voice.color.color)
+                                                        .frame(width: 20, height: 20)
+                                                        .overlay(
+                                                            Image(systemName: "mic.fill")
+                                                                .foregroundColor(.white)
+                                                                .font(.system(size: 10))
+                                                        )
+                                                    
+                                                    Text(item.voice.name)
+                                                        .foregroundColor(.white.opacity(0.7))
+                                                        .font(.caption2)
+                                                }
+                                                .padding(.horizontal, 9)
+                                                .padding(.vertical, 4)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 20)
+                                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                                )
+                                                
+                                                // time
+                                                Text("\(item.date, formatter: dateFormatter)")
+                                                    .foregroundColor(.gray)
+                                                    .font(.caption)
+                                            }
                                         }
                                         .padding(.horizontal)
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -142,7 +154,7 @@ struct HistoryScreen: View {
                 
                 // PlayerView overlay
                 if let item = selectedItem, showPlayer {
-                    PlayerView(
+                    VoicelyPlayer.PlayerView(
                         text: item.text,
                         voice: item.voice,
                         audioURL: item.audioURL,
@@ -152,7 +164,8 @@ struct HistoryScreen: View {
                                 showPlayer = false
                                 selectedItem = nil
                             }
-                        }
+                        },
+                        style: .TextToSpeech
                     )
                     .id(item.id)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -188,7 +201,7 @@ struct HistoryScreen: View {
                     .zIndex(2)
                 }
             }
-            .navigationTitle("History")
+            .navigationTitle("Your Stories")
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 if !history.isEmpty {

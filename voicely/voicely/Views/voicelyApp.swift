@@ -13,6 +13,7 @@ import Amplitude
 struct voicelyApp: App {
     
     @StateObject private var purchaseVM = PurchaseViewModel.shared
+    @StateObject private var mainVM = MainViewModel(selectedVoice: Voice.default)
 
     init() {
         Purchases.configure(
@@ -28,9 +29,11 @@ struct voicelyApp: App {
             if AppStorageManager.shared.isOnboardingCompleted() {
                 ContentView()
                     .environmentObject(purchaseVM)
+                    .environmentObject(mainVM)
             } else {
                 OnboardingView()
                     .environmentObject(purchaseVM)
+                    .environmentObject(mainVM)
             }
         }
     }
