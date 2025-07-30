@@ -47,15 +47,27 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    VStack(spacing: 6){
-                        HeaderTitle(
-                            text: "Stories 📖",
-                            actionIcon: Image(systemName: "chevron.forward"),
-                            color: .white
-                        ) {
-                            // all stories action
+                    VStack(spacing: 6) {
+                        NavigationLink {
+                            AllStoriesView(stories: Story.allStories)
+                        } label: {
+                            HStack {
+                                Text("Stories 📖")
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                                HStack {
+                                    Text("More")
+                                    Image(systemName: "chevron.forward")
+                                }
+                                .font(.callout)
+                                .foregroundColor(.gray)
+                            }
+                            .padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 20)
+                        
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
                                 ForEach(Story.allStories) { story in
