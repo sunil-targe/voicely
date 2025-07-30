@@ -125,15 +125,22 @@ struct PlayerView: View {
             
             // Main controls
             HStack(spacing: 30) {
-                // Voice icon (bottom left)
-                Circle()
-                    .fill(voice.color.color)
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: "mic.fill")
-                            .foregroundColor(.white)
-                            .font(.system(size: 16))
-                    )
+                // Voice icon (bottom left) - now a CTA button
+                Button(action: {
+                    playHapticFeedback()
+                    // Add your voice selection action here
+                    print("Voice button tapped")
+                }) {
+                    Circle()
+                        .fill(voice.color.color)
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: "mic.fill")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16))
+                        )
+                }
+                .buttonStyle(PlainButtonStyle())
                 
                 // Rewind 10s
                 VStack(spacing: 4) {
