@@ -87,7 +87,7 @@ The people of the land loved Felix, not just for his magic, but for his big hear
                     .fill(Color(red: 35/255, green: 30/255, blue: 40/255))
                     .shadow(color: .black.opacity(0.4), radius: 10, x: 0, y: 5)
             )
-            .padding(.horizontal, 6)
+            .padding(6)
         }
     }
 }

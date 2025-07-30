@@ -88,7 +88,7 @@ From that day on, they knew that no matter what challenges came their way, they 
                     .fill(Color(red: 30/255, green: 30/255, blue: 35/255)) // dark card color
                     .shadow(color: .black.opacity(0.4), radius: 10, x: 0, y: 5)
             )
-            .padding(.horizontal, 6)
+            .padding(6)
         }
     }
 }

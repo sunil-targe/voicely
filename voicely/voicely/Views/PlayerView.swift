@@ -39,21 +39,19 @@ struct PlayerView: View {
     @State private var duration: Double = 0
     @State private var currentTime: Double = 0
     @State private var timeObserver: Any?
-    @State private var showShareSheet = false
     @State private var playerStatus: AVPlayerItem.Status = .unknown
     @StateObject private var statusObserver = PlayerItemStatusObserver()
     @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
-    @State private var activityItems: [Any] = []
     @State private var playbackSpeed: Double = 1.0
-    
     @State private var showFullText = false
 
     var body: some View {
         VStack(spacing: 0) {
             Divider()
-            // Title and close button
+            
+            // Header with title and controls
             HStack {
                 // Share button
                 if let filename = localAudioFilename {
@@ -70,12 +68,12 @@ struct PlayerView: View {
                     }
                 }
                 
-                // title
+                // Title
                 Spacer()
                 Button(action: {
                     playHapticFeedback()
                     withAnimation {
-                        showFullText.toggle() // action
+                        showFullText.toggle()
                     }
                 }) {
                     HStack {
@@ -90,22 +88,24 @@ struct PlayerView: View {
                 }
                 Spacer()
                 
-                // Close button
-                Button(action: {
-                    playHapticFeedback()
-                    withAnimation {
-                        onClose?()
+                // Close button - only show if onClose is provided
+                if onClose != nil {
+                    Button(action: {
+                        playHapticFeedback()
+                        withAnimation {
+                            onClose?()
+                        }
+                    }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.gray)
+                            .frame(width: 32, height: 32)
                     }
-                }) {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.gray)
-                        .frame(width: 32, height: 32)
                 }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             
-            // Progress bar at top
+            // Progress bar
             HStack {
                 Text(timeString(currentTime))
                     .font(.caption)
@@ -121,11 +121,9 @@ struct PlayerView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             
-            
-            
             // Main controls
             HStack(spacing: 30) {
-                // Voice icon (bottom left) - now a CTA button
+                // Voice icon CTA button
                 Button(action: {
                     playHapticFeedback()
                     // Add your voice selection action here
@@ -143,18 +141,16 @@ struct PlayerView: View {
                 .buttonStyle(PlainButtonStyle())
                 
                 // Rewind 10s
-                VStack(spacing: 4) {
-                    Button(action: {
-                        playHapticFeedback()
-                        seekBackward()
-                    }) {
-                        Image(systemName: "gobackward.10")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                    }
+                Button(action: {
+                    playHapticFeedback()
+                    seekBackward()
+                }) {
+                    Image(systemName: "gobackward.10")
+                        .foregroundColor(.white)
+                        .font(.title2)
                 }
                 
-                // Play/Pause button (center)
+                // Play/Pause button
                 Button(action: {
                     playHapticFeedback()
                     togglePlay()
@@ -168,18 +164,16 @@ struct PlayerView: View {
                 .disabled(playerStatus != .readyToPlay)
                 
                 // Fast forward 10s
-                VStack(spacing: 4) {
-                    Button(action: {
-                        playHapticFeedback()
-                        seekForward()
-                    }) {
-                        Image(systemName: "goforward.10")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                    }
+                Button(action: {
+                    playHapticFeedback()
+                    seekForward()
+                }) {
+                    Image(systemName: "goforward.10")
+                        .foregroundColor(.white)
+                        .font(.title2)
                 }
                 
-                // Speed control (bottom right)
+                // Speed control
                 Button(action: {
                     playHapticFeedback()
                     togglePlaybackSpeed()
@@ -214,10 +208,12 @@ struct PlayerView: View {
         }
     }
     
+    // MARK: - Computed Properties
     private var speedText: String {
         return String(format: "%.1fx", playbackSpeed)
     }
     
+    // MARK: - Player Control Methods
     private func togglePlaybackSpeed() {
         switch playbackSpeed {
         case 0.5:
@@ -252,32 +248,27 @@ struct PlayerView: View {
     }
 
     private func setupPlayer() {
-        // Configure audio session for background playback
         AudioSessionManager.shared.configureAudioSession()
         
-        // Determine the correct URL to use
         var resolvedURL = audioURL
         if let filename = localAudioFilename {
             let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let fileURL = docs.appendingPathComponent(filename)
             let exists = FileManager.default.fileExists(atPath: fileURL.path)
-            print("Checking for local audio file at: \(fileURL.path), exists: \(exists)")
             if exists {
                 resolvedURL = fileURL
-            } else {
-                print("Local audio file missing, falling back to remote URL.")
             }
         }
-        print("Attempting to play audioURL: \(resolvedURL)")
+        
         if resolvedURL.isFileURL {
             let exists = FileManager.default.fileExists(atPath: resolvedURL.path)
-            print("File exists at path: \(resolvedURL.path): \(exists)")
             if !exists {
                 errorMessage = "Audio file does not exist at path: \(resolvedURL.lastPathComponent). It may not have downloaded correctly. Please try regenerating."
                 showErrorAlert = true
                 return
             }
         }
+        
         DispatchQueue.main.async {
             let player = AVPlayer(url: resolvedURL)
             self.player = player
@@ -290,27 +281,22 @@ struct PlayerView: View {
                         if let duration = self.player?.currentItem?.asset.duration.seconds, duration > 0, duration.isFinite {
                             self.startPlayback()
                         } else {
-                            print("Audio file has zero or invalid duration.")
-                            errorMessage = "Audio file has zero or invalid duration."
-                            showErrorAlert = true
+                            self.errorMessage = "Audio file has zero or invalid duration."
+                            self.showErrorAlert = true
                         }
                     } else if status == .failed {
                         let errDesc = self.player?.currentItem?.error?.localizedDescription ?? "Unknown error"
-                        print("Failed to load audio: \(String(describing: self.player?.currentItem?.error))")
-                        errorMessage = "Failed to load audio: \(errDesc)"
-                        showErrorAlert = true
+                        self.errorMessage = "Failed to load audio: \(errDesc)"
+                        self.showErrorAlert = true
                     }
                 }
 
-                // Set up time observer
                 timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 600), queue: .main) { time in
                     currentTime = time.seconds
                     if let duration = player.currentItem?.duration.seconds, currentTime >= duration {
                         isPlaying = false
-                        // Update media player manager
                         mediaPlayerManager.pause()
                     }
-                    // Update media player manager
                     mediaPlayerManager.updateDuration(duration)
                 }
 
@@ -318,9 +304,8 @@ struct PlayerView: View {
                     if let duration = self.player?.currentItem?.asset.duration.seconds, duration > 0, duration.isFinite {
                         self.startPlayback()
                     } else {
-                        print("Audio file has zero or invalid duration.")
-                        errorMessage = "Audio file has zero or invalid duration."
-                        showErrorAlert = true
+                        self.errorMessage = "Audio file has zero or invalid duration."
+                        self.showErrorAlert = true
                     }
                 }
             }
@@ -333,15 +318,12 @@ struct PlayerView: View {
               item.status == .readyToPlay,
               item.asset.duration.seconds.isFinite,
               item.asset.duration.seconds > 0 else {
-            print("Player not ready or duration invalid.")
             return
         }
         
-        // Configure media player manager
         mediaPlayerManager.configurePlayer(player, title: text, voiceName: voice.name)
         mediaPlayerManager.updateDuration(item.asset.duration.seconds)
         
-        // Start Dynamic Island activity if available
         if #available(iOS 16.1, *) {
             DynamicIslandManager.shared.startActivity(
                 title: text,
@@ -365,18 +347,13 @@ struct PlayerView: View {
             timeObserver = nil
         }
         statusObserver.invalidate()
-        
-        // Clean up media player manager
         mediaPlayerManager.cleanup()
         
-        // End Dynamic Island activity
         if #available(iOS 16.1, *) {
             DynamicIslandManager.shared.endActivity()
         }
         
-        // Deactivate audio session
         AudioSessionManager.shared.deactivateAudioSession()
-        
         player?.pause()
         player = nil
     }
@@ -387,7 +364,6 @@ struct PlayerView: View {
             player.pause()
             mediaPlayerManager.pause()
             
-            // Update Dynamic Island
             if #available(iOS 16.1, *) {
                 DynamicIslandManager.shared.updateActivity(
                     isPlaying: false,
@@ -396,7 +372,6 @@ struct PlayerView: View {
                 )
             }
         } else {
-            // If playback finished, reset to beginning
             if currentTime >= duration {
                 player.seek(to: .zero)
                 currentTime = 0
@@ -407,7 +382,6 @@ struct PlayerView: View {
             player.rate = Float(playbackSpeed)
             mediaPlayerManager.play()
             
-            // Update Dynamic Island
             if #available(iOS 16.1, *) {
                 DynamicIslandManager.shared.updateActivity(
                     isPlaying: true,
@@ -425,7 +399,6 @@ struct PlayerView: View {
             player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
             mediaPlayerManager.seek(to: currentTime)
             
-            // Update Dynamic Island
             if #available(iOS 16.1, *) {
                 DynamicIslandManager.shared.updateActivity(
                     isPlaying: isPlaying,
@@ -454,7 +427,6 @@ struct PreviewText: View {
         VStack(spacing: 0) {
             HStack {
                 Spacer()
-                // Close button
                 Button(action: {
                     playHapticFeedback()
                     withAnimation {
@@ -467,6 +439,7 @@ struct PreviewText: View {
                 }
             }
             .padding([.horizontal, .top])
+            
             ScrollView {
                 Text(text)
                     .font(.title3)
@@ -474,12 +447,12 @@ struct PreviewText: View {
                     .textSelection(.enabled)
                     .padding(.horizontal)
             }
+            
             Button(action: {
                 UIPasteboard.general.string = text
                 isCopied = true
                 playHapticFeedback()
 
-                // Reset back to "Copy" after 1.5 seconds
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     isCopied = false
                 }

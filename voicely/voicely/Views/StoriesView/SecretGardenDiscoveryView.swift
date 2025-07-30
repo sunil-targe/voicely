@@ -87,7 +87,7 @@ The children learned that magic wasn't just in fairy tales—it was in the curio
                     .fill(Color(red: 30/255, green: 35/255, blue: 30/255))
                     .shadow(color: .black.opacity(0.4), radius: 10, x: 0, y: 5)
             )
-            .padding(.horizontal, 6)
+            .padding(6)
         }
     }
 }

@@ -12,7 +12,8 @@ struct BookPageView: View {
     let story: Story
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            // header
             HStack {
                 Spacer()
                 Button(action: {
@@ -28,32 +29,52 @@ struct BookPageView: View {
                 .padding(.horizontal)
             }
             
-            switch story.storyViewName {
-            case "BraveLittleRabbitView":
-                BraveLittleRabbitView()
-            case "BearFamilyHibernationView":
-                BearFamilyHibernationView()
-            case "DragonCouldntBreatheFireView":
-                DragonCouldntBreatheFireView()
-            case "DreamOfFlyingView":
-                DreamOfFlyingView()
-            case "ForestFriendsStormView":
-                ForestFriendsStormView()
-            case "LostKittenJourneyView":
-                LostKittenJourneyView()
-            case "MermaidOceanLessonView":
-                MermaidOceanLessonView()
-            case "SecretGardenDiscoveryView":
-                SecretGardenDiscoveryView()
-            case "ToysNighttimeAdventureView":
-                ToysNighttimeAdventureView()
-            case "YoungWizardLessonView":
-                YoungWizardLessonView()
-            default:
-                Text("Story not found")
-                    .foregroundColor(.white)
-                    .font(.title)
+            // Story view
+            ZStack(alignment: .bottom) {
+                switch story.storyViewName {
+                case "BraveLittleRabbitView":
+                    BraveLittleRabbitView()
+                case "BearFamilyHibernationView":
+                    BearFamilyHibernationView()
+                case "DragonCouldntBreatheFireView":
+                    DragonCouldntBreatheFireView()
+                case "DreamOfFlyingView":
+                    DreamOfFlyingView()
+                case "ForestFriendsStormView":
+                    ForestFriendsStormView()
+                case "LostKittenJourneyView":
+                    LostKittenJourneyView()
+                case "MermaidOceanLessonView":
+                    MermaidOceanLessonView()
+                case "SecretGardenDiscoveryView":
+                    SecretGardenDiscoveryView()
+                case "ToysNighttimeAdventureView":
+                    ToysNighttimeAdventureView()
+                case "YoungWizardLessonView":
+                    YoungWizardLessonView()
+                default:
+                    Text("Story not found")
+                        .foregroundColor(.white)
+                        .font(.title)
+                }
+                // bottom shadow
+                LinearGradient(
+                    gradient: Gradient(colors: [.clear, Color.black.opacity(0.3)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 20)
+                .allowsHitTesting(false)
             }
+            
+            
+            // bottom view (Player)
+            PlayerView(
+                text: "Heyyyyy",
+                voice: Voice.default,
+                audioURL: URL(string: "https://replicate.delivery/xezq/hKXWcfOQBfkqjUWeBbAPRy3F3dl9sVS3wUZlfJWkp6FZYzpTB/tmpw8d9j_p4.mp3")!,
+                localAudioFilename: nil
+            )
         }
         .background(Color.black.edgesIgnoringSafeArea(.all))
     }

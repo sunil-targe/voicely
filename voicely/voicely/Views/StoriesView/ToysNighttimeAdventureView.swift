@@ -87,7 +87,7 @@ The children never knew about the amazing adventures their toys had while they s
                     .fill(Color(red: 40/255, green: 30/255, blue: 35/255))
                     .shadow(color: .black.opacity(0.4), radius: 10, x: 0, y: 5)
             )
-            .padding(.horizontal, 6)
+            .padding(6)
         }
     }
 }
