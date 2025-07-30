@@ -39,9 +39,10 @@ struct AllStoriesView: View {
                 // Stories Grid
                 ScrollView {
                     LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 16),
-                        GridItem(.flexible(), spacing: 16)
-                    ], spacing: 20) {
+                        GridItem(.flexible(), spacing: 10),
+                        GridItem(.flexible(), spacing: 10),
+                        GridItem(.flexible(), spacing: 10)
+                    ], spacing: 10) {
                         ForEach(stories) { story in
                             StoryGridCard(story: story)
                                 .onTapGesture {
@@ -50,7 +51,7 @@ struct AllStoriesView: View {
                                 }
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 10)
                     .padding(.bottom, 20)
                 }
             }
@@ -67,7 +68,7 @@ struct StoryGridCard: View {
     let story: Story
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             // Story Image with 2:3 aspect ratio
             Image(story.thumbnailImageName)
                 .resizable()
@@ -78,16 +79,15 @@ struct StoryGridCard: View {
             
             // Story Title
             Text(story.name)
-                .font(.headline)
+                .font(.caption)
                 .fontWeight(.semibold)
-                .foregroundColor(.primary)
+                .foregroundColor(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
-                .padding(.horizontal, 8)
+                .padding([.horizontal, .bottom], 8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
