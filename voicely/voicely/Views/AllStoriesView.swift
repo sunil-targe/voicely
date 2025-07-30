@@ -7,35 +7,7 @@ struct AllStoriesView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
             VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Button(action: {
-                        playHapticFeedback()
-                        dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.title3)
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Spacer()
-                    
-                    Text("All Stories")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    // Placeholder for balance
-                    Color.clear
-                        .frame(width: 24, height: 24)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                
                 // Stories Grid
                 ScrollView {
                     LazyVGrid(columns: [
@@ -55,12 +27,11 @@ struct AllStoriesView: View {
                     .padding(.bottom, 20)
                 }
             }
+            .navigationTitle("All Stories 📖")
             .background(Color(.systemBackground))
             .fullScreenCover(item: $selectedStory) { story in
                 BookPageView(story: story)
             }
-        }
-        .navigationBarHidden(true)
     }
 }
 
