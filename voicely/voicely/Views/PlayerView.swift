@@ -130,10 +130,10 @@ struct PlayerView: View {
                     print("Voice button tapped")
                 }) {
                     Circle()
-                        .fill(voice.color.color)
+                        .fill(Color.gray.opacity(0.3))
                         .frame(width: 40, height: 40)
                         .overlay(
-                            Image(systemName: "mic.fill")
+                            Image(systemName: "ellipsis")
                                 .foregroundColor(.white)
                                 .font(.system(size: 16))
                         )
