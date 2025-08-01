@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import MediaPlayer
+import DesignSystem
 
 // Helper class for KVO observation
 class PlayerItemStatusObserver: NSObject, ObservableObject {
@@ -28,6 +29,8 @@ class PlayerItemStatusObserver: NSObject, ObservableObject {
 }
 
 struct PlayerView: View {
+    @EnvironmentObject var mainVM: MainViewModel
+    
     let text: String
     let voice: Voice
     let audioURL: URL
@@ -46,13 +49,52 @@ struct PlayerView: View {
     @State private var errorMessage = ""
     @State private var playbackSpeed: Double = 1.0
     @State private var showFullText = false
-
+    @State private var showVoice = false
+    
     var body: some View {
         VStack(spacing: 0) {
             Divider()
             
             // Header with title and controls
             HStack {
+                // Voice selection button
+                VoiceSelectionButton(
+                    color: mainVM.selectedVoice.color.color,
+                    title: mainVM.selectedVoice.name
+                ) {
+                    playHapticFeedback()
+                    showVoice = true
+                }
+                .sheet(isPresented: $showVoice) {
+                    VoiceNameScreen(isPresented: $showVoice, selectedVoice: $mainVM.selectedVoice)
+                        .onDisappear {
+                            mainVM.updateVoiceSelection()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                RatingPromptManager.shared.requestReviewIfAppropriate()
+                            }
+                        }
+                }
+                
+//                // Title
+//                Spacer()
+//                Button(action: {
+//                    playHapticFeedback()
+//                    withAnimation {
+//                        showFullText.toggle()
+//                    }
+//                }) {
+//                    HStack {
+//                        Text(String(text.prefix(15)) + "…")
+//                            .font(.headline)
+//                            .foregroundColor(.gray)
+//                            .lineLimit(1)
+//                        Image(systemName: "chevron.right")
+//                            .foregroundColor(.gray)
+//                            .font(.caption)
+//                    }
+//                }
+                Spacer()
+                
                 // Share button
                 if let filename = localAudioFilename {
                     let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -67,26 +109,6 @@ struct PlayerView: View {
                         }
                     }
                 }
-                
-                // Title
-                Spacer()
-                Button(action: {
-                    playHapticFeedback()
-                    withAnimation {
-                        showFullText.toggle()
-                    }
-                }) {
-                    HStack {
-                        Text(String(text.prefix(15)) + "…")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                            .lineLimit(1)
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
-                            .font(.caption)
-                    }
-                }
-                Spacer()
                 
                 // Close button - only show if onClose is provided
                 if onClose != nil {
@@ -480,7 +502,7 @@ struct PreviewText: View {
             audioURL: URL(string: "https://replicate.delivery/xezq/hKXWcfOQBfkqjUWeBbAPRy3F3dl9sVS3wUZlfJWkp6FZYzpTB/tmpw8d9j_p4.mp3")!,
             localAudioFilename: nil,
             onClose: { }
-        )
+        ).environmentObject(MainViewModel(selectedVoice: Voice.default))
     }
     .background(Color.black)
 }

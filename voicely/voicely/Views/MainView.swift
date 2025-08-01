@@ -9,6 +9,7 @@ import SwiftUI
 import AVFoundation
 import RevenueCat
 import RevenueCatUI
+import DesignSystem
 
 struct MainView: View {
     @EnvironmentObject var purchaseVM: PurchaseViewModel
@@ -63,29 +64,13 @@ struct MainView: View {
                 VStack(spacing: 0) {
                     Divider()
                     HStack(alignment: .center) {
-                        Button(action: { 
+                        // Voice selection button
+                        VoiceSelectionButton(
+                            color: mainVM.selectedVoice.color.color,
+                            title: mainVM.selectedVoice.name
+                        ) {
                             playHapticFeedback()
-                            showVoice = true 
-                        }) {
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(mainVM.selectedVoice.color.color)
-                                    .frame(width: 24, height: 24)
-                                Text(mainVM.selectedVoice.name)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.white)
-                                Divider()
-                                    .foregroundStyle(.white.opacity(0.1))
-                                    .frame(height: 20)
-                                Image(systemName: "chevron.down").imageScale(.small)
-                                    .foregroundStyle(.white.opacity(0.1))
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                            )
+                            showVoice = true
                         }
                         .sheet(isPresented: $showVoice) {
                             VoiceNameScreen(isPresented: $showVoice, selectedVoice: $mainVM.selectedVoice)
@@ -274,5 +259,7 @@ struct MainView: View {
 }
 
 #Preview {
-    MainView().environmentObject(PurchaseViewModel.shared)
+    MainView()
+        .environmentObject(PurchaseViewModel.shared)
+        .environmentObject(MainViewModel(selectedVoice: Voice.default))
 }
