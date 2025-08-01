@@ -154,7 +154,7 @@ struct HistoryScreen: View {
                 
                 // PlayerView overlay
                 if let item = selectedItem, showPlayer {
-                    PlayerView(
+                    VoicelyPlayer.PlayerView(
                         text: item.text,
                         voice: item.voice,
                         audioURL: item.audioURL,
@@ -164,7 +164,8 @@ struct HistoryScreen: View {
                                 showPlayer = false
                                 selectedItem = nil
                             }
-                        }
+                        },
+                        style: .TextToSpeech
                     )
                     .id(item.id)
                     .transition(.move(edge: .bottom).combined(with: .opacity))

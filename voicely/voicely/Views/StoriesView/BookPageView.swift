@@ -69,11 +69,12 @@ struct BookPageView: View {
             
             
             // bottom view (Player)
-            PlayerView(
+            VoicelyPlayer.PlayerView(
                 text: "Heyyyyy",
                 voice: Voice.default,
                 audioURL: URL(string: "https://replicate.delivery/xezq/hKXWcfOQBfkqjUWeBbAPRy3F3dl9sVS3wUZlfJWkp6FZYzpTB/tmpw8d9j_p4.mp3")!,
-                localAudioFilename: nil
+                localAudioFilename: nil,
+                style: .ReadBook,
             )
         }
         .background(Color.black.edgesIgnoringSafeArea(.all))

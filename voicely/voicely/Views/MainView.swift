@@ -44,7 +44,7 @@ struct MainView: View {
                 Spacer()
                 // Player view if audio is generated
                 if showPlayerView, let audioURL = mainVM.generatedAudioURL, let localAudioFilename = mainVM.generatedLocalAudioFilename {
-                    PlayerView(
+                    VoicelyPlayer.PlayerView(
                         text: mainVM.inputText,
                         voice: mainVM.selectedVoice,
                         audioURL: audioURL,
@@ -55,7 +55,8 @@ struct MainView: View {
                                 mainVM.generatedAudioURL = nil
                                 mainVM.generatedLocalAudioFilename = nil
                             }
-                        }
+                        },
+                        style: .TextToSpeech
                     )
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .zIndex(1)
