@@ -28,6 +28,186 @@ class PlayerItemStatusObserver: NSObject, ObservableObject {
     }
 }
 
+// MARK: - Player Subviews
+
+private struct PlayerHeaderView: View {
+    @EnvironmentObject var mainVM: MainViewModel
+    
+    let style: VoicelyPlayer.Style
+    let voice: Voice
+    let localAudioFilename: String?
+    let onClose: (() -> Void)?
+    
+    @Binding var showVoice: Bool
+    
+    var body: some View {
+        HStack {
+            VoiceSelectionButton(
+                color: style == .ReadBook ? mainVM.selectedVoice.color.color : voice.color.color,
+                title: style == .ReadBook ? mainVM.selectedVoice.name : voice.name,
+                style: style == .TextToSpeech ? .plain : .withDropdown
+            ) {
+                guard style == .ReadBook else { return }
+                playHapticFeedback()
+                showVoice = true
+            }
+            .sheet(isPresented: $showVoice) {
+                VoiceNameScreen(isPresented: $showVoice, selectedVoice: $mainVM.selectedVoice)
+                    .onDisappear {
+                        mainVM.updateVoiceSelection()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            RatingPromptManager.shared.requestReviewIfAppropriate()
+                        }
+                    }
+            }
+            
+            Spacer()
+            
+            if let filename = localAudioFilename,
+               let fileURL = getLocalFileURL(for: filename) {
+                ShareLink(item: fileURL) {
+                    Image("ic_share")
+                        .resizable()
+                        .padding(6)
+                        .foregroundColor(.gray)
+                        .frame(width: 32, height: 32)
+                }
+            }
+            
+            if onClose != nil {
+                Button(action: {
+                    playHapticFeedback()
+                    withAnimation {
+                        onClose?()
+                    }
+                }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.gray)
+                        .frame(width: 32, height: 32)
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+    }
+    
+    private func getLocalFileURL(for filename: String) -> URL? {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileURL = docs.appendingPathComponent(filename)
+        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
+    }
+}
+
+private struct PlayerProgressView: View {
+    @Binding var currentTime: Double
+    let duration: Double
+    let onSliderChanged: (Bool) -> Void
+    
+    var body: some View {
+        HStack {
+            Text(timeString(currentTime))
+                .font(.caption)
+                .foregroundColor(.gray)
+            
+            Slider(value: $currentTime, in: 0...duration, onEditingChanged: onSliderChanged)
+                .accentColor(.blue)
+            
+            Text(timeString(duration))
+                .font(.caption)
+                .foregroundColor(.gray)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+    }
+    
+    private func timeString(_ seconds: Double) -> String {
+        guard seconds.isFinite else { return "00:00" }
+        let intSec = Int(seconds)
+        let min = intSec / 60
+        let sec = intSec % 60
+        return String(format: "%02d:%02d", min, sec)
+    }
+}
+
+private struct PlayerControlsView: View {
+    let playerStatus: AVPlayerItem.Status
+    @Binding var isPlaying: Bool
+    let speedText: String
+    
+    let onSeekBackward: () -> Void
+    let onTogglePlay: () -> Void
+    let onSeekForward: () -> Void
+    let onToggleSpeed: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 30) {
+            // Voice icon CTA button
+            Button(action: {
+                playHapticFeedback()
+                print("Voice options button tapped") // Placeholder action
+            }) {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "ellipsis")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                    )
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            // Rewind 10s
+            Button(action: {
+                playHapticFeedback()
+                onSeekBackward()
+            }) {
+                Image(systemName: "gobackward.10")
+                    .foregroundColor(.white)
+                    .font(.title2)
+            }
+            
+            // Play/Pause button
+            Button(action: {
+                playHapticFeedback()
+                onTogglePlay()
+            }) {
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .foregroundColor(.white)
+                    .font(.title)
+                    .frame(width: 60, height: 60)
+                    .background(Circle().fill(Color.blue))
+            }
+            .disabled(playerStatus != .readyToPlay)
+            
+            // Fast forward 10s
+            Button(action: {
+                playHapticFeedback()
+                onSeekForward()
+            }) {
+                Image(systemName: "goforward.10")
+                    .foregroundColor(.white)
+                    .font(.title2)
+            }
+            
+            // Speed control
+            Button(action: {
+                playHapticFeedback()
+                onToggleSpeed()
+            }) {
+                Text(speedText)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(Color.gray.opacity(0.3)))
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
+    }
+}
+
 extension VoicelyPlayer {
     struct PlayerView: View {
         @EnvironmentObject var mainVM: MainViewModel
@@ -57,163 +237,29 @@ extension VoicelyPlayer {
             VStack(spacing: 0) {
                 Divider()
                 
-                // Header with title and controls
-                HStack {
-                    // Voice selection button
-                    VoiceSelectionButton(
-                        color: style == .ReadBook ? mainVM.selectedVoice.color.color : voice.color.color,
-                        title: style == .ReadBook ? mainVM.selectedVoice.name : voice.name,
-                        style: style == .TextToSpeech ? .plain : .withDropdown
-                    ) {
-                        guard style == .ReadBook else { return }
-                        playHapticFeedback()
-                        showVoice = true
-                    }
-                    .sheet(isPresented: $showVoice) {
-                        VoiceNameScreen(isPresented: $showVoice, selectedVoice: $mainVM.selectedVoice)
-                            .onDisappear {
-                                mainVM.updateVoiceSelection()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    RatingPromptManager.shared.requestReviewIfAppropriate()
-                                }
-                            }
-                    }
-                    
-                    //                // Title
-                    //                Spacer()
-                    //                Button(action: {
-                    //                    playHapticFeedback()
-                    //                    withAnimation {
-                    //                        showFullText.toggle()
-                    //                    }
-                    //                }) {
-                    //                    HStack {
-                    //                        Text(String(text.prefix(15)) + "…")
-                    //                            .font(.headline)
-                    //                            .foregroundColor(.gray)
-                    //                            .lineLimit(1)
-                    //                        Image(systemName: "chevron.right")
-                    //                            .foregroundColor(.gray)
-                    //                            .font(.caption)
-                    //                    }
-                    //                }
-                    Spacer()
-                    
-                    // Share button
-                    if let filename = localAudioFilename {
-                        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                        let fileURL = docs.appendingPathComponent(filename)
-                        if FileManager.default.fileExists(atPath: fileURL.path) {
-                            ShareLink(item: fileURL) {
-                                Image("ic_share")
-                                    .resizable()
-                                    .padding(6)
-                                    .foregroundColor(.gray)
-                                    .frame(width: 32, height: 32)
-                            }
-                        }
-                    }
-                    
-                    // Close button - only show if onClose is provided
-                    if onClose != nil {
-                        Button(action: {
-                            playHapticFeedback()
-                            withAnimation {
-                                onClose?()
-                            }
-                        }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.gray)
-                                .frame(width: 32, height: 32)
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                PlayerHeaderView(
+                    style: style,
+                    voice: voice,
+                    localAudioFilename: localAudioFilename,
+                    onClose: onClose,
+                    showVoice: $showVoice
+                )
                 
-                // Progress bar
-                HStack {
-                    Text(timeString(currentTime))
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    
-                    Slider(value: $currentTime, in: 0...duration, onEditingChanged: sliderChanged)
-                        .accentColor(.blue)
-                    
-                    Text(timeString(duration))
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                PlayerProgressView(
+                    currentTime: $currentTime,
+                    duration: duration,
+                    onSliderChanged: sliderChanged
+                )
                 
-                // Main controls
-                HStack(spacing: 30) {
-                    // Voice icon CTA button
-                    Button(action: {
-                        playHapticFeedback()
-                        // Add your voice selection action here
-                        print("Voice button tapped")
-                    }) {
-                        Circle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 40, height: 40)
-                            .overlay(
-                                Image(systemName: "ellipsis")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 16))
-                            )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    // Rewind 10s
-                    Button(action: {
-                        playHapticFeedback()
-                        seekBackward()
-                    }) {
-                        Image(systemName: "gobackward.10")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                    }
-                    
-                    // Play/Pause button
-                    Button(action: {
-                        playHapticFeedback()
-                        togglePlay()
-                    }) {
-                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                            .foregroundColor(.white)
-                            .font(.title)
-                            .frame(width: 60, height: 60)
-                            .background(Circle().fill(Color.blue))
-                    }
-                    .disabled(playerStatus != .readyToPlay)
-                    
-                    // Fast forward 10s
-                    Button(action: {
-                        playHapticFeedback()
-                        seekForward()
-                    }) {
-                        Image(systemName: "goforward.10")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                    }
-                    
-                    // Speed control
-                    Button(action: {
-                        playHapticFeedback()
-                        togglePlaybackSpeed()
-                    }) {
-                        Text(speedText)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.white)
-                            .frame(width: 40, height: 40)
-                            .background(Circle().fill(Color.gray.opacity(0.3)))
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+                PlayerControlsView(
+                    playerStatus: playerStatus,
+                    isPlaying: $isPlaying,
+                    speedText: speedText,
+                    onSeekBackward: seekBackward,
+                    onTogglePlay: togglePlay,
+                    onSeekForward: seekForward,
+                    onToggleSpeed: togglePlaybackSpeed
+                )
             }
             .background(Color(.secondarySystemBackground))
             .onAppear(perform: setupPlayer)
@@ -433,14 +479,6 @@ extension VoicelyPlayer {
                     )
                 }
             }
-        }
-        
-        private func timeString(_ seconds: Double) -> String {
-            guard seconds.isFinite else { return "00:00" }
-            let intSec = Int(seconds)
-            let min = intSec / 60
-            let sec = intSec % 60
-            return String(format: "%02d:%02d", min, sec)
         }
     }
     
