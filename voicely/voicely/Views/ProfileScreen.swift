@@ -73,7 +73,6 @@ struct MembershipCardView: View {
                 } else {
                     Button(action: {
                         playHapticFeedback()
-                        OnboardingViewModel.shared.trackPaywallShown(source: "profile_button")
                         showPaywall = true
                     }) {
                         Text("Upgrade")
