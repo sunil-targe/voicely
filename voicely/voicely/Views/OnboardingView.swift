@@ -148,7 +148,7 @@ struct OnboardingView: View {
     }
 
     private func completeOnboarding() {
-//        AppStorageManager.shared.markOnboardingCompleted()
+        AppStorageManager.shared.markOnboardingCompleted()
         showMainApp = true
     }
 
