@@ -116,8 +116,6 @@ struct MainView: View {
                                     languageBoost: mainVM.selectedVoice.language
                                 )
                             } else {
-                                // Track paywall shown event
-                                OnboardingViewModel.shared.trackPaywallShown(source: "generate_button")
                                 showPaywall = true
                             }
                         }) {
