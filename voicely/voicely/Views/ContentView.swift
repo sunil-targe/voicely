@@ -307,16 +307,4 @@ struct PasteLinkView: View {
     }
 }
 
-struct UploadFileView: View {
-    var body: some View {
-        VStack {
-            Text("Upload File")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Spacer()
-        }
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
+
