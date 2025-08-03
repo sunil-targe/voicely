@@ -6,9 +6,19 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct BookPageView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var mainVM: MainViewModel
+    @StateObject private var storyVM = StoryViewModel()
+    @State private var showPlayerView = false
+    @State private var currentSavedStory: SavedStory?
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
+    @State private var showVoiceSelection = false
+    @State private var showConfirmationAlert = false
+    
     let story: Story
 
     var body: some View {
@@ -57,6 +67,7 @@ struct BookPageView: View {
                         .foregroundColor(.white)
                         .font(.title)
                 }
+                                
                 // bottom shadow
                 LinearGradient(
                     gradient: Gradient(colors: [.clear, Color.black.opacity(0.3)]),
@@ -67,20 +78,163 @@ struct BookPageView: View {
                 .allowsHitTesting(false)
             }
             
-            
-            // bottom view (Player)
-            VoicelyPlayer.PlayerView(
-                text: "Heyyyyy",
-                voice: Voice.default,
-                audioURL: URL(string: "https://replicate.delivery/xezq/hKXWcfOQBfkqjUWeBbAPRy3F3dl9sVS3wUZlfJWkp6FZYzpTB/tmpw8d9j_p4.mp3")!,
-                localAudioFilename: nil,
-                style: .ReadBook,
-            )
+            // Player view
+            if showPlayerView, let savedStory = currentSavedStory {
+                VoicelyPlayer.PlayerView(
+                    text: savedStory.story.name,
+                    voice: savedStory.voice,
+                    audioURL: storyVM.getLocalAudioURL(for: savedStory) ?? savedStory.audioURL,
+                    localAudioFilename: savedStory.localAudioFilename,
+                    onClose: {
+                        withAnimation {
+                            showPlayerView = false
+                        }
+                    },
+                    style: .ReadBook
+                )
+            } else {
+                VStack(spacing: 16) {
+                    Divider()
+                    HStack {
+                        // Voice Selection Button
+                        Button(action: {
+                            playHapticFeedback()
+                            showVoiceSelection = true
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "mic.circle.fill")
+                                    .font(.title2)
+                                Text(mainVM.selectedVoice.name)
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 12)
+                            .background(Capsule().fill(.indigo))
+                        }
+                        
+                        // Read/Generate Button
+                        Button(action: {
+                            playHapticFeedback()
+                            handleListenButtonAction()
+                        }) {
+                            HStack(spacing: 8) {
+                                if storyVM.isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .frame(width: 20, height: 20)
+                                } else {
+                                    Image(systemName: "headphones.circle.fill")
+                                        .font(.title2)
+                                }
+                                Text("Listen")
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 12)
+                            .background(Color.orange)
+                            .cornerRadius(25)
+                        }
+                        .disabled(storyVM.isLoading)
+                    }
+                }.background(Color(.secondarySystemBackground))
+            }
         }
         .background(Color.black.edgesIgnoringSafeArea(.all))
+        .onAppear {
+            loadSavedStory()
+        }
+        .onChange(of: storyVM.generatedAudioURL) { newValue in
+            if newValue != nil && storyVM.generatedLocalAudioFilename != nil {
+                loadSavedStory()
+                withAnimation {
+                    showPlayerView = true
+                }
+            }
+        }
+        .onChange(of: storyVM.errorMessage) { error in
+            if let error = error {
+                errorMessage = error
+                showErrorAlert = true
+            }
+        }
+        .sheet(isPresented: $showVoiceSelection) {
+            VoiceNameScreen(isPresented: $showVoiceSelection, selectedVoice: $mainVM.selectedVoice)
+                .onDisappear {
+                    mainVM.updateVoiceSelection()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        RatingPromptManager.shared.requestReviewIfAppropriate()
+                    }
+            }
+        }
+        .alert("Error", isPresented: $showErrorAlert) {
+            Button("OK") { 
+                storyVM.errorMessage = nil
+            }
+        } message: {
+            Text(errorMessage)
+        }
+        .alert("Listen with new voice?", isPresented: $showConfirmationAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Listen again") {
+                if let savedStory = storyVM.getSavedStory(for: story) {
+                    currentSavedStory = savedStory
+                    withAnimation {
+                        showPlayerView = true
+                    }
+                }
+            }
+            Button("Go for new voice") {
+                generateStoryVoice()
+            }
+        } message: {
+            Text("Story was previously generated with a different voice. Do you want to listen it again with the new voice?")
+        }
+    }
+    
+    private func handleListenButtonAction() {
+        // If there's a saved story and the selected voice matches the saved story's voice
+        if let savedStory = storyVM.getSavedStory(for: story),
+           mainVM.selectedVoice.voice_id == savedStory.voice.voice_id {
+            // Show the player with existing saved story
+            currentSavedStory = savedStory
+            withAnimation {
+                showPlayerView = true
+            }
+        } else if let savedStory = storyVM.getSavedStory(for: story),
+                  mainVM.selectedVoice.voice_id != savedStory.voice.voice_id {
+            // Show confirmation alert for different voice
+            showConfirmationAlert = true
+        } else {
+            // No saved story exists, generate without confirmation
+            generateStoryVoice()
+        }
+    }
+    
+    private func generateStoryVoice() {
+        // Check if user has premium access (you might want to add this check)
+        storyVM.generateStoryVoice(for: story, with: mainVM.selectedVoice)
+    }
+    
+    private func loadSavedStory() {
+        print("BookPageView: Loading saved story for \(story.name)")
+        if let savedStory = storyVM.getSavedStory(for: story) {
+            print("BookPageView: Found saved story, showing player")
+            currentSavedStory = savedStory
+            showPlayerView = true
+        } else {
+            print("BookPageView: No saved story found, showing read button")
+        }
+    }
+    
+    private func playHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .soft)
+        generator.impactOccurred()
     }
 }
 
 #Preview {
     BookPageView(story: Story.allStories[0])
+        .environmentObject(MainViewModel(selectedVoice: Voice.default))
 }

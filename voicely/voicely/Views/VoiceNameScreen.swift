@@ -140,10 +140,29 @@ struct VoiceGridItem: View {
                 VStack(spacing: 12) {
                     // Voice Circle with Waveform - 1:1 aspect ratio
                     ZStack {
+                        // Text around the circle
+                        let text = "• \(voice.preferredListenTime) •"
+                        let characters = Array(text)
+                        let radius: CGFloat = 58
+                        let angle = 100.0 / Double(characters.count)
+
+                        ForEach(0..<characters.count, id: \.self) { i in
+                            let charAngle = Angle(degrees: Double(i) * angle - 190)
+                            let xOffset = CGFloat(cos(charAngle.radians)) * radius
+                            let yOffset = CGFloat(sin(charAngle.radians)) * radius
+
+                            Text(String(characters[i]))
+                                .font(.caption2)
+                                .foregroundColor(.white)
+                                .rotationEffect(charAngle + Angle(degrees: 90))
+                                .offset(x: xOffset, y: yOffset)
+                        }
+
+                        // Your original ZStack content
                         Circle()
                             .fill(voice.color.color)
                             .frame(width: 90, height: 90)
-                        
+
                         if isPlaying {
                             Image(systemName: "waveform")
                                 .font(.title)
@@ -153,8 +172,7 @@ struct VoiceGridItem: View {
                                 .font(.title)
                                 .foregroundColor(.white)
                         }
-                        
-                        // Selection indicator
+
                         if isSelected {
                             Circle()
                                 .stroke(Color.white, lineWidth: 3)
