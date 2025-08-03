@@ -17,5 +17,9 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to capture text from documents and images for text-to-speech conversion.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photo library access to select images containing text for text-to-speech conversion.</string>
 </dict>
 </plist>

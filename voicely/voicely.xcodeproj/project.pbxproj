@@ -12,6 +12,7 @@
 		387F2D712E1126E900BA8681 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 387F2D702E1126E900BA8681 /* RevenueCat */; };
 		387F2D732E1126E900BA8681 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 387F2D722E1126E900BA8681 /* RevenueCatUI */; };
 		38A57AF52E18F8F70082F442 /* Amplitude in Frameworks */ = {isa = PBXBuildFile; productRef = 38A57AF42E18F8F70082F442 /* Amplitude */; };
+		F4DF49622E3DD709006C7625 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F4DF49612E3DD709006C7625 /* DesignSystem */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 				387637F12E37AAED002C05F3 /* DesignSystem in Frameworks */,
 				38A57AF52E18F8F70082F442 /* Amplitude in Frameworks */,
 				387F2D732E1126E900BA8681 /* RevenueCatUI in Frameworks */,
+				F4DF49622E3DD709006C7625 /* DesignSystem in Frameworks */,
 				387F2D712E1126E900BA8681 /* RevenueCat in Frameworks */,
 				3876376C2E37A8E5002C05F3 /* DesignSystem in Frameworks */,
 			);
@@ -96,6 +98,7 @@
 				38A57AF42E18F8F70082F442 /* Amplitude */,
 				3876376B2E37A8E5002C05F3 /* DesignSystem */,
 				387637F02E37AAED002C05F3 /* DesignSystem */,
+				F4DF49612E3DD709006C7625 /* DesignSystem */,
 			);
 			productName = voicely;
 			productReference = 387F29DF2E0BC11500BA8681 /* voicely.app */;
@@ -128,7 +131,7 @@
 			packageReferences = (
 				387F2D6F2E1126E900BA8681 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */,
-				387637EF2E37AAED002C05F3 /* XCLocalSwiftPackageReference "DesignSystem/DesignSystem" */,
+				F4DF49602E3DD709006C7625 /* XCLocalSwiftPackageReference "DesignSystem/DesignSystem" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 387F29E02E0BC11500BA8681 /* Products */;
@@ -380,7 +383,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		387637EF2E37AAED002C05F3 /* XCLocalSwiftPackageReference "DesignSystem/DesignSystem" */ = {
+		F4DF49602E3DD709006C7625 /* XCLocalSwiftPackageReference "DesignSystem/DesignSystem" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = DesignSystem/DesignSystem;
 		};
@@ -428,6 +431,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */;
 			productName = Amplitude;
+		};
+		F4DF49612E3DD709006C7625 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesignSystem;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
