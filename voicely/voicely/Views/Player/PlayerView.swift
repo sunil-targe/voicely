@@ -37,29 +37,14 @@ private struct PlayerHeaderView: View {
     let voice: Voice
     let localAudioFilename: String?
     let onClose: (() -> Void)?
-    
-    @Binding var showVoice: Bool
-    
+        
     var body: some View {
         HStack {
             VoiceSelectionButton(
-                color: style == .ReadBook ? mainVM.selectedVoice.color.color : voice.color.color,
-                title: style == .ReadBook ? mainVM.selectedVoice.name : voice.name,
-                style: style == .TextToSpeech ? .plain : .withDropdown
-            ) {
-                guard style == .ReadBook else { return }
-                playHapticFeedback()
-                showVoice = true
-            }
-            .sheet(isPresented: $showVoice) {
-                VoiceNameScreen(isPresented: $showVoice, selectedVoice: $mainVM.selectedVoice)
-                    .onDisappear {
-                        mainVM.updateVoiceSelection()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            RatingPromptManager.shared.requestReviewIfAppropriate()
-                        }
-                    }
-            }
+                color: voice.color.color,
+                title: voice.name,
+                style: .plain
+            )
             
             Spacer()
             
@@ -231,7 +216,6 @@ extension VoicelyPlayer {
         @State private var errorMessage = ""
         @State private var playbackSpeed: Double = 1.0
         @State private var showFullText = false
-        @State private var showVoice = false
         
         var body: some View {
             VStack(spacing: 0) {
@@ -241,8 +225,7 @@ extension VoicelyPlayer {
                     style: style,
                     voice: voice,
                     localAudioFilename: localAudioFilename,
-                    onClose: onClose,
-                    showVoice: $showVoice
+                    onClose: onClose
                 )
                 
                 PlayerProgressView(

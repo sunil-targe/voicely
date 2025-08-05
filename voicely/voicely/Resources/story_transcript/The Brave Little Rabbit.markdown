@@ -1,0 +1,10 @@
+# The Brave Little Rabbit
+## A Tale of Courage and Friendship
+
+In a quiet meadow, nestled among tall grasses, lived a little rabbit named Benny. His burrow was cozy, with soft moss and warm earth, but Benny was timid, always jumping at shadows or rustling leaves. His best friend, Sammy the squirrel, was adventurous, always scampering up trees and exploring the forest. One sunny morning, Sammy didn’t return from his usual adventure, and Benny grew worried. The other animals whispered that Sammy was lost deep in the woods, where thorny bushes and dark paths awaited.
+
+Benny’s heart raced, but he couldn’t leave his friend alone. Taking a deep breath, he hopped out of his burrow, his tiny paws trembling. The forest was vast, with towering trees and eerie sounds. Benny called, “Sammy! Where are you?” but only echoes answered. As he ventured deeper, he met a wise old owl perched on a gnarled branch. “I’m scared,” Benny admitted, “but I must find Sammy.” The owl hooted softly, “Courage is not the absence of fear, but the triumph over it. Follow the stream, little one.”
+
+Benny followed the owl’s advice, hopping along the sparkling stream. The path grew narrow, and thorns snagged at his fur, but he pressed on, imagining Sammy’s cheerful chatter. At last, he spotted Sammy, his tail caught in a thorny bush. “Benny!” Sammy squeaked. “I thought no one would come!” Benny, small and nimble, carefully wiggled through the thorns, nibbling them away until Sammy was free. Together, they hopped back to the meadow, laughing and sharing stories.
+
+Back at the burrow, the other animals gathered, amazed at Benny’s bravery. Sammy hugged him tightly, saying, “You’re the bravest rabbit I know!” Benny smiled, his fears fading. From that day, he explored the forest with Sammy, knowing that even the smallest creatures could be brave when it mattered most.

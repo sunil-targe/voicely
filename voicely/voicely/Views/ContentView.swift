@@ -31,19 +31,22 @@ struct ContentView: View {
                                             .fontWeight(.bold)
                                             .foregroundColor(.white)
                                         Image(systemName: "mic.fill")
+                                            .foregroundStyle(.gray)
                                     }
                                     Text(mainVM.selectedVoice.name)
                                         .font(.headline)
                                         .fontWeight(.semibold)
                                         .foregroundColor(.gray)
                                 }
+                                Spacer()
                                 Image(systemName: "chevron.forward")
+                                    .foregroundStyle(.gray)
                             }
                             .padding(.horizontal, 30)
                             .padding(.vertical)
                         }
                         .background(Color(.secondarySystemBackground))
-                        .clipShape(Capsule())
+                        .cornerRadius(15)
                         Spacer()
                     }
                     .padding()
