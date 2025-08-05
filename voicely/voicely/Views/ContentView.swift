@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var showProfile = false
     @State private var selectedStory: Story?
     @State private var showVoiceName = false
+
     
     var body: some View {
         NavigationView {
@@ -121,16 +122,23 @@ struct ContentView: View {
                                 ActionButton(icon: "doc.fill", title: "Upload a file")
                             }
                             
-                            NavigationLink(destination: AnyView(ScanTextView())) {
+                            NavigationLink(
+                                destination: ScanTextView()
+                                    .environmentObject(mainVM)
+                            ) { 
                                 ActionButton(icon: "viewfinder", title: "Scan text")
                             }
                             
-                            NavigationLink(destination: AnyView(PasteLinkView())) {
+                            NavigationLink(
+                                destination: PasteLinkView()
+                                    .environmentObject(mainVM)
+                            ) {
                                 ActionButton(icon: "globe", title: "Paste a link")
                             }
                         }
                     }
                     .padding(.horizontal, 20)
+                    
                     Spacer()
                 }
             }
@@ -163,32 +171,9 @@ struct ContentView: View {
             .fullScreenCover(item: $selectedStory) { story in
                 BookPageView(story: story)
             }
+
         }
         .tint(.gray)
-    }
-}
-
-struct ActionButton: View {
-    let icon: String
-    let title: String
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(.white)
-            
-            Text(title)
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 100)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
     }
 }
 
@@ -222,79 +207,8 @@ struct AddStoryCard: View {
     }
 }
 
-struct StoryCard: View {
-    let story: Story
-    
-    var body: some View {
-        VStack(spacing: 6) {
-//            Spacer(minLength: 6)
-            Image(story.thumbnailImageName)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-            
-            // Story Title
-            Text(story.name)
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.white.opacity(0.7))
-                .multilineTextAlignment(.leading)
-                .lineLimit(2)
-                .padding([.horizontal, .bottom], 8)
-        }
-        .frame(width: 120, height: 170)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-    }
-}
-
 #Preview {
     ContentView()
         .environmentObject(PurchaseViewModel.shared)
         .environmentObject(MainViewModel(selectedVoice: Voice.default))
 }
-
-// Destination Views for NavigationLinks
-struct WriteTextView: View {
-    var body: some View {
-        VStack {
-            Text("Write Text")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Spacer()
-        }
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct ScanTextView: View {
-    var body: some View {
-        VStack {
-            Text("Scan Text")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Spacer()
-        }
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct PasteLinkView: View {
-    var body: some View {
-        VStack {
-            Text("Paste Link")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Spacer()
-        }
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-
