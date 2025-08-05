@@ -30,13 +30,20 @@ struct ContentView: View {
                                             .font(.title3)
                                             .fontWeight(.bold)
                                             .foregroundColor(.white)
-                                        Image(systemName: "mic.fill")
-                                            .foregroundStyle(.gray)
+                                        Image(systemName: "beats.headphones")
                                     }
-                                    Text(mainVM.selectedVoice.name)
-                                        .font(.headline)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.gray)
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "mic.circle.fill")
+                                        Text(mainVM.selectedVoice.name)
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Capsule().fill(.indigo))
+                                    
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.forward")
@@ -73,7 +80,17 @@ struct ContentView: View {
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
-                                ForEach(Story.allStories) { story in
+                                // Add Story Card
+                                NavigationLink(
+                                    destination: MainView()
+                                        .environmentObject(purchaseVM)
+                                        .environmentObject(mainVM)
+                                ) {
+                                    AddStoryCard()
+                                }
+                                
+                                // Story Cards
+                                ForEach(Array(Story.allStories.prefix(3))) { story in
                                     StoryCard(story: story)
                                         .onTapGesture {
                                             selectedStory = story
@@ -96,14 +113,12 @@ struct ContentView: View {
                         
                         LazyVGrid(columns: [
                             GridItem(.flexible(), spacing: 10),
+                            GridItem(.flexible(), spacing: 10),
                             GridItem(.flexible(), spacing: 10)
                         ], spacing: 10) {
-                            NavigationLink(
-                                destination: MainView()
-                                    .environmentObject(purchaseVM)
-                                    .environmentObject(mainVM)
-                            ) {
-                                ActionButton(icon: "textformat", title: "Write text")
+
+                            NavigationLink(destination: AnyView(UploadFileView())) {
+                                ActionButton(icon: "doc.fill", title: "Upload a file")
                             }
                             
                             NavigationLink(destination: AnyView(ScanTextView())) {
@@ -113,10 +128,6 @@ struct ContentView: View {
                             NavigationLink(destination: AnyView(PasteLinkView())) {
                                 ActionButton(icon: "globe", title: "Paste a link")
                             }
-                            
-                            NavigationLink(destination: AnyView(UploadFileView())) {
-                                ActionButton(icon: "doc.fill", title: "Upload a file")
-                            }
                         }
                     }
                     .padding(.horizontal, 20)
@@ -124,6 +135,8 @@ struct ContentView: View {
                 }
             }
             .background(Color(.systemBackground))
+            .navigationTitle("Voicely")
+            .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
@@ -176,6 +189,36 @@ struct ActionButton: View {
         .frame(height: 100)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+    }
+}
+
+struct AddStoryCard: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            
+            // Plus Icon
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 40))
+                .foregroundColor(.gray)
+            
+            // "Add Story" Text
+            Text("Write a Story")
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+            
+            Spacer()
+        }
+        .frame(width: 120, height: 200)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 12)
+//                .stroke(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
+//        )
     }
 }
 

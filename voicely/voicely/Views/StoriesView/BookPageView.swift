@@ -106,9 +106,10 @@ struct BookPageView: View {
                                     .font(.title2)
                                 Text(mainVM.selectedVoice.name)
                                     .fontWeight(.semibold)
+                                    .multilineTextAlignment(.leading)
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 20)
                             .padding(.vertical, 12)
                             .background(Capsule().fill(.indigo))
                         }
@@ -131,7 +132,7 @@ struct BookPageView: View {
                                     .fontWeight(.semibold)
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 20)
                             .padding(.vertical, 12)
                             .background(Color.orange)
                             .cornerRadius(25)

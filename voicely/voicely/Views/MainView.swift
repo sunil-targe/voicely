@@ -24,13 +24,12 @@ struct MainView: View {
     var body: some View {
             VStack(spacing: 0) {
                 // Main input area
-                TextField("Start typing here...", text: $mainVM.inputText, axis: .vertical)
+                TextField("Start writing here...", text: $mainVM.inputText, axis: .vertical)
                     .focused($isTextFieldFocused)
                     .padding(.horizontal)
                     .cornerRadius(12)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .tint(Color(red: 0.98, green: 0.67, blue: 0.53))
+                    .font(.title3)
+                    .tint(.orange)
                     .onChange(of: mainVM.inputText) { newValue in
                         if newValue.count > 5000 {
                             mainVM.inputText = String(newValue.prefix(5000))
@@ -125,18 +124,25 @@ struct MainView: View {
                                     .frame(width: 24, height: 24)
                                     .padding(.horizontal)
                             } else {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "sparkles").imageScale(.medium)
-                                        .padding(.leading)
-                                    Text("Generate")
+                                
+                                HStack(spacing: 8) {
+                                    if mainVM.isLoading {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                            .frame(width: 20, height: 20)
+                                    } else {
+                                        Image(systemName: "headphones.circle.fill")
+                                            .foregroundColor(.white)
+                                            .frame(width: 20, height: 20)
+                                    }
+                                    Text("Listen")
+                                        .font(.subheadline)
                                         .fontWeight(.semibold)
-                                        .padding(.vertical, 8)
-                                        .padding(.trailing)
-                                    
                                 }
-                                .background(mainVM.inputText.count > 0 ? Color.white : Color(.systemGray4))
-                                .foregroundColor(mainVM.inputText.count > 0 ? .black : .gray)
-                                .cornerRadius(14)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(Capsule().fill(mainVM.inputText.count > 0 ? Color.orange : Color(.systemGray4)))
+                                .foregroundColor(mainVM.inputText.count > 0 ? .white : .gray)
                             }
                         }
                         .disabled(mainVM.inputText.isEmpty || mainVM.isLoading)
@@ -174,14 +180,14 @@ struct MainView: View {
                             }) {
                                 Text("Clear")
                                     .font(.caption)
-                                    .foregroundColor(Color(red: 0.98, green: 0.67, blue: 0.53))
+                                    .foregroundColor(.orange.opacity(0.6))
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
-                                    .background(Color(red: 0.98, green: 0.67, blue: 0.53).opacity(0.2))
+                                    .background(.orange.opacity(0.1))
                                     .cornerRadius(20)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color(red: 0.98, green: 0.67, blue: 0.53).opacity(0.3), lineWidth: 1)
+                                            .stroke(Color.orange.opacity(0.2), lineWidth: 1)
                                     )
                             }
                             .transition(.scale.combined(with: .opacity))

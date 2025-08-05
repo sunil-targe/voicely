@@ -21,7 +21,7 @@ public struct VoiceSelectionButton: View {
                         .foregroundColor(.white)
                         .frame(width: 20, height: 20)
                     Text(title)
-                        .font(.caption)
+                        .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
                 }
