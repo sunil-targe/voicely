@@ -1,23 +1,13 @@
-//
-//  UploadFileView.swift
-//  voicely
-//
-//  Created by Gaurav on 02/08/25.
-//
-
 import SwiftUI
 import DesignSystem
-import UniformTypeIdentifiers
 import Vision
 import PhotosUI
 
-struct UploadFileView: View {
+struct ScanTextView: View {
     @EnvironmentObject var mainVM: MainViewModel
     @Environment(\.dismiss) private var dismiss
     
-    @State private var showUploadOptions = false
-    @State private var showDocumentPicker = false
-    @State private var showImagePicker = false
+    @State private var showCamera = false
     @State private var extractedText = ""
     @State private var isProcessing = false
     @State private var showAlert = false
@@ -29,16 +19,16 @@ struct UploadFileView: View {
             VStack(spacing: 0) {
                 // Header
                 VStack(spacing: 16) {
-                    Image(systemName: "doc.fill")
+                    Image(systemName: "viewfinder")
                         .font(.system(size: 50))
-                        .foregroundColor(.purple)
+                        .foregroundColor(.green)
                     
-                    Text("Upload a File")
+                    Text("Scan Text")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                     
-                    Text("Upload documents or images to extract text")
+                    Text("Capture text from images using your camera")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -48,24 +38,24 @@ struct UploadFileView: View {
                 
                 // Content
                 VStack(spacing: 20) {
-                    Text("Upload PDF documents, RTF files, text files, or images containing text. The app will extract and convert the text to speech.")
+                    Text("Point your camera at any text document, book, or image containing text. The app will extract and convert the text to speech.")
                         .font(.body)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 20)
                     
                     Button(action: {
-                        showUploadOptions = true
+                        showCamera = true
                     }) {
                         HStack {
-                            Image(systemName: "plus.circle")
-                            Text("Choose File Type")
+                            Image(systemName: "camera")
+                            Text("Start Scanning")
                         }
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.purple)
+                        .background(Color.green)
                         .cornerRadius(12)
                     }
                     .padding(.horizontal, 20)
@@ -74,7 +64,7 @@ struct UploadFileView: View {
                 }
                 .padding(.top, 30)
             }
-            .navigationTitle("Upload File")
+            .navigationTitle("Scan Text")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -83,17 +73,8 @@ struct UploadFileView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showUploadOptions) {
-                UploadOptionsSheet(
-                    showDocumentPicker: $showDocumentPicker,
-                    showImagePicker: $showImagePicker
-                )
-            }
-            .sheet(isPresented: $showDocumentPicker) {
-                DocumentPicker(extractedText: $extractedText, isProcessing: $isProcessing, showAlert: $showAlert, alertMessage: $alertMessage, showExtractedTextView: $showExtractedTextView)
-            }
-            .sheet(isPresented: $showImagePicker) {
-                ImagePicker(extractedText: $extractedText, isProcessing: $isProcessing, showAlert: $showAlert, alertMessage: $alertMessage, showExtractedTextView: $showExtractedTextView)
+            .sheet(isPresented: $showCamera) {
+                CameraPicker(extractedText: $extractedText, isProcessing: $isProcessing, showAlert: $showAlert, alertMessage: $alertMessage, showExtractedTextView: $showExtractedTextView)
             }
             .sheet(isPresented: $showExtractedTextView) {
                 ExtractedTextView(extractedText: $extractedText, mainVM: mainVM)
@@ -109,14 +90,7 @@ struct UploadFileView: View {
 
 
 
-
-
-
-
 #Preview {
-    UploadFileView()
+    ScanTextView()
         .environmentObject(MainViewModel(selectedVoice: Voice.default))
-}
-
-
-
+} 

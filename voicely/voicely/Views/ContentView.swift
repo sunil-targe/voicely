@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var showProfile = false
     @State private var selectedStory: Story?
     @State private var showVoiceName = false
+
     
     var body: some View {
         NavigationView {
@@ -121,16 +122,23 @@ struct ContentView: View {
                                 ActionButton(icon: "doc.fill", title: "Upload a file")
                             }
                             
-                            NavigationLink(destination: AnyView(ScanTextView())) {
+                            NavigationLink(
+                                destination: ScanTextView()
+                                    .environmentObject(mainVM)
+                            ) { 
                                 ActionButton(icon: "viewfinder", title: "Scan text")
                             }
                             
-                            NavigationLink(destination: AnyView(PasteLinkView())) {
+                            NavigationLink(
+                                destination: PasteLinkView()
+                                    .environmentObject(mainVM)
+                            ) {
                                 ActionButton(icon: "globe", title: "Paste a link")
                             }
                         }
                     }
                     .padding(.horizontal, 20)
+                    
                     Spacer()
                 }
             }
@@ -163,98 +171,9 @@ struct ContentView: View {
             .fullScreenCover(item: $selectedStory) { story in
                 BookPageView(story: story)
             }
+
         }
         .tint(.gray)
-    }
-}
-
-struct ActionButton: View {
-    let icon: String
-    let title: String
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(.white)
-            
-            Text(title)
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 100)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-    }
-}
-
-struct AddStoryCard: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            Spacer()
-            
-            // Plus Icon
-            Image(systemName: "plus.circle.fill")
-                .font(.system(size: 40))
-                .foregroundColor(.gray)
-            
-            // "Add Story" Text
-            Text("Write a Story")
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-            
-            Spacer()
-        }
-        .frame(width: 120, height: 200)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-//        .overlay(
-//            RoundedRectangle(cornerRadius: 12)
-//                .stroke(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
-//        )
-    }
-}
-
-struct StoryCard: View {
-    let story: Story
-    
-    var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack {
-                // Story Image with 2:3 aspect ratio
-                Image(story.thumbnailImageName)
-                    .resizable()
-                    .aspectRatio(2/3, contentMode: .fit)
-                    .padding(.horizontal, 6)
-                    .frame(width: 120)
-                    .clipped()
-                    .cornerRadius(8)
-                Spacer()
-            }
-            VStack {
-                // Story Title at bottom
-                Text(story.name)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.5)
-                    .padding(.horizontal, 4)
-                    .offset(y: 4)
-            }
-            .padding(.vertical)
-        }
-        .frame(width: 120, height: 200)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
     }
 }
 
@@ -263,48 +182,3 @@ struct StoryCard: View {
         .environmentObject(PurchaseViewModel.shared)
         .environmentObject(MainViewModel(selectedVoice: Voice.default))
 }
-
-// Destination Views for NavigationLinks
-struct WriteTextView: View {
-    var body: some View {
-        VStack {
-            Text("Write Text")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Spacer()
-        }
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct ScanTextView: View {
-    var body: some View {
-        VStack {
-            Text("Scan Text")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Spacer()
-        }
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct PasteLinkView: View {
-    var body: some View {
-        VStack {
-            Text("Paste Link")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Spacer()
-        }
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-
