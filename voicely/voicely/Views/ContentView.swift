@@ -177,6 +177,37 @@ struct ContentView: View {
     }
 }
 
+struct AddStoryCard: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            
+            // Plus Icon
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 40))
+                .foregroundColor(.gray)
+            
+            // "Add Story" Text
+            Text("Write a Story")
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+            
+            Spacer()
+        }
+        .frame(width: 120, height: 200)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 12)
+//                .stroke(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
+//        )
+    }
+}
+
+
 #Preview {
     ContentView()
         .environmentObject(PurchaseViewModel.shared)
