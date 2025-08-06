@@ -17,7 +17,7 @@ struct MainView: View {
     @FocusState private var isTextFieldFocused: Bool
     @State private var showHistory = false
     @State private var showVoice = false
-    @State private var showFilter = false
+
     @State private var showPlayerView = false
     @State private var showPaywall = false
     
@@ -81,28 +81,7 @@ struct MainView: View {
                                     }
                                 }
                         }
-                        Button(action: { 
-                            playHapticFeedback()
-                            showFilter = true 
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(.white)
-                                    .frame(width: 32, height: 32)
-                                Image(systemName: "waveform")
-                                    .imageScale(.small)
-                                    .foregroundStyle(.black)
-                            }
-                        }
-                        .sheet(isPresented: $showFilter) {
-                            FilterScreen(
-                                isPresented: $showFilter,
-                                selectedVoice: $mainVM.selectedVoice
-                            )
-                            .onDisappear {
-                                mainVM.updateVoiceSelection()
-                            }
-                        }
+
                         
                         Spacer(minLength: 1)
                         // Generate button
