@@ -97,32 +97,23 @@ struct MainView: View {
                                 showPaywall = true
                             }
                         }) {
-                            if mainVM.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .frame(width: 24, height: 24)
-                                    .padding(.horizontal)
-                            } else {
-                                
-                                HStack(spacing: 8) {
-                                    if mainVM.isLoading {
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                            .frame(width: 20, height: 20)
-                                    } else {
-                                        Image(systemName: "headphones.circle.fill")
-                                            .foregroundColor(.white)
-                                            .frame(width: 20, height: 20)
-                                    }
-                                    Text("Listen")
-                                        .font(.subheadline)
-                                        .fontWeight(.semibold)
+                            HStack(spacing: 8) {
+                                if mainVM.isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .frame(width: 20, height: 20)
+                                } else {
+                                    Image(systemName: "headphones.circle.fill")
+                                        .frame(width: 20, height: 20)
                                 }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
-                                .background(Capsule().fill(mainVM.inputText.count > 0 ? Color.orange : Color(.systemGray4)))
-                                .foregroundColor(mainVM.inputText.count > 0 ? .white : .gray)
+                                Text("Listen")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
                             }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(Capsule().fill(mainVM.inputText.count > 0 ? Color.orange : Color(.systemGray4)))
+                            .foregroundColor(mainVM.inputText.count > 0 ? .white : .gray)
                         }
                         .disabled(mainVM.inputText.isEmpty || mainVM.isLoading)
                         .onChange(of: mainVM.generatedAudioURL) { newValue in
