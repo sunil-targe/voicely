@@ -243,7 +243,7 @@ struct FAQSection: View {
                         .foregroundColor(Color(.systemGray))
                     if !purchaseVM.isPremium {
                         Divider()
-                        Text("🎁 Special Offer for Parents!\n✨ Unlock 7 Days of Premium Access — FREE! 🚀 Create unlimited magical stories for your little ones!")
+                        Text("🎁 Special Offer for Parents!\n✨ Unlock 3 Days of Premium Access — FREE! 🚀 Create unlimited magical stories for your little ones!")
                             .font(.subheadline)
                             .foregroundStyle(.white.opacity(0.9))
                     }
