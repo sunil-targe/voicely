@@ -334,24 +334,28 @@ struct VoiceGridItem: View {
                         }
 
                         // Your original ZStack content
-                        Circle()
-                            .fill(voice.color.color)
-                            .frame(width: 90, height: 90)
-
-                        if isPlaying {
-                            Image(systemName: "waveform")
-                                .font(.title)
-                                .foregroundColor(.white)
-                        } else {
-                            Image(systemName: "mic.fill")
-                                .font(.title)
-                                .foregroundColor(.white)
-                        }
-
                         if isSelected {
                             Circle()
                                 .stroke(Color.white, lineWidth: 3)
                                 .frame(width: 96, height: 96)
+                        }
+                        ZStack(alignment: .bottomTrailing) {
+                            Image(voice.voice_id)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 90, height: 90)
+
+                            if isPlaying {
+                                Image(systemName: "waveform.circle.fill")
+                                    .imageScale(.large)
+                                    .foregroundColor(.white)
+                                    .offset(x: 20, y: 6)
+                            } else {
+                                Image(systemName: "mic.circle.fill")
+                                    .imageScale(.large)
+                                    .foregroundColor(.white)
+                                    .offset(x: 20, y: 6)
+                            }
                         }
                     }
                     
