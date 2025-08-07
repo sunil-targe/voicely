@@ -347,14 +347,14 @@ struct VoiceGridItem: View {
 
                             if isPlaying {
                                 Image(systemName: "waveform.circle.fill")
-                                    .imageScale(.large)
+                                    .imageScale(.medium)
                                     .foregroundColor(.white)
-                                    .offset(x: 20, y: 6)
+                                    .offset(x: 12, y: 6)
                             } else {
                                 Image(systemName: "mic.circle.fill")
-                                    .imageScale(.large)
+                                    .imageScale(.medium)
                                     .foregroundColor(.white)
-                                    .offset(x: 20, y: 6)
+                                    .offset(x: 12, y: 6)
                             }
                         }
                     }
