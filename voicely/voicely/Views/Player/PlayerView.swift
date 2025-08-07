@@ -48,17 +48,6 @@ private struct PlayerHeaderView: View {
             
             Spacer()
             
-            if let filename = localAudioFilename,
-               let fileURL = getLocalFileURL(for: filename) {
-                ShareLink(item: fileURL) {
-                    Image("ic_share")
-                        .resizable()
-                        .padding(6)
-                        .foregroundColor(.gray)
-                        .frame(width: 32, height: 32)
-                }
-            }
-            
             if onClose != nil {
                 Button(action: {
                     playHapticFeedback()
@@ -74,12 +63,6 @@ private struct PlayerHeaderView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
-    }
-    
-    private func getLocalFileURL(for filename: String) -> URL? {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let fileURL = docs.appendingPathComponent(filename)
-        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
     }
 }
 
@@ -118,6 +101,7 @@ private struct PlayerControlsView: View {
     let playerStatus: AVPlayerItem.Status
     @Binding var isPlaying: Bool
     let speedText: String
+    let localAudioFilename: String?
     
     let onSeekBackward: () -> Void
     let onTogglePlay: () -> Void
@@ -126,11 +110,20 @@ private struct PlayerControlsView: View {
     
     var body: some View {
         HStack(spacing: 30) {
-            // Voice icon CTA button
-            Button(action: {
-                playHapticFeedback()
-                print("Voice options button tapped") // Placeholder action
-            }) {
+            // Menu button
+            Menu {
+                if let filename = localAudioFilename,
+                   let fileURL = getLocalFileURL(for: filename) {
+                    ShareLink(item: fileURL) {
+                        HStack{
+                            Text("Share Audio")
+                            Image("ic_share")
+                                .resizable()
+                                .frame(width: 24, height: 24)
+                        }
+                    }
+                }
+            } label: {
                 Circle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 40, height: 40)
@@ -191,6 +184,12 @@ private struct PlayerControlsView: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
     }
+    
+    private func getLocalFileURL(for filename: String) -> URL? {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileURL = docs.appendingPathComponent(filename)
+        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
+    }
 }
 
 extension VoicelyPlayer {
@@ -238,6 +237,7 @@ extension VoicelyPlayer {
                     playerStatus: playerStatus,
                     isPlaying: $isPlaying,
                     speedText: speedText,
+                    localAudioFilename: localAudioFilename,
                     onSeekBackward: seekBackward,
                     onTogglePlay: togglePlay,
                     onSeekForward: seekForward,
