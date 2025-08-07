@@ -39,29 +39,25 @@ struct StoryGridCard: View {
     let story: Story
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Story Image with 2:3 aspect ratio
+        VStack(spacing: 6) {
+            Spacer(minLength: 6)
             Image(story.thumbnailImageName)
                 .resizable()
-                .aspectRatio(2/3, contentMode: .fit)
+                .scaledToFit()
                 .frame(maxWidth: .infinity)
-                .clipped()
-                .cornerRadius(12)
             
             // Story Title
             Text(story.name)
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.white.opacity(0.7))
-                .multilineTextAlignment(.center)
+                .multilineTextAlignment(.leading)
                 .lineLimit(2)
-                .minimumScaleFactor(0.8)
                 .padding([.horizontal, .bottom], 8)
         }
         .frame(maxWidth: .infinity)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 }
 

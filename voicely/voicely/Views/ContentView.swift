@@ -212,7 +212,7 @@ struct AddStoryCard: View {
             
             Spacer()
         }
-        .frame(width: 120, height: 200)
+        .frame(width: 120, height: 170)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
 //        .overlay(
@@ -226,33 +226,23 @@ struct StoryCard: View {
     let story: Story
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack {
-                // Story Image with 2:3 aspect ratio
-                Image(story.thumbnailImageName)
-                    .resizable()
-                    .aspectRatio(2/3, contentMode: .fit)
-                    .padding(.horizontal, 6)
-                    .frame(width: 120)
-                    .clipped()
-                    .cornerRadius(8)
-                Spacer()
-            }
-            VStack {
-                // Story Title at bottom
-                Text(story.name)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.5)
-                    .padding(.horizontal, 4)
-                    .offset(y: 4)
-            }
-            .padding(.vertical)
+        VStack(spacing: 6) {
+//            Spacer(minLength: 6)
+            Image(story.thumbnailImageName)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+            
+            // Story Title
+            Text(story.name)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.white.opacity(0.7))
+                .multilineTextAlignment(.leading)
+                .lineLimit(2)
+                .padding([.horizontal, .bottom], 8)
         }
-        .frame(width: 120, height: 200)
+        .frame(width: 120, height: 170)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
     }
