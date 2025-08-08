@@ -14,6 +14,15 @@ struct ContentView: View {
     @State private var showProfile = false
     @State private var selectedStory: Story?
     @State private var showVoiceName = false
+    @State private var showUploadOptions = false
+    @State private var showDocumentPicker = false
+    @State private var showImagePicker = false
+    @State private var showCamera = false
+    @State private var extractedText = ""
+    @State private var isProcessing = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var showExtractedTextView = false
 
     
     var body: some View {
@@ -118,14 +127,15 @@ struct ContentView: View {
                             GridItem(.flexible(), spacing: 10)
                         ], spacing: 10) {
 
-                            NavigationLink(destination: AnyView(UploadFileView())) {
+                            Button(action: {
+                                showUploadOptions = true
+                            }) {
                                 ActionButton(icon: "doc.fill", title: "Upload a file")
                             }
                             
-                            NavigationLink(
-                                destination: ScanTextView()
-                                    .environmentObject(mainVM)
-                            ) { 
+                            Button(action: {
+                                showCamera = true
+                            }) {
                                 ActionButton(icon: "viewfinder", title: "Scan text")
                             }
                             
@@ -135,10 +145,12 @@ struct ContentView: View {
                             ) {
                                 ActionButton(icon: "globe", title: "Paste a link")
                             }
+                            
+                       
                         }
                     }
                     .padding(.horizontal, 20)
-                    
+    
                     Spacer()
                 }
             }
@@ -170,6 +182,47 @@ struct ContentView: View {
             }
             .fullScreenCover(item: $selectedStory) { story in
                 BookPageView(story: story)
+            }
+            .sheet(isPresented: $showUploadOptions) {
+                UploadOptionsSheet(
+                    showDocumentPicker: $showDocumentPicker,
+                    showImagePicker: $showImagePicker
+                )
+            }
+            .sheet(isPresented: $showDocumentPicker) {
+                DocumentPicker(
+                    extractedText: $extractedText,
+                    isProcessing: $isProcessing,
+                    showAlert: $showAlert,
+                    alertMessage: $alertMessage,
+                    showExtractedTextView: $showExtractedTextView
+                )
+            }
+            .sheet(isPresented: $showImagePicker) {
+                ImagePicker(
+                    extractedText: $extractedText,
+                    isProcessing: $isProcessing,
+                    showAlert: $showAlert,
+                    alertMessage: $alertMessage,
+                    showExtractedTextView: $showExtractedTextView
+                )
+            }
+            .sheet(isPresented: $showCamera) {
+                CameraPicker(
+                    extractedText: $extractedText,
+                    isProcessing: $isProcessing,
+                    showAlert: $showAlert,
+                    alertMessage: $alertMessage,
+                    showExtractedTextView: $showExtractedTextView
+                )
+            }
+            .sheet(isPresented: $showExtractedTextView) {
+                ExtractedTextView(extractedText: $extractedText, mainVM: mainVM)
+            }
+            .alert("Error", isPresented: $showAlert) {
+                Button("OK") { }
+            } message: {
+                Text(alertMessage)
             }
 
         }
