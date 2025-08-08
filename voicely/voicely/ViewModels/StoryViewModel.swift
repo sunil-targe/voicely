@@ -29,8 +29,8 @@ class StoryViewModel: ObservableObject {
     ///   - story: The story to generate voice for
     ///   - voice: The voice to use for generation
     func generateStoryVoice(for story: Story, with voice: Voice) {
-        guard !story.transcript.isEmpty else { 
-            errorMessage = "Story transcript is empty"
+        guard !story.fullStoryContent.isEmpty else { 
+            errorMessage = "Story content is empty"
             return 
         }
         
@@ -40,7 +40,7 @@ class StoryViewModel: ObservableObject {
         errorMessage = nil
         
         speechService.generateSpeech(
-            text: story.transcript,
+            text: story.fullStoryContent,
             voiceID: voice.voice_id,
             emotion: voice.emotion,
             channel: voice.channel,
@@ -92,7 +92,7 @@ class StoryViewModel: ObservableObject {
                                     "emotion": voice.emotion,
                                     "languageBoost": voice.language,
                                     "channel": voice.channel,
-                                    "transcript_length": story.transcript.count
+                                    "story_content_length": story.fullStoryContent.count
                                 ]
                             )
                         }
