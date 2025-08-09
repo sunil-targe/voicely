@@ -8,25 +8,6 @@ struct ExtractedTextView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Header
-                VStack(spacing: 16) {
-                    Image(systemName: "doc.text.fill")
-                        .font(.system(size: 50))
-                        .foregroundColor(.blue)
-                    
-                    Text("Extracted Content")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    
-                    Text("Review and use the extracted text")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top, 40)
-                .padding(.horizontal, 20)
-                
                 // Action Buttons
                 HStack(spacing: 12) {
                     Button(action: {
