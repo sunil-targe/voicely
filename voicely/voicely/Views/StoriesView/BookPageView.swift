@@ -23,22 +23,6 @@ struct BookPageView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // header
-            HStack {
-                Spacer()
-                Button(action: {
-                    playHapticFeedback()
-                    dismiss()
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .imageScale(.medium)
-                        .font(.title2)
-                        .foregroundColor(.white.opacity(0.4))
-                        .padding([.bottom, .trailing], 6)
-                }
-                .padding(.horizontal)
-            }
-            
             // Story view
             ZStack(alignment: .bottom) {
                 switch story.storyViewName {
@@ -143,6 +127,21 @@ struct BookPageView: View {
             }
         }
         .background(Color.black.edgesIgnoringSafeArea(.all))
+        .overlay(alignment: .topTrailing, content: {
+            // header
+            Button(action: {
+                playHapticFeedback()
+                dismiss()
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .imageScale(.medium)
+                    .font(.title2)
+                    .foregroundColor(.white.opacity(0.4))
+                    .padding(.trailing, 6)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 20)
+        })
         .onAppear {
             loadSavedStory()
         }

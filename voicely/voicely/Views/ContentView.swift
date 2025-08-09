@@ -250,7 +250,7 @@ struct AddStoryCard: View {
             
             Spacer()
         }
-        .frame(width: 120, height: 200)
+        .frame(width: 120, height: 170)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
 //        .overlay(
@@ -259,7 +259,6 @@ struct AddStoryCard: View {
 //        )
     }
 }
-
 
 #Preview {
     ContentView()
