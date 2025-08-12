@@ -76,10 +76,23 @@ struct VoiceNameScreen: View {
                     VStack(spacing: 16) {
                         // Filter Header
                         HStack {
-                            Text("Voice settings")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
+                            Button(action: {
+                                playHapticFeedback()
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    
+                                }
+                            }) {
+                                HStack(alignment: .center, spacing: 6) {
+                                    Text("Voice settings")
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                    Image("ic_info")
+                                        .resizable()
+                                        .frame(width: 18, height: 18)
+                                        .foregroundColor(.gray)
+                                }
+                            }
                             Spacer()
                             Button(action: {
                                 playHapticFeedback()
