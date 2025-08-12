@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct UsageSelectionView: View {
-    @Binding var selectedOption: UsageOption?
+    @Binding var selectedOptions: Set<UsageOption>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -19,7 +19,7 @@ struct UsageSelectionView: View {
                     .fontWeight(.bold)
                     .multilineTextAlignment(.leading)
                 
-                Text("Select the main way you plan to use our app with your child")
+                Text("Select all the ways you plan to use our app with your child (you can choose multiple)")
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.secondary)
@@ -31,12 +31,16 @@ struct UsageSelectionView: View {
                 ForEach(UsageOption.allCases, id: \.self) { option in
                     OptionCard(
                         option: option,
-                        isSelected: selectedOption == option
+                        isSelected: selectedOptions.contains(option)
                     )
                     .onTapGesture {
                         playHapticFeedback()
                         withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedOption = option
+                            if selectedOptions.contains(option) {
+                                selectedOptions.remove(option)
+                            } else {
+                                selectedOptions.insert(option)
+                            }
                         }
                     }
                 }
@@ -120,9 +124,9 @@ struct OptionCard: View {
 
 // MARK: - Previews
 #Preview("Default State") {
-    UsageSelectionView(selectedOption: .constant(nil))
+    UsageSelectionView(selectedOptions: .constant([]))
 }
 
 #Preview("With Selection") {
-    UsageSelectionView(selectedOption: .constant(.bedtimeStories))
+    UsageSelectionView(selectedOptions: .constant([.bedtimeStories, .educationalStories]))
 }
