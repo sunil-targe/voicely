@@ -7,17 +7,17 @@ struct ForestFriendsStormView: View {
                 // Story content
                 VStack(alignment: .leading, spacing: 24) {
                     // Title
-                    Text("The Forest Friends and the Storm")
-                        .font(.system(size: 32, weight: .bold, design: .serif))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
-                        .padding(.top, 12)
+//                    Text("The Forest Friends and the Storm")
+//                        .font(.system(size: 32, weight: .bold, design: .serif))
+//                        .foregroundColor(.white)
+//                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+//                        .padding(.top, 12)
                     
                     // Subtitle
                     Text("When Friends Work Together")
                         .font(.system(size: 22, weight: .medium, design: .serif))
                         .foregroundColor(.green)
-                        .padding(.bottom, 8)
+                        .padding(.vertical, 10)
 
                     // Story content
                     VStack(alignment: .leading, spacing: 16) {

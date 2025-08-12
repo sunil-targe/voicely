@@ -13,16 +13,16 @@ struct BearFamilyHibernationView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 // Title
-                Text("The Bear Family’s Hibernation")
-                    .font(.system(size: 32, weight: .bold, design: .serif))
-                    .foregroundColor(.orange)
-                    .padding(.top, 12)
+//                Text("The Bear Family’s Hibernation")
+//                    .font(.system(size: 32, weight: .bold, design: .serif))
+//                    .foregroundColor(.orange)
+//                    .padding(.top, 12)
                 
                 // Subtitle
                 Text("Preparing for Winter Together")
                     .font(.system(size: 20, weight: .medium, design: .serif))
                     .foregroundColor(.gray)
-                    .padding(.bottom, 8)
+                    .padding(.vertical, 10)
                 
                 // Intro Paragraph
                 Text("""
