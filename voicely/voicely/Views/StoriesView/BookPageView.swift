@@ -31,7 +31,7 @@ struct BookPageView: View {
                 HStack(alignment: .top) {
                     // Title
                     Text(story.name)
-                        .font(.system(size: 28, weight: .bold, design: .serif))
+                        .font(.system(size: 32, weight: .bold, design: .serif))
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.white)
                     Spacer(minLength: 6)
@@ -44,7 +44,7 @@ struct BookPageView: View {
                             .font(.title2)
                             .foregroundColor(.white.opacity(0.4))
                             .padding(.trailing, 6)
-                            .padding(.top, 10)
+                            .padding(.top, 4)
                     }
                 }
                 .padding(.horizontal)
