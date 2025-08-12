@@ -48,7 +48,7 @@ struct Voice: Identifiable, Equatable, Codable {
         ),
         Voice(
             id: UUID(),
-            name: "Moonlight Fairy",
+            name: "Calm Woman",
             description: "Calm and soothing",
             color: ColorCodable(color: Color(red: 0.98, green: 0.67, blue: 0.80)),
             voice_id: "Calm_Woman",
