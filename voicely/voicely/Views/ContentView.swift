@@ -58,7 +58,7 @@ struct ContentView: View {
                             HStack(spacing: 20) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack {
-                                        Text("Voice")
+                                        Text("Choose your voice")
                                             .font(.title3)
                                             .fontWeight(.bold)
                                             .foregroundColor(.white)
@@ -140,7 +140,9 @@ struct ContentView: View {
                             text: "Import your own story",
                             icon: Image(systemName: "plus.circle.fill"),
                             color: .white
-                        )
+                        ) {
+                            showUploadOptions = true
+                        }
                         .padding(.top, 30)
                         
                         LazyVGrid(columns: [
@@ -152,7 +154,7 @@ struct ContentView: View {
                             Button(action: {
                                 showUploadOptions = true
                             }) {
-                                ActionButton(icon: "doc.fill", title: "Upload a file")
+                                ActionButton(icon: "doc.fill", title: "Upload file")
                             }
                             
                             Button(action: {
@@ -165,7 +167,7 @@ struct ContentView: View {
                                 destination: PasteLinkView()
                                     .environmentObject(mainVM)
                             ) {
-                                ActionButton(icon: "link", title: "Paste a link")
+                                ActionButton(icon: "link", title: "Paste link")
                             }
                             
                        

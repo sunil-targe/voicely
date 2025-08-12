@@ -18,7 +18,7 @@ struct PasteLinkView: View {
         ScrollView {
             // Content
             VStack(spacing: 16) {
-                TextField(" Past a link here", text: $linkText, axis: .vertical)
+                TextField(" Paste the link here", text: $linkText, axis: .vertical)
                     .focused($isTextFieldFocused)
                     .disableAutocorrection(true)
                     .keyboardType(.URL)
@@ -92,7 +92,7 @@ struct PasteLinkView: View {
             }
             .padding(.top, 20)
         }
-        .navigationTitle("Paste a Link")
+        .navigationTitle("Paste Link")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Error", isPresented: $showAlert) {
             Button("OK") { }
