@@ -52,6 +52,7 @@ struct VoiceNameScreen: View {
     @Binding var selectedVoice: Voice
     @StateObject private var viewModel = VoiceNameViewModel()
     @State private var tempSelectedVoice: Voice?
+    @State private var showVoiceSettingsGuidelines = false
     
     private let emotions = [
         ("auto", "🎭"),
@@ -79,7 +80,7 @@ struct VoiceNameScreen: View {
                             Button(action: {
                                 playHapticFeedback()
                                 withAnimation(.easeInOut(duration: 0.3)) {
-                                    
+                                    showVoiceSettingsGuidelines = true
                                 }
                             }) {
                                 HStack(alignment: .center, spacing: 6) {
@@ -252,11 +253,140 @@ struct VoiceNameScreen: View {
                 selectedVoice.channel = viewModel.globalChannel
             }
         }
+        .sheet(isPresented: $showVoiceSettingsGuidelines) {
+            VoiceSettingsGuidelinesView()
+        }
     }
     
     private func getEmotionDisplayValue(_ emotion: String) -> String {
         let emoji = emotions.first { $0.0 == emotion }?.1 ?? "🎭"
         return "\(emoji) \(emotion.capitalized)"
+    }
+}
+
+// MARK: - Voice Settings Guidelines View
+struct VoiceSettingsGuidelinesView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Voice Settings Guide")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Text("Learn how each setting affects your voice narration")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal)
+                    
+                    // Settings explanations
+                    VStack(spacing: 20) {
+                        // Emotions
+                        SettingExplanationCard(
+                            title: "Emotions 🎭",
+                            subtitle: "Speech emotion",
+                            description: "Control the emotional tone of the narration. Choose from different emotions like happy, sad, angry, or let the AI automatically detect the most appropriate emotion for your story.",
+                            examples: [
+                                "😊 Happy - Perfect for cheerful stories",
+                                "😢 Sad - Ideal for emotional moments",
+                                "😐 Neutral - Balanced, natural tone",
+                                "🎭 Auto - AI chooses the best emotion"
+                            ]
+                        )
+                        
+                        // Language Boost
+                        SettingExplanationCard(
+                            title: "Language Boost 🌍",
+                            subtitle: "Enhance recognition of specific languages and dialects",
+                            description: "Improve pronunciation and accent accuracy for specific languages. This helps the AI better understand and reproduce the nuances of different languages and regional accents.",
+                            examples: [
+                                "Automatic - Detects language automatically",
+                                "English - Optimized for English pronunciation",
+                                "Spanish - Enhanced Spanish accent",
+                                "Chinese - Better Chinese character pronunciation"
+                            ]
+                        )
+                        
+                        // Channel
+                        SettingExplanationCard(
+                            title: "Channel 🎧",
+                            subtitle: "Number of audio channels",
+                            description: "Choose between mono (single channel) or stereo (dual channel) audio output. Stereo provides spatial audio effects while mono is more compatible with all devices.",
+                            examples: [
+                                "Mono - Single audio channel, universal compatibility",
+                                "Stereo - Dual channels, spatial audio experience"
+                            ]
+                        )
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundColor(.gray)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Setting Explanation Card
+struct SettingExplanationCard: View {
+    let title: String
+    let subtitle: String
+    let description: String
+    let examples: [String]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            // Description
+            Text(description)
+                .font(.body)
+                .foregroundColor(.primary)
+            
+            // Examples
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Examples:")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                
+                ForEach(examples, id: \.self) { example in
+                    HStack(alignment: .center, spacing: 8) {
+                        Image(systemName: "arrowshape.right.fill").imageScale(.small)
+                            .foregroundColor(.white)
+                        
+                        Text(example)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }
 
