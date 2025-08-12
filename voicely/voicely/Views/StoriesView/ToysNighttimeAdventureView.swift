@@ -6,17 +6,17 @@ struct ToysNighttimeAdventureView: View {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 24) {
                     // Title
-                    Text("The Toys' Nighttime Adventure")
-                        .font(.system(size: 32, weight: .bold, design: .serif))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
-                        .padding(.top, 12)
+//                    Text("The Toys' Nighttime Adventure")
+//                        .font(.system(size: 32, weight: .bold, design: .serif))
+//                        .foregroundColor(.white)
+//                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+//                        .padding(.top, 12)
 
                     // Subtitle
                     Text("When the Children Are Asleep")
                         .font(.system(size: 22, weight: .medium, design: .serif))
                         .foregroundColor(.pink)
-                        .padding(.bottom, 8)
+                        .padding(.vertical, 10)
 
                     // Story content
                     VStack(alignment: .leading, spacing: 16) {

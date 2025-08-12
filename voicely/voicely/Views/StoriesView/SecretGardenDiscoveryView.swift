@@ -6,17 +6,17 @@ struct SecretGardenDiscoveryView: View {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 24) {
                     // Title
-                    Text("The Secret Garden Discovery")
-                        .font(.system(size: 32, weight: .bold, design: .serif))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
-                        .padding(.top, 12)
+//                    Text("The Secret Garden Discovery")
+//                        .font(.system(size: 32, weight: .bold, design: .serif))
+//                        .foregroundColor(.white)
+//                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+//                        .padding(.top, 12)
 
                     // Subtitle
                     Text("Where Magic Grows in Hidden Places")
                         .font(.system(size: 22, weight: .medium, design: .serif))
                         .foregroundColor(.yellow)
-                        .padding(.bottom, 8)
+                        .padding(.vertical, 10)
 
                     // Story content
                     VStack(alignment: .leading, spacing: 16) {
