@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import RevenueCat
+import RevenueCatUI
 import DesignSystem
 
 struct BookPageView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var mainVM: MainViewModel
+    @EnvironmentObject var purchaseVM: PurchaseViewModel
     @StateObject private var storyVM = StoryViewModel()
     @State private var showPlayerView = false
     @State private var currentSavedStory: SavedStory?
@@ -18,6 +21,7 @@ struct BookPageView: View {
     @State private var errorMessage = ""
     @State private var showVoiceSelection = false
     @State private var showConfirmationAlert = false
+    @State private var showPaywall = false
     
     let story: Story
 
@@ -213,9 +217,19 @@ struct BookPageView: View {
             } message: {
                 Text("Story was previously generated with a different voice. Do you want to listen it again with the new voice?")
             }
+            .fullScreenCover(isPresented: $showPaywall) {
+                purchaseVM.refreshPurchaseStatus()
+            } content: {
+                PaywallView()
+            }
     }
     
-    private func handleListenButtonAction() {
+    private func handleListenButtonAction() { //
+        guard purchaseVM.isPremium else {
+            showPaywall = true
+            return
+        }
+        
         // If there's a saved story and the selected voice matches the saved story's voice
         if let savedStory = storyVM.getSavedStory(for: story),
            mainVM.selectedVoice.voice_id == savedStory.voice.voice_id {
