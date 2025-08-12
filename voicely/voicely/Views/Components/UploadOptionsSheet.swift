@@ -31,7 +31,7 @@ struct UploadOptionsSheet: View {
                             Text("Documents")
                                 .font(.headline)
                                 .fontWeight(.semibold)
-                            Text("PDF, RTF, Text files")
+                            Text("PDF, RTF, txt files")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
