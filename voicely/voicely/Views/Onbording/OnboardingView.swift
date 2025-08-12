@@ -2,8 +2,8 @@ import SwiftUI
 
 struct OnboardingView: View {
     @State private var currentStep = 0
-    @State private var selectedUsage: UsageOption?
-    @State private var selectedStorytime: StorytimeOption?
+    @State private var selectedUsage: Set<UsageOption> = []
+    @State private var selectedStorytime: Set<StorytimeOption> = []
     @State private var selectedFrequency: FrequencyOption?
     @State private var showMainApp = false
     @State private var progressValue: Double = 0.0
@@ -85,9 +85,9 @@ struct OnboardingView: View {
     private var questionContent: some View {
         switch currentStep {
         case 1:
-            UsageSelectionView(selectedOption: $selectedUsage)
+            UsageSelectionView(selectedOptions: $selectedUsage)
         case 2:
-            StorytimeSelectionView(selectedTime: $selectedStorytime)
+            StorytimeSelectionView(selectedTimes: $selectedStorytime)
         case 3:
             UsageFrequencyView(selectedOption: $selectedFrequency)
         default:
@@ -184,9 +184,9 @@ struct OnboardingView: View {
         case 0:
             return true
         case 1:
-            return selectedUsage != nil
+            return !selectedUsage.isEmpty
         case 2:
-            return selectedStorytime != nil
+            return !selectedStorytime.isEmpty
         case 3:
             return selectedFrequency != nil
         default:
@@ -231,12 +231,12 @@ struct OnboardingView: View {
 
     private func saveOnboardingSelections() {
         // Save the selected options to persistent storage
-        if let usage = selectedUsage {
-            UserDefaults.standard.set(usage.rawValue, forKey: "onboarding_usage")
-        }
-        if let storytime = selectedStorytime {
-            UserDefaults.standard.set(storytime.rawValue, forKey: "onboarding_storytime")
-        }
+        let usageStrings = selectedUsage.map { $0.rawValue }
+        UserDefaults.standard.set(usageStrings, forKey: "onboarding_usage")
+        
+        let storytimeStrings = selectedStorytime.map { $0.rawValue }
+        UserDefaults.standard.set(storytimeStrings, forKey: "onboarding_storytime")
+        
         if let frequency = selectedFrequency {
             UserDefaults.standard.set(frequency.rawValue, forKey: "onboarding_frequency")
         }

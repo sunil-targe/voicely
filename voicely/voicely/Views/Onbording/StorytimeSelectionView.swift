@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StorytimeSelectionView: View {
-    @Binding var selectedTime: StorytimeOption?
+    @Binding var selectedTimes: Set<StorytimeOption>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -19,7 +19,7 @@ struct StorytimeSelectionView: View {
                     .fontWeight(.bold)
                     .multilineTextAlignment(.leading)
                 
-                Text("We'll customize your experience based on your typical storytime")
+                Text("Select all the times you typically read stories (you can choose multiple)")
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.secondary)
@@ -38,12 +38,16 @@ struct StorytimeSelectionView: View {
                 ForEach(StorytimeOption.allCases, id: \.self) { option in
                     StorytimeCard(
                         option: option,
-                        isSelected: selectedTime == option
+                        isSelected: selectedTimes.contains(option)
                     )
                     .onTapGesture {
                         playHapticFeedback()
                         withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedTime = option
+                            if selectedTimes.contains(option) {
+                                selectedTimes.remove(option)
+                            } else {
+                                selectedTimes.insert(option)
+                            }
                         }
                     }
                 }
@@ -138,10 +142,10 @@ struct StorytimeCard: View {
 
 // MARK: - Previews
 #Preview("Default State") {
-    StorytimeSelectionView(selectedTime: .constant(nil))
+    StorytimeSelectionView(selectedTimes: .constant([]))
 }
 
 #Preview("With Selection") {
-    StorytimeSelectionView(selectedTime: .constant(.bedtime))
+    StorytimeSelectionView(selectedTimes: .constant([.bedtime, .evening]))
 }
 
