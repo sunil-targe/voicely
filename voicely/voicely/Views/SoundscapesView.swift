@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SoundscapesView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedSoundscape: SoundscapeType = .mute
+    @Binding var selectedSoundscape: SoundscapeType
     
     enum SoundscapeType: String, CaseIterable {
         case mute = "Mute"
@@ -87,5 +87,5 @@ struct SoundscapesView: View {
 }
 
 #Preview {
-    SoundscapesView()
+    SoundscapesView(selectedSoundscape: .constant(.mute))
 }

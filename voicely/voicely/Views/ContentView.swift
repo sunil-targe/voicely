@@ -26,6 +26,7 @@ struct ContentView: View {
     @State private var showMainView = false
     @State private var showCameraPermissionAlert = false
     @State private var showSoundscapes = false
+    @State private var selectedSoundscape: SoundscapesView.SoundscapeType = .mute
     
     
     private func checkCameraPermission() {
@@ -190,7 +191,16 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "waveform")
                             .imageScale(.medium)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(selectedSoundscape != .mute ? .blue : .gray)
+                            .scaleEffect(selectedSoundscape != .mute ? 1.15 : 1.0)
+                            .opacity(selectedSoundscape != .mute ? 0.9 : 1.0)
+                            .animation(
+                                selectedSoundscape != .mute ? 
+                                .easeInOut(duration: 0.3)
+                                .repeatForever(autoreverses: true) :
+                                .easeOut(duration: 0.1),
+                                value: selectedSoundscape
+                            )
                             .padding(.leading, 6)
                     }
                 }
@@ -209,7 +219,7 @@ struct ContentView: View {
                 ProfileScreen(isPresented: $showProfile)
             }
             .sheet(isPresented: $showSoundscapes) {
-                SoundscapesView()
+                SoundscapesView(selectedSoundscape: $selectedSoundscape)
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
@@ -298,6 +308,7 @@ struct ContentView: View {
                     .ignoresSafeArea()
                 }
             }
+
 
         }
         .tint(.gray)
