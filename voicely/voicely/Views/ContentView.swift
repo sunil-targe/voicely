@@ -184,22 +184,24 @@ struct ContentView: View {
             .navigationTitle("Voicely")
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        showSoundscapes = true
+                    }) {
+                        Image(systemName: "waveform")
+                            .imageScale(.medium)
+                            .foregroundStyle(.gray)
+                            .padding(.leading, 6)
+                    }
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 16) {
-                        Button(action: {
-                            showSoundscapes = true
-                        }) {
-                            Image(systemName: "speaker.wave.3.fill")
-                                .foregroundStyle(.gray)
-                        }
-                        
-                        Button(action: {
-                            showProfile = true
-                        }) {
-                            Image("ic_user")
-                                .foregroundStyle(.gray)
-                                .padding(.trailing, 6)
-                        }
+                    Button(action: {
+                        showProfile = true
+                    }) {
+                        Image("ic_user")
+                            .foregroundStyle(.gray)
+                            .padding(.trailing, 6)
                     }
                 }
             }
@@ -209,7 +211,7 @@ struct ContentView: View {
             .sheet(isPresented: $showSoundscapes) {
                 SoundscapesView()
                     .presentationDetents([.medium])
-                    .presentationDragIndicator(true)
+                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showVoiceName) {
                 VoiceNameScreen(isPresented: $showVoiceName, selectedVoice: $mainVM.selectedVoice)
