@@ -25,6 +25,8 @@ struct ContentView: View {
     @State private var alertMessage = ""
     @State private var showMainView = false
     @State private var showCameraPermissionAlert = false
+    @State private var showSoundscapes = false
+    
     
     private func checkCameraPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
@@ -183,17 +185,31 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        showProfile = true
-                    }) {
-                        Image("ic_user")
-                            .foregroundStyle(.gray)
-                            .padding(.trailing, 6)
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            showSoundscapes = true
+                        }) {
+                            Image(systemName: "speaker.wave.3.fill")
+                                .foregroundStyle(.gray)
+                        }
+                        
+                        Button(action: {
+                            showProfile = true
+                        }) {
+                            Image("ic_user")
+                                .foregroundStyle(.gray)
+                                .padding(.trailing, 6)
+                        }
                     }
                 }
             }
             .sheet(isPresented: $showProfile) {
                 ProfileScreen(isPresented: $showProfile)
+            }
+            .sheet(isPresented: $showSoundscapes) {
+                SoundscapesView()
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(true)
             }
             .sheet(isPresented: $showVoiceName) {
                 VoiceNameScreen(isPresented: $showVoiceName, selectedVoice: $mainVM.selectedVoice)
