@@ -3,6 +3,7 @@ import SwiftUI
 struct SoundscapesView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedSoundscape: SoundscapeType
+    @StateObject private var audioManager = SoundscapeAudioManager.shared
     
     enum SoundscapeType: String, CaseIterable {
         case mute = "Mute"
@@ -49,6 +50,7 @@ struct SoundscapesView: View {
                     ForEach(SoundscapeType.allCases, id: \.self) { soundscape in
                         Button(action: {
                             selectedSoundscape = soundscape
+                            audioManager.playSoundscape(soundscape)
                         }) {
                             VStack(spacing: 8) {
                                 Image(systemName: soundscape.icon)
@@ -80,6 +82,12 @@ struct SoundscapesView: View {
                         dismiss()
                     }
                 }
+            }
+        }
+        .onAppear {
+            // Sync the audio manager's current soundscape with the selected one
+            if audioManager.currentSoundscape != selectedSoundscape {
+                audioManager.playSoundscape(selectedSoundscape)
             }
         }
     }

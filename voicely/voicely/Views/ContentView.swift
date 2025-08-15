@@ -27,6 +27,7 @@ struct ContentView: View {
     @State private var showCameraPermissionAlert = false
     @State private var showSoundscapes = false
     @State private var selectedSoundscape: SoundscapesView.SoundscapeType = .mute
+    @StateObject private var audioManager = SoundscapeAudioManager.shared
     
     
     private func checkCameraPermission() {
@@ -191,15 +192,15 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "waveform")
                             .imageScale(.medium)
-                            .foregroundStyle(selectedSoundscape != .mute ? .blue : .gray)
-                            .scaleEffect(selectedSoundscape != .mute ? 1.15 : 1.0)
-                            .opacity(selectedSoundscape != .mute ? 0.9 : 1.0)
+                            .foregroundStyle(audioManager.currentSoundscape != .mute ? .blue : .gray)
+                            .scaleEffect(audioManager.currentSoundscape != .mute ? 1.15 : 1.0)
+                            .opacity(audioManager.currentSoundscape != .mute ? 0.9 : 1.0)
                             .animation(
-                                selectedSoundscape != .mute ? 
+                                audioManager.currentSoundscape != .mute ? 
                                 .easeInOut(duration: 0.3)
                                 .repeatForever(autoreverses: true) :
                                 .easeOut(duration: 0.1),
-                                value: selectedSoundscape
+                                value: audioManager.currentSoundscape
                             )
                             .padding(.leading, 6)
                     }
@@ -308,7 +309,10 @@ struct ContentView: View {
                     .ignoresSafeArea()
                 }
             }
-
+            .onChange(of: selectedSoundscape) { newValue in
+                // Update the audio manager when soundscape changes
+                audioManager.playSoundscape(newValue)
+            }
 
         }
         .tint(.gray)
