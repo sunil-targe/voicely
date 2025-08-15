@@ -38,15 +38,15 @@ class SoundscapeAudioManager: ObservableObject {
         // Get the audio file name based on soundscape type
         let fileName = getAudioFileName(for: soundscape)
         
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "mp3", subdirectory: "Resources/whitenoise") else {
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: "mp3") else {
             print("Could not find audio file for \(soundscape): \(fileName).mp3")
             return
         }
         
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.numberOfLoops = -1 // Loop indefinitely
-            audioPlayer?.volume = 0.3 // Set volume to 30%
+//            audioPlayer?.numberOfLoops = .max // Loop indefinitely
+//            audioPlayer?.volume = 1 // Set volume to 30%
             audioPlayer?.play()
             
             currentSoundscape = soundscape

@@ -192,7 +192,7 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "waveform")
                             .imageScale(.medium)
-                            .foregroundStyle(audioManager.currentSoundscape != .mute ? .blue : .gray)
+                            .foregroundStyle(audioManager.currentSoundscape != .mute ? .orange : .gray)
                             .scaleEffect(audioManager.currentSoundscape != .mute ? 1.15 : 1.0)
                             .opacity(audioManager.currentSoundscape != .mute ? 0.9 : 1.0)
                             .animation(
