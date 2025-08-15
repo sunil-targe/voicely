@@ -8,10 +8,13 @@ class MediaPlayerManager: ObservableObject {
     @Published var isPlaying: Bool = false
     @Published var currentTime: Double = 0
     @Published var duration: Double = 0
+    @Published var currentSoundscape: SoundscapesView.SoundscapeType = .mute
     
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var nowPlayingInfo: [String: Any] = [:]
+    private var soundscapePlayer: AVPlayer?
+    private var soundscapeLoopObserver: Any?
     
     private init() {
         setupRemoteCommandCenter()
@@ -129,12 +132,119 @@ class MediaPlayerManager: ObservableObject {
     }
     
     func cleanup() {
+        // Stop the player if it's playing
+        player?.pause()
+        
+        // Remove time observer
         if let observer = timeObserver {
             player?.removeTimeObserver(observer)
             timeObserver = nil
         }
         
+        // Clear now playing info
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        
+        // Reset state
+        isPlaying = false
+        currentTime = 0
+        duration = 0
+        
+        // Clear player reference
         player = nil
+    }
+    
+    // MARK: - Soundscape Management
+    
+    func playSoundscape(_ soundscape: SoundscapesView.SoundscapeType) {
+        // Always stop any currently playing soundscape first
+        stopCurrentSoundscape()
+        
+        // Don't play anything for mute
+        if soundscape == .mute {
+            currentSoundscape = .mute
+            print("MediaPlayerManager: Stopped all soundscapes")
+            return
+        }
+        
+        // Get the audio file name based on soundscape type
+        let fileName = getSoundscapeFileName(for: soundscape)
+        
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: "mp3") else {
+            print("MediaPlayerManager: Could not find audio file for \(soundscape): \(fileName).mp3")
+            return
+        }
+        
+        // Create new soundscape player
+        let player = AVPlayer(url: url)
+        soundscapePlayer = player
+        currentSoundscape = soundscape
+        
+        // Set up looping for soundscape
+        soundscapeLoopObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem,
+            queue: .main
+        ) { [weak self] _ in
+            // Only loop if this is still the current soundscape player
+            if self?.soundscapePlayer === player {
+                player.seek(to: .zero)
+                player.play()
+            }
+        }
+        
+        // Start playing
+        player.play()
+        
+        print("MediaPlayerManager: Playing soundscape: \(soundscape) - \(fileName).mp3")
+    }
+    
+    func stopCurrentSoundscape() {
+        // Stop current soundscape if playing
+        if let player = soundscapePlayer {
+            player.pause()
+            player.replaceCurrentItem(with: nil)
+        }
+        
+        // Remove soundscape loop observer
+        if let observer = soundscapeLoopObserver {
+            NotificationCenter.default.removeObserver(observer)
+            soundscapeLoopObserver = nil
+        }
+        
+        // Clear current soundscape player
+        soundscapePlayer = nil
+    }
+    
+    func stopAllAudio() {
+        // Stop main player
+        cleanup()
+        
+        // Stop soundscape
+        stopCurrentSoundscape()
+        
+        // Reset soundscape state
+        currentSoundscape = .mute
+        print("MediaPlayerManager: Stopped all audio")
+    }
+    
+    private func getSoundscapeFileName(for soundscape: SoundscapesView.SoundscapeType) -> String {
+        switch soundscape {
+        case .mute:
+            return ""
+        case .nature:
+            return "nature"
+        case .water:
+            return "water"
+        case .music:
+            return "brown"
+        case .coffee:
+            return "coffee"
+        case .fire:
+            return "fire"
+        case .sparkle:
+            return "sparkle"
+        case .clock:
+            return "clock"
+        }
     }
 } 

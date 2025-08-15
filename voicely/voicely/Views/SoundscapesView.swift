@@ -1,9 +1,12 @@
 import SwiftUI
+import AVFoundation
 
 struct SoundscapesView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedSoundscape: SoundscapeType
-    @StateObject private var audioManager = SoundscapeAudioManager.shared
+    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
+
+
     
     enum SoundscapeType: String, CaseIterable {
         case mute = "Mute"
@@ -50,16 +53,16 @@ struct SoundscapesView: View {
                     ForEach(SoundscapeType.allCases, id: \.self) { soundscape in
                         Button(action: {
                             selectedSoundscape = soundscape
-                            audioManager.playSoundscape(soundscape)
+                            playSoundscape(soundscape)
                         }) {
                             VStack(spacing: 8) {
                                 Image(systemName: soundscape.icon)
                                     .font(.system(size: 24))
-                                    .foregroundColor(selectedSoundscape == soundscape ? .white : .white.opacity(0.7))
+                                    .foregroundColor(mediaPlayerManager.currentSoundscape == soundscape ? .white : .white.opacity(0.7))
                                     .frame(width: 50, height: 50)
                                     .background(
                                         Circle()
-                                            .fill(selectedSoundscape == soundscape ? soundscape.color : Color.clear)
+                                            .fill(mediaPlayerManager.currentSoundscape == soundscape ? soundscape.color : Color.clear)
                                             .overlay(
                                                 Circle()
                                                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
@@ -85,12 +88,27 @@ struct SoundscapesView: View {
             }
         }
         .onAppear {
-            // Sync the audio manager's current soundscape with the selected one
-            if audioManager.currentSoundscape != selectedSoundscape {
-                audioManager.playSoundscape(selectedSoundscape)
+            // Sync the current soundscape with the selected one
+            if mediaPlayerManager.currentSoundscape != selectedSoundscape {
+                playSoundscape(selectedSoundscape)
+            }
+        }
+        .onDisappear {
+            // Ensure the selected soundscape is properly synced when view disappears
+            if mediaPlayerManager.currentSoundscape != selectedSoundscape {
+                mediaPlayerManager.playSoundscape(selectedSoundscape)
             }
         }
     }
+    
+    // MARK: - Private Methods
+    
+    private func playSoundscape(_ soundscape: SoundscapeType) {
+        // Use the MediaPlayerManager to play the soundscape
+        mediaPlayerManager.playSoundscape(soundscape)
+    }
+    
+
     
 }
 

@@ -27,7 +27,7 @@ struct ContentView: View {
     @State private var showCameraPermissionAlert = false
     @State private var showSoundscapes = false
     @State private var selectedSoundscape: SoundscapesView.SoundscapeType = .mute
-    @StateObject private var audioManager = SoundscapeAudioManager.shared
+    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
     
     
     private func checkCameraPermission() {
@@ -192,15 +192,15 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "waveform")
                             .imageScale(.medium)
-                            .foregroundStyle(audioManager.currentSoundscape != .mute ? .orange : .gray)
-                            .scaleEffect(audioManager.currentSoundscape != .mute ? 1.15 : 1.0)
-                            .opacity(audioManager.currentSoundscape != .mute ? 0.9 : 1.0)
+                            .foregroundStyle(mediaPlayerManager.currentSoundscape != .mute ? .orange : .gray)
+                            .scaleEffect(mediaPlayerManager.currentSoundscape != .mute ? 1.15 : 1.0)
+                            .opacity(mediaPlayerManager.currentSoundscape != .mute ? 0.9 : 1.0)
                             .animation(
-                                audioManager.currentSoundscape != .mute ? 
+                                mediaPlayerManager.currentSoundscape != .mute ? 
                                 .easeInOut(duration: 0.3)
                                 .repeatForever(autoreverses: true) :
                                 .easeOut(duration: 0.1),
-                                value: audioManager.currentSoundscape
+                                value: mediaPlayerManager.currentSoundscape
                             )
                             .padding(.leading, 6)
                     }
@@ -311,12 +311,21 @@ struct ContentView: View {
             }
             .onChange(of: selectedSoundscape) { newValue in
                 // Update the audio manager when soundscape changes
-                audioManager.playSoundscape(newValue)
+                mediaPlayerManager.playSoundscape(newValue)
             }
 
         }
         .tint(.gray)
+        .onAppear {
+            // Sync the current soundscape with the selected one
+            if mediaPlayerManager.currentSoundscape != selectedSoundscape {
+                mediaPlayerManager.playSoundscape(selectedSoundscape)
+            }
+        }
     }
+    
+
+
 }
 
 struct AddStoryCard: View {
