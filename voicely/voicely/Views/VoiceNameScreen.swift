@@ -1,5 +1,7 @@
 import SwiftUI
 import AVFoundation
+import RevenueCat
+import RevenueCatUI
 
 class VoiceNameViewModel: ObservableObject {
     @Published var voices: [Voice] = Voice.all
@@ -10,15 +12,37 @@ class VoiceNameViewModel: ObservableObject {
     @Published var globalEmotion: String = "auto"
     @Published var globalLanguage: String = "Automatic"
     @Published var globalChannel: String = "mono"
+    @Published var showPaywall: Bool = false
     private var audioPlayer: AVAudioPlayer?
-    
+    let purchaseVM = PurchaseViewModel.shared
+
     init() {
         selectedVoice = voices.first
     }
     
     func selectVoice(_ voice: Voice) {
-        selectedVoice = voice
-        showSelectButton = true
+        // Check if voice is free (first two voices are free)
+        if isVoiceFree(voice) {
+            selectedVoice = voice
+            showSelectButton = true
+        } else {
+            // Show paywall for premium voices
+            showPaywall = true
+        }
+    }
+    
+    func isVoiceFree(_ voice: Voice) -> Bool {
+        // If user is premium, all voices are free
+        if purchaseVM.isPremium {
+            return true
+        }
+        
+        // First two voices are free for non-premium users
+        let freeVoiceCount = 2
+        if let index = voices.firstIndex(where: { $0.voice_id == voice.voice_id }) {
+            return index < freeVoiceCount
+        }
+        return false
     }
     
     func playPreview(for voice: Voice) {
@@ -162,27 +186,49 @@ struct VoiceNameScreen: View {
                 }
                 
                 // Voice grid
-                ScrollView {
-                    LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 6),
-                        GridItem(.flexible(), spacing: 6)
-                    ], spacing: 6) {
+                VStack(spacing: 12) {
+                    // Voice count header
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Available Voices")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                            
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    ScrollView {
+                        LazyVGrid(columns: [
+                            GridItem(.flexible(), spacing: 6),
+                            GridItem(.flexible(), spacing: 6)
+                        ], spacing: 6) {
                         ForEach(viewModel.voices) { voice in
                             VoiceGridItem(
                                 voice: voice,
                                 isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == voice.voice_id,
                                 isPlaying: viewModel.currentlyPlayingVoiceID == voice.voice_id,
+                                isFree: viewModel.isVoiceFree(voice),
+                                isPremium: viewModel.purchaseVM.isPremium,
                                 onTap: {
                                     playHapticFeedback()
-                                    tempSelectedVoice = voice
-                                    viewModel.showSelectButton = true
-                                    viewModel.playPreview(for: voice)
+                                    if viewModel.isVoiceFree(voice) {
+                                        tempSelectedVoice = voice
+                                        viewModel.showSelectButton = true
+                                        viewModel.playPreview(for: voice)
+                                    } else {
+                                        // Show paywall for premium voices
+                                        viewModel.showPaywall = true
+                                    }
                                 }
                             )
                         }
                     }
                     .padding(.horizontal, 10)
                     .padding(.bottom, 10)
+                    }
                 }
                 
                 if viewModel.showSelectButton, let tempVoice = tempSelectedVoice {
@@ -243,7 +289,9 @@ struct VoiceNameScreen: View {
                 viewModel.globalEmotion = selectedVoice.emotion
                 viewModel.globalLanguage = selectedVoice.language
                 viewModel.globalChannel = selectedVoice.channel
-
+                
+                // Refresh purchase status to ensure UI is up to date
+                viewModel.purchaseVM.fetchPremiumStatus()
             }
             .onDisappear {
                 viewModel.stopPreview()
@@ -255,6 +303,12 @@ struct VoiceNameScreen: View {
         }
         .sheet(isPresented: $showVoiceSettingsGuidelines) {
             VoiceSettingsGuidelinesView()
+        }
+        .fullScreenCover(isPresented: $viewModel.showPaywall) {
+            // Refresh purchase status when paywall is dismissed
+            viewModel.purchaseVM.refreshPurchaseStatus()
+        } content: {
+            PaywallView()
         }
     }
     
@@ -448,6 +502,8 @@ struct VoiceGridItem: View {
     let voice: Voice
     let isSelected: Bool
     let isPlaying: Bool
+    let isFree: Bool
+    let isPremium: Bool
     let onTap: () -> Void
     
     var body: some View {
@@ -471,6 +527,7 @@ struct VoiceGridItem: View {
 
                             Text(String(characters[i]))
                                 .font(.caption2)
+                                .fontWeight(.medium)
                                 .foregroundColor(.white)
                                 .rotationEffect(charAngle + Angle(degrees: 90))
                                 .offset(x: xOffset, y: yOffset)
@@ -482,6 +539,7 @@ struct VoiceGridItem: View {
                                 .stroke(Color.white, lineWidth: 3)
                                 .frame(width: 96, height: 96)
                         }
+                        
                         ZStack(alignment: .bottomTrailing) {
                             Image(voice.voice_id)
                                 .resizable()
@@ -493,13 +551,27 @@ struct VoiceGridItem: View {
                                     .imageScale(.medium)
                                     .foregroundColor(.white)
                                     .offset(x: 12, y: 6)
+                            } else if isFree {
+                                Image(systemName: "mic.circle.fill")
+                                    .imageScale(.medium)
+                                    .foregroundColor(.white)
+                                    .offset(x: 12, y: 6)
+                            } else if !isPremium {
+                                // Lock icon for premium voices (only show for non-premium users)
+                                Image(systemName: "lock.circle.fill")
+                                    .imageScale(.medium)
+                                    .foregroundColor(.orange)
+                                    .offset(x: 12, y: 6)
                             } else {
+                                // Premium users see mic icon for all voices
                                 Image(systemName: "mic.circle.fill")
                                     .imageScale(.medium)
                                     .foregroundColor(.white)
                                     .offset(x: 12, y: 6)
                             }
                         }
+                        
+
                     }
                     
                     // Voice Name and Description
@@ -516,6 +588,18 @@ struct VoiceGridItem: View {
                             .foregroundColor(Color(.systemGray2))
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
+                        
+                        // Show free status only
+                        if !isPremium && isFree {
+                            Text("FREE")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.green)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 2)
+                                .background(Color.green.opacity(0.2))
+                                .cornerRadius(6)
+                        }
                     }
                 }
                 .padding(.vertical)

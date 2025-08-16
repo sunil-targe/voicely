@@ -65,6 +65,9 @@ class MediaPlayerManager: ObservableObject {
     func configurePlayer(_ player: AVPlayer, title: String, voiceName: String) {
         self.player = player
         
+        // Ensure soundscape continues playing when story audio starts
+        // The soundscape player should remain active alongside the story player
+        
         // Set up time observer
         timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 600), queue: .main) { [weak self] time in
             self?.currentTime = time.seconds
@@ -151,6 +154,9 @@ class MediaPlayerManager: ObservableObject {
         
         // Clear player reference
         player = nil
+        
+        // Note: We don't stop the soundscape here to allow it to continue playing
+        // The soundscape will continue in the background
     }
     
     // MARK: - Soundscape Management
@@ -165,6 +171,9 @@ class MediaPlayerManager: ObservableObject {
             print("MediaPlayerManager: Stopped all soundscapes")
             return
         }
+        
+        // Configure audio session for soundscape playback
+        AudioSessionManager.shared.configureAudioSessionForSoundscape()
         
         // Get the audio file name based on soundscape type
         let fileName = getSoundscapeFileName(for: soundscape)
@@ -191,6 +200,9 @@ class MediaPlayerManager: ObservableObject {
                 player.play()
             }
         }
+        
+        // Set appropriate volume for background soundscape
+        player.volume = 0.3 // Lower volume for background soundscape
         
         // Start playing
         player.play()
@@ -225,6 +237,26 @@ class MediaPlayerManager: ObservableObject {
         // Reset soundscape state
         currentSoundscape = .mute
         print("MediaPlayerManager: Stopped all audio")
+    }
+    
+    func stopStoryAudioOnly() {
+        // Stop only the story player, keep soundscape playing
+        cleanup()
+        print("MediaPlayerManager: Stopped story audio only, soundscape continues")
+    }
+    
+    func adjustSoundscapeVolumeForStoryPlayback() {
+        // Adjust soundscape volume when story is playing
+        if let player = soundscapePlayer {
+            player.volume = 0.2 // Even lower volume when story is playing
+        }
+    }
+    
+    func restoreSoundscapeVolume() {
+        // Restore normal soundscape volume when story stops
+        if let player = soundscapePlayer {
+            player.volume = 0.3 // Normal background volume
+        }
     }
     
     private func getSoundscapeFileName(for soundscape: SoundscapesView.SoundscapeType) -> String {

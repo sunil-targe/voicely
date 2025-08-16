@@ -351,6 +351,8 @@ extension VoicelyPlayer {
                         if let duration = player.currentItem?.duration.seconds, currentTime >= duration {
                             isPlaying = false
                             mediaPlayerManager.pause()
+                            // Restore soundscape volume when story ends naturally
+                            mediaPlayerManager.restoreSoundscapeVolume()
                         }
                         mediaPlayerManager.updateDuration(duration)
                     }
@@ -379,6 +381,9 @@ extension VoicelyPlayer {
             mediaPlayerManager.configurePlayer(player, title: text, voiceName: voice.name)
             mediaPlayerManager.updateDuration(item.asset.duration.seconds)
             
+            // Adjust soundscape volume for story playback
+            mediaPlayerManager.adjustSoundscapeVolumeForStoryPlayback()
+            
             if #available(iOS 16.1, *) {
                 DynamicIslandManager.shared.startActivity(
                     title: text,
@@ -402,7 +407,10 @@ extension VoicelyPlayer {
                 timeObserver = nil
             }
             statusObserver.invalidate()
-            mediaPlayerManager.cleanup()
+            
+            // Restore soundscape volume before stopping story audio
+            mediaPlayerManager.restoreSoundscapeVolume()
+            mediaPlayerManager.stopStoryAudioOnly() // Use new method to keep soundscape playing
             
             if #available(iOS 16.1, *) {
                 DynamicIslandManager.shared.endActivity()
@@ -418,6 +426,9 @@ extension VoicelyPlayer {
             if isPlaying {
                 player.pause()
                 mediaPlayerManager.pause()
+                
+                // Restore soundscape volume when story is paused
+                mediaPlayerManager.restoreSoundscapeVolume()
                 
                 if #available(iOS 16.1, *) {
                     DynamicIslandManager.shared.updateActivity(
@@ -436,6 +447,9 @@ extension VoicelyPlayer {
                 player.play()
                 player.rate = Float(playbackSpeed)
                 mediaPlayerManager.play()
+                
+                // Adjust soundscape volume when story resumes
+                mediaPlayerManager.adjustSoundscapeVolumeForStoryPlayback()
                 
                 if #available(iOS 16.1, *) {
                     DynamicIslandManager.shared.updateActivity(

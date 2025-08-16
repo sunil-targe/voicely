@@ -9,12 +9,14 @@ import SwiftUI
 import RevenueCat
 import RevenueCatUI
 import DesignSystem
+import AVFoundation
 
 struct BookPageView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var mainVM: MainViewModel
     @EnvironmentObject var purchaseVM: PurchaseViewModel
     @StateObject private var storyVM = StoryViewModel()
+    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
     @State private var showPlayerView = false
     @State private var currentSavedStory: SavedStory?
     @State private var showErrorAlert = false
@@ -22,6 +24,8 @@ struct BookPageView: View {
     @State private var showVoiceSelection = false
     @State private var showConfirmationAlert = false
     @State private var showPaywall = false
+    @State private var showSoundscapes = false
+    @State private var selectedSoundscape: SoundscapesView.SoundscapeType = .mute
     
     let story: Story
 
@@ -153,23 +157,32 @@ struct BookPageView: View {
                 }
             }
             .background(Color.black.edgesIgnoringSafeArea(.all))
-            //        .overlay(alignment: .topTrailing, content: {
-            //            // header
-            //            Button(action: {
-            //                playHapticFeedback()
-            //                dismiss()
-            //            }) {
-            //                Image(systemName: "xmark.circle.fill")
-            //                    .imageScale(.medium)
-            //                    .font(.title2)
-            //                    .foregroundColor(.white.opacity(0.4))
-            //                    .padding(.trailing, 6)
-            //            }
-            //            .padding(.horizontal)
-            //            .padding(.vertical, 20)
-            //        })
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        playHapticFeedback()
+                        showSoundscapes = true
+                    }) {
+                        Image(systemName: "waveform")
+                            .imageScale(.medium)
+                            .foregroundStyle(mediaPlayerManager.currentSoundscape != .mute ? .orange : .gray)
+                            .scaleEffect(mediaPlayerManager.currentSoundscape != .mute ? 1.15 : 1.0)
+                            .opacity(mediaPlayerManager.currentSoundscape != .mute ? 0.9 : 1.0)
+                            .animation(
+                                mediaPlayerManager.currentSoundscape != .mute ? 
+                                .easeInOut(duration: 0.3)
+                                .repeatForever(autoreverses: true) :
+                                .easeOut(duration: 0.1),
+                                value: mediaPlayerManager.currentSoundscape
+                            )
+                            .padding(.leading, 6)
+                    }
+                }
+            }
             .onAppear {
                 loadSavedStory()
+                // Sync the current soundscape with the selected one
+                selectedSoundscape = mediaPlayerManager.currentSoundscape
             }
             .onChange(of: storyVM.generatedAudioURL) { newValue in
                 if newValue != nil && storyVM.generatedLocalAudioFilename != nil {
@@ -216,6 +229,11 @@ struct BookPageView: View {
                 }
             } message: {
                 Text("Story was previously generated with a different voice. Do you want to listen it again with the new voice?")
+            }
+            .sheet(isPresented: $showSoundscapes) {
+                SoundscapesView(selectedSoundscape: $selectedSoundscape)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
             .fullScreenCover(isPresented: $showPaywall) {
                 purchaseVM.refreshPurchaseStatus()
