@@ -37,12 +37,9 @@ class VoiceNameViewModel: ObservableObject {
             return true
         }
         
-        // First two voices are free for non-premium users
-        let freeVoiceCount = 2
-        if let index = voices.firstIndex(where: { $0.voice_id == voice.voice_id }) {
-            return index < freeVoiceCount
-        }
-        return false
+        // Only "Honey Bear" and "Thunder Bear" are free for non-premium users
+        let freeVoiceNames = ["Honey Bear", "Thunder Bear"]
+        return freeVoiceNames.contains(voice.name)
     }
     
     func playPreview(for voice: Voice) {
@@ -188,18 +185,6 @@ struct VoiceNameScreen: View {
                 // Voice grid
                 VStack(spacing: 12) {
                     // Voice count header
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Available Voices")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                            
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal, 20)
-                    
                     ScrollView {
                         LazyVGrid(columns: [
                             GridItem(.flexible(), spacing: 6),
@@ -507,109 +492,106 @@ struct VoiceGridItem: View {
     let onTap: () -> Void
     
     var body: some View {
-        Button(action: onTap) {
-            ZStack {
-                Color(.secondarySystemBackground)
-                    .cornerRadius(12)
-                VStack(spacing: 12) {
-                    // Voice Circle with Waveform - 1:1 aspect ratio
-                    ZStack {
-                        // Text around the circle
-                        let text = "• \(voice.preferredListenTime) •"
-                        let characters = Array(text)
-                        let radius: CGFloat = 58
-                        let angle = 100.0 / Double(characters.count)
+        ZStack {
+            Color(.secondarySystemBackground)
+                .cornerRadius(12)
+            
+            VStack(spacing: 12) {
+                ZStack {
+                    let text = "• \(voice.preferredListenTime) •"
+                    let characters = Array(text)
+                    let radius: CGFloat = 58
+                    let angle = 100.0 / Double(characters.count)
 
-                        ForEach(0..<characters.count, id: \.self) { i in
-                            let charAngle = Angle(degrees: Double(i) * angle - 190)
-                            let xOffset = CGFloat(cos(charAngle.radians)) * radius
-                            let yOffset = CGFloat(sin(charAngle.radians)) * radius
+                    ForEach(0..<characters.count, id: \.self) { i in
+                        let charAngle = Angle(degrees: Double(i) * angle - 190)
+                        let xOffset = CGFloat(cos(charAngle.radians)) * radius
+                        let yOffset = CGFloat(sin(charAngle.radians)) * radius
 
-                            Text(String(characters[i]))
-                                .font(.caption2)
-                                .fontWeight(.medium)
-                                .foregroundColor(.white)
-                                .rotationEffect(charAngle + Angle(degrees: 90))
-                                .offset(x: xOffset, y: yOffset)
-                        }
+                        Text(String(characters[i]))
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .rotationEffect(charAngle + Angle(degrees: 90))
+                            .offset(x: xOffset, y: yOffset)
+                    }
 
-                        // Your original ZStack content
-                        if isSelected {
-                            Circle()
-                                .stroke(Color.white, lineWidth: 3)
-                                .frame(width: 96, height: 96)
-                        }
-                        
-                        ZStack(alignment: .bottomTrailing) {
-                            Image(voice.voice_id)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 90, height: 90)
-
-                            if isPlaying {
-                                Image(systemName: "waveform.circle.fill")
-                                    .imageScale(.medium)
-                                    .foregroundColor(.white)
-                                    .offset(x: 12, y: 6)
-                            } else if isFree {
-                                Image(systemName: "mic.circle.fill")
-                                    .imageScale(.medium)
-                                    .foregroundColor(.white)
-                                    .offset(x: 12, y: 6)
-                            } else if !isPremium {
-                                // Lock icon for premium voices (only show for non-premium users)
-                                Image(systemName: "lock.circle.fill")
-                                    .imageScale(.medium)
-                                    .foregroundColor(.orange)
-                                    .offset(x: 12, y: 6)
-                            } else {
-                                // Premium users see mic icon for all voices
-                                Image(systemName: "mic.circle.fill")
-                                    .imageScale(.medium)
-                                    .foregroundColor(.white)
-                                    .offset(x: 12, y: 6)
-                            }
-                        }
-                        
-
+                    if isSelected {
+                        Circle()
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: 96, height: 96)
                     }
                     
-                    // Voice Name and Description
-                    VStack(spacing: 3) {
-                        Text(voice.name)
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
+                    ZStack(alignment: .bottomTrailing) {
+                        Image(voice.voice_id)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 90, height: 90)
                         
-                        Text(voice.description)
-                            .font(.caption)
-                            .foregroundColor(Color(.systemGray2))
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-                        
-                        // Show free status only
-                        if !isPremium && isFree {
-                            Text("FREE")
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.green)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(Color.green.opacity(0.2))
-                                .cornerRadius(6)
+                        if isPlaying {
+                            Image(systemName: "waveform.circle.fill")
+                                .imageScale(.medium)
+                                .foregroundColor(.white)
+                                .offset(x: 12, y: 6)
+                        } else {
+                            Image(systemName: "mic.circle.fill")
+                                .imageScale(.medium)
+                                .foregroundColor(.white)
+                                .offset(x: 12, y: 6)
                         }
                     }
                 }
-                .padding(.vertical)
+                
+                VStack(spacing: 3) {
+                    Text(voice.name)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                    
+                    Text(voice.description)
+                        .font(.caption)
+                        .foregroundColor(Color(.systemGray2))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .aspectRatio(1, contentMode: .fit)
+            .padding(.vertical)
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    if !isPremium && !isFree {
+                        Image(systemName: "lock.circle.fill")
+                            .imageScale(.large)
+                            .foregroundColor(.white)
+                            .padding(8)
+                    } else if !isPremium && isFree {
+                        Text("FREE")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.green)
+                            .frame(width: 40, height: 24)
+                            .background(Color.green.opacity(0.2))
+                            .cornerRadius(6)
+                            .padding(.trailing, 2)
+                            .padding(.top, 8)
+                            .padding(8)
+                    }
+                }
+                Spacer()
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .aspectRatio(1, contentMode: .fit)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
     }
 }
+
 
 #if DEBUG
 #Preview {
