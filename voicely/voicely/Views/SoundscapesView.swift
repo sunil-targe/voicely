@@ -4,7 +4,7 @@ import AVFoundation
 struct SoundscapesView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedSoundscape: SoundscapeType
-    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
+    @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
 
 
     
@@ -12,7 +12,7 @@ struct SoundscapesView: View {
         case mute = "Mute"
         case nature = "Nature"
         case water = "Water"
-        case music = "Music"
+        case music = "Brown"
         case coffee = "Coffee"
         case fire = "Fire"
         case sparkle = "Sparkle"

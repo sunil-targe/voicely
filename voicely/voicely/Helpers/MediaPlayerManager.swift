@@ -227,18 +227,6 @@ class MediaPlayerManager: ObservableObject {
         soundscapePlayer = nil
     }
     
-    func stopAllAudio() {
-        // Stop main player
-        cleanup()
-        
-        // Stop soundscape
-        stopCurrentSoundscape()
-        
-        // Reset soundscape state
-        currentSoundscape = .mute
-        print("MediaPlayerManager: Stopped all audio")
-    }
-    
     func stopStoryAudioOnly() {
         // Stop only the story player, keep soundscape playing
         cleanup()

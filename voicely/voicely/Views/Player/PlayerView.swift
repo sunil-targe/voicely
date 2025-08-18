@@ -210,7 +210,7 @@ extension VoicelyPlayer {
         @State private var timeObserver: Any?
         @State private var playerStatus: AVPlayerItem.Status = .unknown
         @StateObject private var statusObserver = PlayerItemStatusObserver()
-        @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
+        @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
         @State private var showErrorAlert = false
         @State private var errorMessage = ""
         @State private var playbackSpeed: Double = 1.0

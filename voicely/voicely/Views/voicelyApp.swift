@@ -14,6 +14,7 @@ struct voicelyApp: App {
     
     @StateObject private var purchaseVM = PurchaseViewModel.shared
     @StateObject private var mainVM = MainViewModel(selectedVoice: Voice.default)
+    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
 
     init() {
         Purchases.configure(
@@ -30,10 +31,12 @@ struct voicelyApp: App {
                 ContentView()
                     .environmentObject(purchaseVM)
                     .environmentObject(mainVM)
+                    .environmentObject(mediaPlayerManager)
             } else {
                 OnboardingView()
                     .environmentObject(purchaseVM)
                     .environmentObject(mainVM)
+                    .environmentObject(mediaPlayerManager)
             }
         }
     }

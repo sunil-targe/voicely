@@ -27,8 +27,31 @@ struct ContentView: View {
     @State private var showCameraPermissionAlert = false
     @State private var showSoundscapes = false
     @State private var selectedSoundscape: SoundscapesView.SoundscapeType = .mute
-    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
+    @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
     
+    // MARK: - Computed Properties
+    
+    private var soundscapesButton: some View {
+        Button(action: {
+            showSoundscapes = true
+        }) {
+            Image(systemName: "waveform")
+                .imageScale(.medium)
+                .foregroundStyle(mediaPlayerManager.currentSoundscape != .mute ? .orange : .gray)
+                .scaleEffect(mediaPlayerManager.currentSoundscape != .mute ? 1.15 : 1.0)
+                .opacity(mediaPlayerManager.currentSoundscape != .mute ? 0.9 : 1.0)
+                .animation(
+                    mediaPlayerManager.currentSoundscape != .mute ? 
+                    .easeInOut(duration: 0.3)
+                    .repeatForever(autoreverses: true) :
+                    .easeOut(duration: 0.1),
+                    value: mediaPlayerManager.currentSoundscape
+                )
+                .padding(.leading, 6)
+        }
+    }
+    
+    // MARK: - Helper Methods
     
     private func checkCameraPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
@@ -187,23 +210,7 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
-                        showSoundscapes = true
-                    }) {
-                        Image(systemName: "waveform")
-                            .imageScale(.medium)
-                            .foregroundStyle(mediaPlayerManager.currentSoundscape != .mute ? .orange : .gray)
-                            .scaleEffect(mediaPlayerManager.currentSoundscape != .mute ? 1.15 : 1.0)
-                            .opacity(mediaPlayerManager.currentSoundscape != .mute ? 0.9 : 1.0)
-                            .animation(
-                                mediaPlayerManager.currentSoundscape != .mute ? 
-                                .easeInOut(duration: 0.3)
-                                .repeatForever(autoreverses: true) :
-                                .easeOut(duration: 0.1),
-                                value: mediaPlayerManager.currentSoundscape
-                            )
-                            .padding(.leading, 6)
-                    }
+                    soundscapesButton
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {

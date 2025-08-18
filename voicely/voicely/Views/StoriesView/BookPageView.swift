@@ -16,7 +16,7 @@ struct BookPageView: View {
     @EnvironmentObject var mainVM: MainViewModel
     @EnvironmentObject var purchaseVM: PurchaseViewModel
     @StateObject private var storyVM = StoryViewModel()
-    @StateObject private var mediaPlayerManager = MediaPlayerManager.shared
+    @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
     @State private var showPlayerView = false
     @State private var currentSavedStory: SavedStory?
     @State private var showErrorAlert = false
