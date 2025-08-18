@@ -199,14 +199,10 @@ struct VoiceNameScreen: View {
                                 isPremium: viewModel.purchaseVM.isPremium,
                                 onTap: {
                                     playHapticFeedback()
-                                    if viewModel.isVoiceFree(voice) {
-                                        tempSelectedVoice = voice
-                                        viewModel.showSelectButton = true
-                                        viewModel.playPreview(for: voice)
-                                    } else {
-                                        // Show paywall for premium voices
-                                        viewModel.showPaywall = true
-                                    }
+                                    // Do not open paywall on tap. Just select temporarily and preview
+                                    tempSelectedVoice = voice
+                                    viewModel.showSelectButton = true
+                                    viewModel.playPreview(for: voice)
                                 }
                             )
                         }
@@ -219,14 +215,19 @@ struct VoiceNameScreen: View {
                 if viewModel.showSelectButton, let tempVoice = tempSelectedVoice {
                     Button(action: {
                         playHapticFeedback()
-                        // Apply global filter settings to the selected voice
-                        var newVoice = tempVoice
-                        newVoice.emotion = viewModel.globalEmotion
-                        newVoice.language = viewModel.globalLanguage
-                        newVoice.channel = viewModel.globalChannel
-                        selectedVoice = newVoice
-                        isPresented = false
-                        viewModel.stopPreview()
+                        // If premium required, show paywall on Select instead of on card tap
+                        if viewModel.isVoiceFree(tempVoice) {
+                            var newVoice = tempVoice
+                            newVoice.emotion = viewModel.globalEmotion
+                            newVoice.language = viewModel.globalLanguage
+                            newVoice.channel = viewModel.globalChannel
+                            selectedVoice = newVoice
+                            isPresented = false
+                            viewModel.stopPreview()
+                        } else {
+                            viewModel.stopPreview()
+                            viewModel.showPaywall = true
+                        }
                     }) {
                         Text("Select")
                             .fontWeight(.semibold)
