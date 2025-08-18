@@ -15,6 +15,7 @@ struct BookPageView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var mainVM: MainViewModel
     @EnvironmentObject var purchaseVM: PurchaseViewModel
+    @EnvironmentObject var favoritesManager: FavoritesManager
     @StateObject private var storyVM = StoryViewModel()
     @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
     @State private var showPlayerView = false
@@ -39,6 +40,16 @@ struct BookPageView: View {
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.white)
                     Spacer(minLength: 6)
+                    // Favorite toggle
+                    Button(action: {
+                        favoritesManager.toggleFavorite(story.id)
+                    }) {
+                        Image(systemName: favoritesManager.isFavorite(story.id) ? "heart.fill" : "heart")
+                            .foregroundColor(favoritesManager.isFavorite(story.id) ? .red : .white.opacity(0.6))
+                            .imageScale(.large)
+                            .padding(.trailing, 6)
+                            .padding(.top, 6)
+                    }
                     Button(action: {
                         playHapticFeedback()
                         dismiss()

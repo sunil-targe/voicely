@@ -28,6 +28,7 @@ struct ContentView: View {
     @State private var showSoundscapes = false
     @State private var selectedSoundscape: SoundscapesView.SoundscapeType = .mute
     @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
+    @EnvironmentObject var favoritesManager: FavoritesManager
     
     // MARK: - Computed Properties
     
@@ -74,10 +75,15 @@ struct ContentView: View {
         }
     }
     
+    private func storiesForFavorites() -> [Story] {
+        Story.allStories.filter { favoritesManager.favoriteStoryIDs.contains($0.id) }
+    }
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
+                    // Favorite stories section
                     HStack {
                         Button(action: {
                             showVoiceName = true
@@ -116,6 +122,31 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
+                    // Favorites Section (if any)
+                    if !favoritesManager.favoriteStoryIDs.isEmpty {
+                        VStack(spacing: 6) {
+                            HeaderTitle(
+                                text: "Favorites ❤️",
+                                icon: Image(systemName: "heart.fill"),
+                                color: .white
+                            ) {}
+                            .padding(.top, 10)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(storiesForFavorites(), id: \.id) { story in
+                                        StoryCard(story: story)
+                                            .environmentObject(favoritesManager)
+                                            .onTapGesture {
+                                                selectedStory = story
+                                            }
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                        }
+                    }
+
                     VStack(spacing: 6) {
                         NavigationLink {
                             AllStoriesView(stories: Story.allStories)
@@ -151,6 +182,7 @@ struct ContentView: View {
                                 // Story Cards
                                 ForEach(Array(Story.allStories.prefix(3))) { story in
                                     StoryCard(story: story)
+                                        .environmentObject(favoritesManager)
                                         .onTapGesture {
                                             selectedStory = story
                                         }
@@ -368,4 +400,6 @@ struct AddStoryCard: View {
     ContentView()
         .environmentObject(PurchaseViewModel.shared)
         .environmentObject(MainViewModel(selectedVoice: Voice.default))
+        .environmentObject(MediaPlayerManager.shared)
+        .environmentObject(FavoritesManager())
 }
