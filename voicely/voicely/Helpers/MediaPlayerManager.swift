@@ -5,7 +5,8 @@ import AVFoundation
 class MediaPlayerManager: ObservableObject {
     static let shared = MediaPlayerManager()
     
-    @Published var isStoryPlaying: Bool = false
+    // Keep legacy published property so views can subscribe with `$isPlaying`
+    @Published var isPlaying: Bool = false
     @Published var currentTime: Double = 0
     @Published var duration: Double = 0
     @Published var currentSoundscape: SoundscapesView.SoundscapeType = .mute
@@ -95,7 +96,7 @@ class MediaPlayerManager: ObservableObject {
     
     private func updateNowPlayingInfo() {
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isStoryPlaying ? 1.0 : 0.0
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
         
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
@@ -103,13 +104,13 @@ class MediaPlayerManager: ObservableObject {
     
     func playStory() {
         player?.play()
-        isStoryPlaying = true
+        isPlaying = true
         updateNowPlayingInfo()
     }
     
     func pauseStory() {
         player?.pause()
-        isStoryPlaying = false
+        isPlaying = false
         updateNowPlayingInfo()
     }
     
@@ -148,7 +149,7 @@ class MediaPlayerManager: ObservableObject {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         
         // Reset state
-        isStoryPlaying = false
+        isPlaying = false
         currentTime = 0
         duration = 0
         
@@ -278,7 +279,5 @@ class MediaPlayerManager: ObservableObject {
         pauseStory()
     }
     
-    var isPlaying: Bool {
-        return isStoryPlaying
-    }
+    // Back-compat computed property no longer needed since we restored `isPlaying`
 } 

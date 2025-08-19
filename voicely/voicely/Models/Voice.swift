@@ -32,6 +32,14 @@ struct Voice: Identifiable, Equatable, Codable {
         ),
         Voice(
             id: UUID(),
+            name: "Thunder Bear",
+            description: "Deep and powerful",
+            color: ColorCodable(color: Color(red: 0.47, green: 0.81, blue: 0.98)),
+            voice_id: "Deep_Voice_Man",
+            preferredListenTime: "evening"
+        ),
+        Voice(
+            id: UUID(),
             name: "Honey Bear",
             description: "Sweet and gentle",
             color: ColorCodable(color: Color(red: 0.67, green: 0.98, blue: 0.53)),
@@ -69,14 +77,6 @@ struct Voice: Identifiable, Equatable, Codable {
             color: ColorCodable(color: Color(red: 0.67, green: 0.91, blue: 0.67)),
             voice_id: "Inspirational_girl",
             preferredListenTime: "morning"
-        ),
-        Voice(
-            id: UUID(),
-            name: "Thunder Bear",
-            description: "Deep and powerful",
-            color: ColorCodable(color: Color(red: 0.47, green: 0.81, blue: 0.98)),
-            voice_id: "Deep_Voice_Man",
-            preferredListenTime: "evening"
         ),
         Voice(
             id: UUID(),

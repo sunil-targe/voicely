@@ -38,7 +38,7 @@ class VoiceNameViewModel: ObservableObject {
         }
         
         // Only "Honey Bear" and "Thunder Bear" are free for non-premium users
-        let freeVoiceNames = ["Honey Bear", "Thunder Bear"]
+        let freeVoiceNames = ["Grandma Willow", "Thunder Bear"]
         return freeVoiceNames.contains(voice.name)
     }
     
