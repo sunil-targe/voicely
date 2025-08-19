@@ -122,21 +122,32 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    // Favorites Section (if any)
+                    // Favorites Section (if any) with a button to open full list
                     if !favoritesManager.favoriteStoryIDs.isEmpty {
                         VStack(spacing: 6) {
-                            HeaderTitle(
-                                text: "Favorites ❤️",
-                                icon: Image(systemName: "heart.fill"),
-                                color: .white
-                            ) {}
-                            .padding(.top, 10)
+                            HStack {
+                                HeaderTitle(
+                                    text: "Favorites",
+                                    icon: Image(systemName: "heart.fill"),
+                                    color: .white
+                                ) {}
+                                Spacer()
+                                NavigationLink(destination: FavoritesListView()) {
+                                    HStack(spacing: 4) {
+                                        Text("More")
+                                        Image(systemName: "chevron.forward")
+                                    }
+                                    .font(.callout)
+                                    .foregroundColor(.gray)
+                                }
+                                .padding(.trailing, 20)
+                            }
+                            .padding(.leading, 20)
 
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
-                                    ForEach(storiesForFavorites(), id: \.id) { story in
+                                    ForEach(storiesForFavorites().prefix(10), id: \.id) { story in
                                         StoryCard(story: story)
-                                            .environmentObject(favoritesManager)
                                             .onTapGesture {
                                                 selectedStory = story
                                             }

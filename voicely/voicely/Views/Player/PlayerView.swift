@@ -350,7 +350,7 @@ extension VoicelyPlayer {
                         currentTime = time.seconds
                         if let duration = player.currentItem?.duration.seconds, currentTime >= duration {
                             isPlaying = false
-                            mediaPlayerManager.pause()
+                            mediaPlayerManager.pauseStory()
                             // Restore soundscape volume when story ends naturally
                             mediaPlayerManager.restoreSoundscapeVolume()
                         }
@@ -398,7 +398,7 @@ extension VoicelyPlayer {
             player.rate = Float(playbackSpeed)
             isPlaying = true
             duration = item.asset.duration.seconds
-            mediaPlayerManager.play()
+            mediaPlayerManager.playStory()
         }
         
         private func cleanupPlayer() {
@@ -425,7 +425,7 @@ extension VoicelyPlayer {
             guard let player = player, player.currentItem?.status == .readyToPlay else { return }
             if isPlaying {
                 player.pause()
-                mediaPlayerManager.pause()
+                mediaPlayerManager.pauseStory()
                 
                 // Restore soundscape volume when story is paused
                 mediaPlayerManager.restoreSoundscapeVolume()
@@ -446,7 +446,7 @@ extension VoicelyPlayer {
                 }
                 player.play()
                 player.rate = Float(playbackSpeed)
-                mediaPlayerManager.play()
+                mediaPlayerManager.playStory()
                 
                 // Adjust soundscape volume when story resumes
                 mediaPlayerManager.adjustSoundscapeVolumeForStoryPlayback()

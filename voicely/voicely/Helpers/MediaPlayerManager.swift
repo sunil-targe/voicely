@@ -5,7 +5,7 @@ import AVFoundation
 class MediaPlayerManager: ObservableObject {
     static let shared = MediaPlayerManager()
     
-    @Published var isPlaying: Bool = false
+    @Published var isStoryPlaying: Bool = false
     @Published var currentTime: Double = 0
     @Published var duration: Double = 0
     @Published var currentSoundscape: SoundscapesView.SoundscapeType = .mute
@@ -25,13 +25,13 @@ class MediaPlayerManager: ObservableObject {
         
         // Play command
         commandCenter.playCommand.addTarget { [weak self] _ in
-            self?.play()
+            self?.playStory()
             return .success
         }
         
         // Pause command
         commandCenter.pauseCommand.addTarget { [weak self] _ in
-            self?.pause()
+            self?.pauseStory()
             return .success
         }
         
@@ -95,21 +95,21 @@ class MediaPlayerManager: ObservableObject {
     
     private func updateNowPlayingInfo() {
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isStoryPlaying ? 1.0 : 0.0
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
         
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
-    func play() {
+    func playStory() {
         player?.play()
-        isPlaying = true
+        isStoryPlaying = true
         updateNowPlayingInfo()
     }
     
-    func pause() {
+    func pauseStory() {
         player?.pause()
-        isPlaying = false
+        isStoryPlaying = false
         updateNowPlayingInfo()
     }
     
@@ -148,7 +148,7 @@ class MediaPlayerManager: ObservableObject {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         
         // Reset state
-        isPlaying = false
+        isStoryPlaying = false
         currentTime = 0
         duration = 0
         
@@ -266,5 +266,19 @@ class MediaPlayerManager: ObservableObject {
         case .clock:
             return "clock"
         }
+    }
+    
+    // MARK: - Legacy Methods for Backward Compatibility
+    
+    func play() {
+        playStory()
+    }
+    
+    func pause() {
+        pauseStory()
+    }
+    
+    var isPlaying: Bool {
+        return isStoryPlaying
     }
 } 

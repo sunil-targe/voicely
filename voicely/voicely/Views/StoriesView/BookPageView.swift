@@ -40,7 +40,7 @@ struct BookPageView: View {
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.white)
                     Spacer(minLength: 6)
-                    // Favorite toggle
+                    // Favorite toggle (detail page only)
                     Button(action: {
                         favoritesManager.toggleFavorite(story.id)
                     }) {
