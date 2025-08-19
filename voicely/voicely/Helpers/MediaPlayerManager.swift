@@ -112,6 +112,8 @@ class MediaPlayerManager: ObservableObject {
         player?.pause()
         isPlaying = false
         updateNowPlayingInfo()
+        // Make sure soundscape continues if set (unless user selected mute)
+        ensureSoundscapePlaying()
     }
     
     func skipForward(by interval: TimeInterval) {
@@ -245,6 +247,16 @@ class MediaPlayerManager: ObservableObject {
         // Restore normal soundscape volume when story stops
         if let player = soundscapePlayer {
             player.volume = 0.3 // Normal background volume
+        }
+    }
+    
+    /// Ensures the soundscape is actively playing if the user has selected a non-mute option.
+    func ensureSoundscapePlaying() {
+        guard currentSoundscape != .mute else { return }
+        guard let scPlayer = soundscapePlayer else { return }
+        // If for any reason the soundscape got paused, resume it
+        if scPlayer.timeControlStatus != .playing {
+            scPlayer.play()
         }
     }
     

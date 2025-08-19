@@ -79,6 +79,10 @@ struct ContentView: View {
         Story.allStories.filter { favoritesManager.favoriteStoryIDs.contains($0.id) }
     }
     
+    // Favorites helpers
+    private var favoriteStories: [Story] { storiesForFavorites() }
+    private var shouldShowMoreFavorites: Bool { favoriteStories.count > 3 }
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -122,7 +126,7 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    // Favorites Section (if any) with a button to open full list
+                    // Favorites Section (if any) with conditional More button
                     if !favoritesManager.favoriteStoryIDs.isEmpty {
                         VStack(spacing: 6) {
                             HStack {
@@ -132,21 +136,23 @@ struct ContentView: View {
                                     color: .white
                                 ) {}
                                 Spacer()
-                                NavigationLink(destination: FavoritesListView()) {
-                                    HStack(spacing: 4) {
-                                        Text("More")
-                                        Image(systemName: "chevron.forward")
+                                if shouldShowMoreFavorites {
+                                    NavigationLink(destination: FavoritesListView()) {
+                                        HStack(spacing: 4) {
+                                            Text("More")
+                                            Image(systemName: "chevron.forward")
+                                        }
+                                        .font(.callout)
+                                        .foregroundColor(.gray)
                                     }
-                                    .font(.callout)
-                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 20)
                                 }
-                                .padding(.trailing, 20)
                             }
                             .padding(.leading, 20)
 
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
-                                    ForEach(storiesForFavorites().prefix(10), id: \.id) { story in
+                                    ForEach((shouldShowMoreFavorites ? Array(favoriteStories.prefix(3)) : favoriteStories), id: \.id) { story in
                                         StoryCard(story: story)
                                             .onTapGesture {
                                                 selectedStory = story

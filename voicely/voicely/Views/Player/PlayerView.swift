@@ -416,7 +416,14 @@ extension VoicelyPlayer {
                 DynamicIslandManager.shared.endActivity()
             }
             
-            AudioSessionManager.shared.deactivateAudioSession()
+            // Keep the audio session active if a soundscape is selected
+            if mediaPlayerManager.currentSoundscape == .mute {
+                AudioSessionManager.shared.deactivateAudioSession()
+            } else {
+                // Reconfigure for soundscape and make sure it is playing
+                AudioSessionManager.shared.configureAudioSessionForSoundscape()
+                mediaPlayerManager.ensureSoundscapePlaying()
+            }
             player?.pause()
             player = nil
         }
