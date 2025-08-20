@@ -254,7 +254,7 @@ struct BookPageView: View {
     }
     
     private func handleListenButtonAction() { //
-        guard purchaseVM.isPremium else {
+        if !purchaseVM.isPremium, story.id > 3 {
             showPaywall = true
             return
         }

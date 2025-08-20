@@ -37,9 +37,8 @@ class VoiceNameViewModel: ObservableObject {
             return true
         }
         
-        // Only "Honey Bear" and "Thunder Bear" are free for non-premium users
-        let freeVoiceNames = ["Grandma Willow", "Thunder Bear"]
-        return freeVoiceNames.contains(voice.name)
+        // Only "Grandma Willow" and "Thunder Bear" are free for non-premium users
+        return ["Wise_Woman", "Deep_Voice_Man"].contains(voice.voice_id)
     }
     
     func playPreview(for voice: Voice) {
@@ -559,36 +558,24 @@ struct VoiceGridItem: View {
                 }
             }
             .padding(.vertical)
-            
-            VStack {
-                HStack {
-                    Spacer()
-                    if !isPremium && !isFree {
-                        Image(systemName: "lock.circle.fill")
-                            .imageScale(.large)
-                            .foregroundColor(.white)
-                            .padding(8)
-                    } else if !isPremium && isFree {
-                        Text("FREE")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.green)
-                            .frame(width: 40, height: 24)
-                            .background(Color.green.opacity(0.2))
-                            .cornerRadius(6)
-                            .padding(.trailing, 2)
-                            .padding(.top, 8)
-                            .padding(8)
-                    }
-                }
-                Spacer()
-            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .aspectRatio(1, contentMode: .fit)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
+        }
+        .overlay(alignment: .topTrailing) {
+            if !isPremium && isFree {
+                Text("FREE")
+                    .font(.caption2)
+                    .foregroundColor(.green)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Color.green.opacity(0.2))
+                    .cornerRadius(4)
+                    .padding(8)
+            }
         }
     }
 }
