@@ -12,6 +12,13 @@
 		387F2D712E1126E900BA8681 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 387F2D702E1126E900BA8681 /* RevenueCat */; };
 		387F2D732E1126E900BA8681 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 387F2D722E1126E900BA8681 /* RevenueCatUI */; };
 		38A57AF52E18F8F70082F442 /* Amplitude in Frameworks */ = {isa = PBXBuildFile; productRef = 38A57AF42E18F8F70082F442 /* Amplitude */; };
+		38BE2EC82E5611B700CED126 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 38BE2EC72E5611B700CED126 /* FirebaseAnalytics */; };
+		38BE2ECA2E5611B700CED126 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 38BE2EC92E5611B700CED126 /* FirebaseAppCheck */; };
+		38BE2ECC2E5611B700CED126 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 38BE2ECB2E5611B700CED126 /* FirebaseCore */; };
+		38BE2ECE2E5611B700CED126 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 38BE2ECD2E5611B700CED126 /* FirebaseCrashlytics */; };
+		38BE2ED02E5611B700CED126 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 38BE2ECF2E5611B700CED126 /* FirebaseDatabase */; };
+		38BE2ED22E5611B700CED126 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 38BE2ED12E5611B700CED126 /* FirebaseFirestore */; };
+		38BE2ED42E5611B700CED126 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 38BE2ED32E5611B700CED126 /* FirebaseStorage */; };
 		F4DF49622E3DD709006C7625 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F4DF49612E3DD709006C7625 /* DesignSystem */; };
 /* End PBXBuildFile section */
 
@@ -45,11 +52,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38BE2ECA2E5611B700CED126 /* FirebaseAppCheck in Frameworks */,
+				38BE2EC82E5611B700CED126 /* FirebaseAnalytics in Frameworks */,
 				387637F12E37AAED002C05F3 /* DesignSystem in Frameworks */,
 				38A57AF52E18F8F70082F442 /* Amplitude in Frameworks */,
 				387F2D732E1126E900BA8681 /* RevenueCatUI in Frameworks */,
+				38BE2ED22E5611B700CED126 /* FirebaseFirestore in Frameworks */,
 				F4DF49622E3DD709006C7625 /* DesignSystem in Frameworks */,
 				387F2D712E1126E900BA8681 /* RevenueCat in Frameworks */,
+				38BE2ED42E5611B700CED126 /* FirebaseStorage in Frameworks */,
+				38BE2ECE2E5611B700CED126 /* FirebaseCrashlytics in Frameworks */,
+				38BE2ED02E5611B700CED126 /* FirebaseDatabase in Frameworks */,
+				38BE2ECC2E5611B700CED126 /* FirebaseCore in Frameworks */,
 				3876376C2E37A8E5002C05F3 /* DesignSystem in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,6 +113,13 @@
 				3876376B2E37A8E5002C05F3 /* DesignSystem */,
 				387637F02E37AAED002C05F3 /* DesignSystem */,
 				F4DF49612E3DD709006C7625 /* DesignSystem */,
+				38BE2EC72E5611B700CED126 /* FirebaseAnalytics */,
+				38BE2EC92E5611B700CED126 /* FirebaseAppCheck */,
+				38BE2ECB2E5611B700CED126 /* FirebaseCore */,
+				38BE2ECD2E5611B700CED126 /* FirebaseCrashlytics */,
+				38BE2ECF2E5611B700CED126 /* FirebaseDatabase */,
+				38BE2ED12E5611B700CED126 /* FirebaseFirestore */,
+				38BE2ED32E5611B700CED126 /* FirebaseStorage */,
 			);
 			productName = voicely;
 			productReference = 387F29DF2E0BC11500BA8681 /* voicely.app */;
@@ -132,6 +153,7 @@
 				387F2D6F2E1126E900BA8681 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */,
 				F4DF49602E3DD709006C7625 /* XCLocalSwiftPackageReference "DesignSystem/DesignSystem" */,
+				38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 387F29E02E0BC11500BA8681 /* Products */;
@@ -406,6 +428,14 @@
 				kind = branch;
 			};
 		};
+		38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -431,6 +461,41 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */;
 			productName = Amplitude;
+		};
+		38BE2EC72E5611B700CED126 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		38BE2EC92E5611B700CED126 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		38BE2ECB2E5611B700CED126 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		38BE2ECD2E5611B700CED126 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		38BE2ECF2E5611B700CED126 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		38BE2ED12E5611B700CED126 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		38BE2ED32E5611B700CED126 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 		F4DF49612E3DD709006C7625 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
