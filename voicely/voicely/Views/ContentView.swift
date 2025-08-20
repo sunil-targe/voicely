@@ -25,6 +25,34 @@ struct ContentView: View {
     @State private var alertMessage = ""
     @State private var showMainView = false
     @State private var showCameraPermissionAlert = false
+    @State private var showSoundscapes = false
+    @State private var selectedSoundscape: SoundscapesView.SoundscapeType = .mute
+    @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
+    @EnvironmentObject var favoritesManager: FavoritesManager
+    
+    // MARK: - Computed Properties
+    
+    private var soundscapesButton: some View {
+        Button(action: {
+            showSoundscapes = true
+        }) {
+            Image(systemName: "waveform")
+                .imageScale(.medium)
+                .foregroundStyle(mediaPlayerManager.currentSoundscape != .mute ? .orange : .gray)
+                .scaleEffect(mediaPlayerManager.currentSoundscape != .mute ? 1.15 : 1.0)
+                .opacity(mediaPlayerManager.currentSoundscape != .mute ? 0.9 : 1.0)
+                .animation(
+                    mediaPlayerManager.currentSoundscape != .mute ? 
+                    .easeInOut(duration: 0.3)
+                    .repeatForever(autoreverses: true) :
+                    .easeOut(duration: 0.1),
+                    value: mediaPlayerManager.currentSoundscape
+                )
+                .padding(.leading, 6)
+        }
+    }
+    
+    // MARK: - Helper Methods
     
     private func checkCameraPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
@@ -47,10 +75,19 @@ struct ContentView: View {
         }
     }
     
+    private func storiesForFavorites() -> [Story] {
+        Story.allStories.filter { favoritesManager.favoriteStoryIDs.contains($0.id) }
+    }
+    
+    // Favorites helpers
+    private var favoriteStories: [Story] { storiesForFavorites() }
+    private var shouldShowMoreFavorites: Bool { favoriteStories.count > 3 }
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
+                    // Favorite stories section
                     HStack {
                         Button(action: {
                             showVoiceName = true
@@ -89,6 +126,44 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
+                    // Favorites Section (if any) with conditional More button
+                    if !favoritesManager.favoriteStoryIDs.isEmpty {
+                        VStack(spacing: 6) {
+                            HStack {
+                                HeaderTitle(
+                                    text: "Favorites",
+                                    icon: Image(systemName: "heart.fill"),
+                                    color: .white
+                                ) {}
+                                Spacer()
+                                if shouldShowMoreFavorites {
+                                    NavigationLink(destination: FavoritesListView()) {
+                                        HStack(spacing: 4) {
+                                            Text("More")
+                                            Image(systemName: "chevron.forward")
+                                        }
+                                        .font(.callout)
+                                        .foregroundColor(.gray)
+                                    }
+                                    .padding(.trailing, 20)
+                                }
+                            }
+                            .padding(.leading, 20)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach((shouldShowMoreFavorites ? Array(favoriteStories.prefix(3)) : favoriteStories), id: \.id) { story in
+                                        StoryCard(story: story)
+                                            .onTapGesture {
+                                                selectedStory = story
+                                            }
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                        }
+                    }
+
                     VStack(spacing: 6) {
                         NavigationLink {
                             AllStoriesView(stories: Story.allStories)
@@ -124,6 +199,7 @@ struct ContentView: View {
                                 // Story Cards
                                 ForEach(Array(Story.allStories.prefix(3))) { story in
                                     StoryCard(story: story)
+                                        .environmentObject(favoritesManager)
                                         .onTapGesture {
                                             selectedStory = story
                                         }
@@ -182,6 +258,10 @@ struct ContentView: View {
             .navigationTitle("Voicely")
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    soundscapesButton
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         showProfile = true
@@ -194,6 +274,11 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showProfile) {
                 ProfileScreen(isPresented: $showProfile)
+            }
+            .sheet(isPresented: $showSoundscapes) {
+                SoundscapesView(selectedSoundscape: $selectedSoundscape)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showVoiceName) {
                 VoiceNameScreen(isPresented: $showVoiceName, selectedVoice: $mainVM.selectedVoice)
@@ -280,10 +365,23 @@ struct ContentView: View {
                     .ignoresSafeArea()
                 }
             }
+            .onChange(of: selectedSoundscape) { newValue in
+                // Update the audio manager when soundscape changes
+                mediaPlayerManager.playSoundscape(newValue)
+            }
 
         }
         .tint(.gray)
+        .onAppear {
+            // Sync the current soundscape with the selected one
+            if mediaPlayerManager.currentSoundscape != selectedSoundscape {
+                mediaPlayerManager.playSoundscape(selectedSoundscape)
+            }
+        }
     }
+    
+
+
 }
 
 struct AddStoryCard: View {
@@ -319,4 +417,6 @@ struct AddStoryCard: View {
     ContentView()
         .environmentObject(PurchaseViewModel.shared)
         .environmentObject(MainViewModel(selectedVoice: Voice.default))
+        .environmentObject(MediaPlayerManager.shared)
+        .environmentObject(FavoritesManager())
 }

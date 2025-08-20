@@ -5,7 +5,6 @@ struct StoryCard: View {
     
     var body: some View {
         VStack(spacing: 6) {
-            //            Spacer(minLength: 6)
             Image(story.thumbnailImageName)
                 .resizable()
                 .scaledToFit()

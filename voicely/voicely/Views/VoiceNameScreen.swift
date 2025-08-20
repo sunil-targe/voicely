@@ -1,5 +1,7 @@
 import SwiftUI
 import AVFoundation
+import RevenueCat
+import RevenueCatUI
 
 class VoiceNameViewModel: ObservableObject {
     @Published var voices: [Voice] = Voice.all
@@ -10,15 +12,34 @@ class VoiceNameViewModel: ObservableObject {
     @Published var globalEmotion: String = "auto"
     @Published var globalLanguage: String = "Automatic"
     @Published var globalChannel: String = "mono"
+    @Published var showPaywall: Bool = false
     private var audioPlayer: AVAudioPlayer?
-    
+    let purchaseVM = PurchaseViewModel.shared
+
     init() {
         selectedVoice = voices.first
     }
     
     func selectVoice(_ voice: Voice) {
-        selectedVoice = voice
-        showSelectButton = true
+        // Check if voice is free (first two voices are free)
+        if isVoiceFree(voice) {
+            selectedVoice = voice
+            showSelectButton = true
+        } else {
+            // Show paywall for premium voices
+            showPaywall = true
+        }
+    }
+    
+    func isVoiceFree(_ voice: Voice) -> Bool {
+        // If user is premium, all voices are free
+        if purchaseVM.isPremium {
+            return true
+        }
+        
+        // Only "Honey Bear" and "Thunder Bear" are free for non-premium users
+        let freeVoiceNames = ["Grandma Willow", "Thunder Bear"]
+        return freeVoiceNames.contains(voice.name)
     }
     
     func playPreview(for voice: Voice) {
@@ -162,18 +183,23 @@ struct VoiceNameScreen: View {
                 }
                 
                 // Voice grid
-                ScrollView {
-                    LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 6),
-                        GridItem(.flexible(), spacing: 6)
-                    ], spacing: 6) {
+                VStack(spacing: 12) {
+                    // Voice count header
+                    ScrollView {
+                        LazyVGrid(columns: [
+                            GridItem(.flexible(), spacing: 6),
+                            GridItem(.flexible(), spacing: 6)
+                        ], spacing: 6) {
                         ForEach(viewModel.voices) { voice in
                             VoiceGridItem(
                                 voice: voice,
                                 isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == voice.voice_id,
                                 isPlaying: viewModel.currentlyPlayingVoiceID == voice.voice_id,
+                                isFree: viewModel.isVoiceFree(voice),
+                                isPremium: viewModel.purchaseVM.isPremium,
                                 onTap: {
                                     playHapticFeedback()
+                                    // Do not open paywall on tap. Just select temporarily and preview
                                     tempSelectedVoice = voice
                                     viewModel.showSelectButton = true
                                     viewModel.playPreview(for: voice)
@@ -183,19 +209,25 @@ struct VoiceNameScreen: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.bottom, 10)
+                    }
                 }
                 
                 if viewModel.showSelectButton, let tempVoice = tempSelectedVoice {
                     Button(action: {
                         playHapticFeedback()
-                        // Apply global filter settings to the selected voice
-                        var newVoice = tempVoice
-                        newVoice.emotion = viewModel.globalEmotion
-                        newVoice.language = viewModel.globalLanguage
-                        newVoice.channel = viewModel.globalChannel
-                        selectedVoice = newVoice
-                        isPresented = false
-                        viewModel.stopPreview()
+                        // If premium required, show paywall on Select instead of on card tap
+                        if viewModel.isVoiceFree(tempVoice) {
+                            var newVoice = tempVoice
+                            newVoice.emotion = viewModel.globalEmotion
+                            newVoice.language = viewModel.globalLanguage
+                            newVoice.channel = viewModel.globalChannel
+                            selectedVoice = newVoice
+                            isPresented = false
+                            viewModel.stopPreview()
+                        } else {
+                            viewModel.stopPreview()
+                            viewModel.showPaywall = true
+                        }
                     }) {
                         Text("Select")
                             .fontWeight(.semibold)
@@ -243,7 +275,9 @@ struct VoiceNameScreen: View {
                 viewModel.globalEmotion = selectedVoice.emotion
                 viewModel.globalLanguage = selectedVoice.language
                 viewModel.globalChannel = selectedVoice.channel
-
+                
+                // Refresh purchase status to ensure UI is up to date
+                viewModel.purchaseVM.fetchPremiumStatus()
             }
             .onDisappear {
                 viewModel.stopPreview()
@@ -255,6 +289,12 @@ struct VoiceNameScreen: View {
         }
         .sheet(isPresented: $showVoiceSettingsGuidelines) {
             VoiceSettingsGuidelinesView()
+        }
+        .fullScreenCover(isPresented: $viewModel.showPaywall) {
+            // Refresh purchase status when paywall is dismissed
+            viewModel.purchaseVM.refreshPurchaseStatus()
+        } content: {
+            PaywallView()
         }
     }
     
@@ -448,84 +488,111 @@ struct VoiceGridItem: View {
     let voice: Voice
     let isSelected: Bool
     let isPlaying: Bool
+    let isFree: Bool
+    let isPremium: Bool
     let onTap: () -> Void
     
     var body: some View {
-        Button(action: onTap) {
-            ZStack {
-                Color(.secondarySystemBackground)
-                    .cornerRadius(12)
-                VStack(spacing: 12) {
-                    // Voice Circle with Waveform - 1:1 aspect ratio
-                    ZStack {
-                        // Text around the circle
-                        let text = "• \(voice.preferredListenTime) •"
-                        let characters = Array(text)
-                        let radius: CGFloat = 58
-                        let angle = 100.0 / Double(characters.count)
+        ZStack {
+            Color(.secondarySystemBackground)
+                .cornerRadius(12)
+            
+            VStack(spacing: 12) {
+                ZStack {
+                    let text = "• \(voice.preferredListenTime) •"
+                    let characters = Array(text)
+                    let radius: CGFloat = 58
+                    let angle = 100.0 / Double(characters.count)
 
-                        ForEach(0..<characters.count, id: \.self) { i in
-                            let charAngle = Angle(degrees: Double(i) * angle - 190)
-                            let xOffset = CGFloat(cos(charAngle.radians)) * radius
-                            let yOffset = CGFloat(sin(charAngle.radians)) * radius
+                    ForEach(0..<characters.count, id: \.self) { i in
+                        let charAngle = Angle(degrees: Double(i) * angle - 190)
+                        let xOffset = CGFloat(cos(charAngle.radians)) * radius
+                        let yOffset = CGFloat(sin(charAngle.radians)) * radius
 
-                            Text(String(characters[i]))
-                                .font(.caption2)
-                                .foregroundColor(.white)
-                                .rotationEffect(charAngle + Angle(degrees: 90))
-                                .offset(x: xOffset, y: yOffset)
-                        }
+                        Text(String(characters[i]))
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .rotationEffect(charAngle + Angle(degrees: 90))
+                            .offset(x: xOffset, y: yOffset)
+                    }
 
-                        // Your original ZStack content
-                        if isSelected {
-                            Circle()
-                                .stroke(Color.white, lineWidth: 3)
-                                .frame(width: 96, height: 96)
-                        }
-                        ZStack(alignment: .bottomTrailing) {
-                            Image(voice.voice_id)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 90, height: 90)
-
-                            if isPlaying {
-                                Image(systemName: "waveform.circle.fill")
-                                    .imageScale(.medium)
-                                    .foregroundColor(.white)
-                                    .offset(x: 12, y: 6)
-                            } else {
-                                Image(systemName: "mic.circle.fill")
-                                    .imageScale(.medium)
-                                    .foregroundColor(.white)
-                                    .offset(x: 12, y: 6)
-                            }
-                        }
+                    if isSelected {
+                        Circle()
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: 96, height: 96)
                     }
                     
-                    // Voice Name and Description
-                    VStack(spacing: 3) {
-                        Text(voice.name)
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
+                    ZStack(alignment: .bottomTrailing) {
+                        Image(voice.voice_id)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 90, height: 90)
                         
-                        Text(voice.description)
-                            .font(.caption)
-                            .foregroundColor(Color(.systemGray2))
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
+                        if isPlaying {
+                            Image(systemName: "waveform.circle.fill")
+                                .imageScale(.medium)
+                                .foregroundColor(.white)
+                                .offset(x: 12, y: 6)
+                        } else {
+                            Image(systemName: "mic.circle.fill")
+                                .imageScale(.medium)
+                                .foregroundColor(.white)
+                                .offset(x: 12, y: 6)
+                        }
                     }
                 }
-                .padding(.vertical)
+                
+                VStack(spacing: 3) {
+                    Text(voice.name)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                    
+                    Text(voice.description)
+                        .font(.caption)
+                        .foregroundColor(Color(.systemGray2))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .aspectRatio(1, contentMode: .fit)
+            .padding(.vertical)
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    if !isPremium && !isFree {
+                        Image(systemName: "lock.circle.fill")
+                            .imageScale(.large)
+                            .foregroundColor(.white)
+                            .padding(8)
+                    } else if !isPremium && isFree {
+                        Text("FREE")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.green)
+                            .frame(width: 40, height: 24)
+                            .background(Color.green.opacity(0.2))
+                            .cornerRadius(6)
+                            .padding(.trailing, 2)
+                            .padding(.top, 8)
+                            .padding(8)
+                    }
+                }
+                Spacer()
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .aspectRatio(1, contentMode: .fit)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
     }
 }
+
 
 #if DEBUG
 #Preview {

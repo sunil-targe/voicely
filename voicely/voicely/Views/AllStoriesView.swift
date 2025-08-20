@@ -5,6 +5,7 @@ struct AllStoriesView: View {
     let stories: [Story]
     @State private var selectedStory: Story?
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var favoritesManager: FavoritesManager
     
     var body: some View {
             VStack(spacing: 0) {
@@ -17,6 +18,7 @@ struct AllStoriesView: View {
                     ], spacing: 10) {
                         ForEach(stories) { story in
                             StoryGridCard(story: story)
+                                .environmentObject(favoritesManager)
                                 .onTapGesture {
                                     playHapticFeedback()
                                     selectedStory = story
