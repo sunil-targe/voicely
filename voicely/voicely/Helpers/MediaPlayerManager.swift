@@ -5,13 +5,17 @@ import AVFoundation
 class MediaPlayerManager: ObservableObject {
     static let shared = MediaPlayerManager()
     
+    // Keep legacy published property so views can subscribe with `$isPlaying`
     @Published var isPlaying: Bool = false
     @Published var currentTime: Double = 0
     @Published var duration: Double = 0
+    @Published var currentSoundscape: SoundscapesView.SoundscapeType = .mute
     
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var nowPlayingInfo: [String: Any] = [:]
+    private var soundscapePlayer: AVPlayer?
+    private var soundscapeLoopObserver: Any?
     
     private init() {
         setupRemoteCommandCenter()
@@ -22,13 +26,13 @@ class MediaPlayerManager: ObservableObject {
         
         // Play command
         commandCenter.playCommand.addTarget { [weak self] _ in
-            self?.play()
+            self?.playStory()
             return .success
         }
         
         // Pause command
         commandCenter.pauseCommand.addTarget { [weak self] _ in
-            self?.pause()
+            self?.pauseStory()
             return .success
         }
         
@@ -61,6 +65,9 @@ class MediaPlayerManager: ObservableObject {
     
     func configurePlayer(_ player: AVPlayer, title: String, voiceName: String) {
         self.player = player
+        
+        // Ensure soundscape continues playing when story audio starts
+        // The soundscape player should remain active alongside the story player
         
         // Set up time observer
         timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 600), queue: .main) { [weak self] time in
@@ -95,16 +102,18 @@ class MediaPlayerManager: ObservableObject {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
-    func play() {
+    func playStory() {
         player?.play()
         isPlaying = true
         updateNowPlayingInfo()
     }
     
-    func pause() {
+    func pauseStory() {
         player?.pause()
         isPlaying = false
         updateNowPlayingInfo()
+        // Make sure soundscape continues if set (unless user selected mute)
+        ensureSoundscapePlaying()
     }
     
     func skipForward(by interval: TimeInterval) {
@@ -129,12 +138,158 @@ class MediaPlayerManager: ObservableObject {
     }
     
     func cleanup() {
+        // Stop the player if it's playing
+        player?.pause()
+        
+        // Remove time observer
         if let observer = timeObserver {
             player?.removeTimeObserver(observer)
             timeObserver = nil
         }
         
+        // Clear now playing info
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        
+        // Reset state
+        isPlaying = false
+        currentTime = 0
+        duration = 0
+        
+        // Clear player reference
         player = nil
+        
+        // Note: We don't stop the soundscape here to allow it to continue playing
+        // The soundscape will continue in the background
     }
+    
+    // MARK: - Soundscape Management
+    
+    func playSoundscape(_ soundscape: SoundscapesView.SoundscapeType) {
+        // Always stop any currently playing soundscape first
+        stopCurrentSoundscape()
+        
+        // Don't play anything for mute
+        if soundscape == .mute {
+            currentSoundscape = .mute
+            print("MediaPlayerManager: Stopped all soundscapes")
+            return
+        }
+        
+        // Configure audio session for soundscape playback
+        AudioSessionManager.shared.configureAudioSessionForSoundscape()
+        
+        // Get the audio file name based on soundscape type
+        let fileName = getSoundscapeFileName(for: soundscape)
+        
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: "mp3") else {
+            print("MediaPlayerManager: Could not find audio file for \(soundscape): \(fileName).mp3")
+            return
+        }
+        
+        // Create new soundscape player
+        let player = AVPlayer(url: url)
+        soundscapePlayer = player
+        currentSoundscape = soundscape
+        
+        // Set up looping for soundscape
+        soundscapeLoopObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem,
+            queue: .main
+        ) { [weak self] _ in
+            // Only loop if this is still the current soundscape player
+            if self?.soundscapePlayer === player {
+                player.seek(to: .zero)
+                player.play()
+            }
+        }
+        
+        // Set appropriate volume for background soundscape
+        player.volume = 0.3 // Lower volume for background soundscape
+        
+        // Start playing
+        player.play()
+        
+        print("MediaPlayerManager: Playing soundscape: \(soundscape) - \(fileName).mp3")
+    }
+    
+    func stopCurrentSoundscape() {
+        // Stop current soundscape if playing
+        if let player = soundscapePlayer {
+            player.pause()
+            player.replaceCurrentItem(with: nil)
+        }
+        
+        // Remove soundscape loop observer
+        if let observer = soundscapeLoopObserver {
+            NotificationCenter.default.removeObserver(observer)
+            soundscapeLoopObserver = nil
+        }
+        
+        // Clear current soundscape player
+        soundscapePlayer = nil
+    }
+    
+    func stopStoryAudioOnly() {
+        // Stop only the story player, keep soundscape playing
+        cleanup()
+        print("MediaPlayerManager: Stopped story audio only, soundscape continues")
+    }
+    
+    func adjustSoundscapeVolumeForStoryPlayback() {
+        // Adjust soundscape volume when story is playing
+        if let player = soundscapePlayer {
+            player.volume = 0.2 // Even lower volume when story is playing
+        }
+    }
+    
+    func restoreSoundscapeVolume() {
+        // Restore normal soundscape volume when story stops
+        if let player = soundscapePlayer {
+            player.volume = 0.3 // Normal background volume
+        }
+    }
+    
+    /// Ensures the soundscape is actively playing if the user has selected a non-mute option.
+    func ensureSoundscapePlaying() {
+        guard currentSoundscape != .mute else { return }
+        guard let scPlayer = soundscapePlayer else { return }
+        // If for any reason the soundscape got paused, resume it
+        if scPlayer.timeControlStatus != .playing {
+            scPlayer.play()
+        }
+    }
+    
+    private func getSoundscapeFileName(for soundscape: SoundscapesView.SoundscapeType) -> String {
+        switch soundscape {
+        case .mute:
+            return ""
+        case .nature:
+            return "nature"
+        case .water:
+            return "water"
+        case .music:
+            return "brown"
+        case .coffee:
+            return "coffee"
+        case .fire:
+            return "fire"
+        case .sparkle:
+            return "sparkle"
+        case .clock:
+            return "clock"
+        }
+    }
+    
+    // MARK: - Legacy Methods for Backward Compatibility
+    
+    func play() {
+        playStory()
+    }
+    
+    func pause() {
+        pauseStory()
+    }
+    
+    // Back-compat computed property no longer needed since we restored `isPlaying`
 } 
