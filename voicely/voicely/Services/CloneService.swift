@@ -18,7 +18,7 @@ class CloneService {
         }
         
         // Check if audio data is too large (Replicate has limits)
-        let maxSize = 50 * 1024 * 1024 // 50MB limit
+        let maxSize = 19 * 1024 * 1024 // 19MB limit
         guard audioData.count <= maxSize else {
             completion(.failure(CloneServiceError.audioTooLarge))
             return
@@ -145,17 +145,26 @@ class CloneService {
                 do {
                     let prediction = try JSONDecoder().decode(ClonePredictionResponse.self, from: data)
                     
-                    if prediction.status == "succeeded", let voiceID = prediction.output {
-                        completion(.success(voiceID))
+                    print("CloneService: Prediction status: \(prediction.status)")
+                    print("CloneService: Prediction output: \(prediction.output?.voice_id ?? "nil")")
+                    
+                    if prediction.status == "succeeded", let output = prediction.output {
+                        print("CloneService: Voice cloning succeeded with ID: \(output.voice_id)")
+                        completion(.success(output.voice_id))
                     } else if prediction.status == "failed" {
-                        completion(.failure(CloneServiceError.cloningFailed))
+                        print("CloneService: Voice cloning failed")
+                        let errorMessage = prediction.error ?? "Unknown error"
+                        print("CloneService: Error details: \(errorMessage)")
+                        completion(.failure(NSError(domain: "CloneService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Voice cloning failed: \(errorMessage)"])))
                     } else {
+                        print("CloneService: Still processing, polling again in 2 seconds...")
                         // Still processing, poll again after delay
                         DispatchQueue.global().asyncAfter(deadline: .now() + 2.0) {
                             poll()
                         }
                     }
                 } catch {
+                    print("CloneService: JSON decoding error: \(error)")
                     completion(.failure(error))
                 }
             }.resume()
@@ -169,7 +178,15 @@ class CloneService {
 struct ClonePredictionResponse: Decodable {
     let id: String
     let status: String
-    let output: String? // The voice_id returned from the API
+    let output: CloneOutput?
+    let error: String?
+    let logs: String?
+}
+
+struct CloneOutput: Decodable {
+    let voice_id: String
+    let model: String
+    let preview: String?
 }
 
 // MARK: - Error Types
