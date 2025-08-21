@@ -233,7 +233,7 @@ struct VoiceNameScreen: View {
                             
                             // Cloned voices section (show if they exist)
                             if !viewModel.clonedVoices.isEmpty {
-                                VStack(alignment: .leading, spacing: 10) {
+                                VStack(alignment: .leading, spacing: 8) {
                                     HStack {
                                         Text("Your Cloned Voices")
                                             .font(.headline)

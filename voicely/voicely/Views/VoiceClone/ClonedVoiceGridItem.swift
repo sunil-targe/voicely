@@ -54,15 +54,24 @@ struct ClonedVoiceGridItem: View {
                     }
                 }
                 
-                Text(clonedVoice.name)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(1)
+                VStack(spacing: 3) {
+                    Text(clonedVoice.name)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
+                    
+                    Text("Your cloned voice")
+                        .font(.caption)
+                        .foregroundColor(Color(.systemGray2))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
             }
         }
-        .frame(height: 160) // Flexible width for grid layout
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .aspectRatio(1, contentMode: .fit)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
