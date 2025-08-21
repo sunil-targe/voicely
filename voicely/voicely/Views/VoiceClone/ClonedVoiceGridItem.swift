@@ -16,7 +16,6 @@ struct ClonedVoiceGridItem: View {
             
             VStack(spacing: 12) {
                 ZStack {
-
                     if isSelected {
                         Circle()
                             .stroke(Color.white, lineWidth: 3)
@@ -55,24 +54,15 @@ struct ClonedVoiceGridItem: View {
                     }
                 }
                 
-                VStack(spacing: 3) {
-                    Text(clonedVoice.name)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                    
-                    Text("Your cloned voice")
-                        .font(.caption)
-                        .foregroundColor(Color(.systemGray2))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                }
+                Text(clonedVoice.name)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(1)
             }
-            .padding(.vertical)
         }
-        .frame(width: 160, height: 160) // Fixed size for horizontal scrolling
+        .frame(height: 160) // Flexible width for grid layout
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()

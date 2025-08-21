@@ -233,7 +233,7 @@ struct VoiceNameScreen: View {
                             
                             // Cloned voices section (show if they exist)
                             if !viewModel.clonedVoices.isEmpty {
-                                VStack(alignment: .leading, spacing: 8) {
+                                VStack(alignment: .leading, spacing: 10) {
                                     HStack {
                                         Text("Your Cloned Voices")
                                             .font(.headline)
@@ -258,29 +258,30 @@ struct VoiceNameScreen: View {
                                     }
                                     .padding(.horizontal, 16)
                                     
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 12) {
-                                            ForEach(viewModel.clonedVoices) { clonedVoice in
-                                                ClonedVoiceGridItem(
-                                                    clonedVoice: clonedVoice,
-                                                    isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == clonedVoice.voiceID,
-                                                    isPlaying: viewModel.currentlyPlayingVoiceID == clonedVoice.voiceID,
-                                                    onTap: {
-                                                        playHapticFeedback()
-                                                        let voice = clonedVoice.toVoice()
-                                                        tempSelectedVoice = voice
-                                                        viewModel.showSelectButton = true
-                                                        viewModel.playClonedVoicePreview(for: clonedVoice)
-                                                    },
-                                                    onDelete: {
-                                                        playHapticFeedback()
-                                                        viewModel.deleteClonedVoice(clonedVoice)
-                                                    }
-                                                )
-                                            }
+                                    LazyVGrid(columns: [
+                                        GridItem(.flexible(), spacing: 6),
+                                        GridItem(.flexible(), spacing: 6)
+                                    ], spacing: 6) {
+                                        ForEach(viewModel.clonedVoices) { clonedVoice in
+                                            ClonedVoiceGridItem(
+                                                clonedVoice: clonedVoice,
+                                                isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == clonedVoice.voiceID,
+                                                isPlaying: viewModel.currentlyPlayingVoiceID == clonedVoice.voiceID,
+                                                onTap: {
+                                                    playHapticFeedback()
+                                                    let voice = clonedVoice.toVoice()
+                                                    tempSelectedVoice = voice
+                                                    viewModel.showSelectButton = true
+                                                    viewModel.playClonedVoicePreview(for: clonedVoice)
+                                                },
+                                                onDelete: {
+                                                    playHapticFeedback()
+                                                    viewModel.deleteClonedVoice(clonedVoice)
+                                                }
+                                            )
                                         }
-                                        .padding(.horizontal, 16)
                                     }
+                                    .padding(.horizontal, 10)
                                 }
                             }
                             
