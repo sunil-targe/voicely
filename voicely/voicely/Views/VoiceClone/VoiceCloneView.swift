@@ -385,6 +385,7 @@ struct PreviewStepView: View {
 // MARK: - Naming Step View
 struct NamingStepView: View {
     @ObservedObject var viewModel: CloneVoiceViewModel
+    @FocusState private var isTextFieldFocused: Bool
     let onContinue: () -> Void
     
     var body: some View {
@@ -402,6 +403,7 @@ struct NamingStepView: View {
                     .foregroundColor(.white.opacity(0.9))
                 
                 TextField("Enter a name for your voice", text: $viewModel.clonedVoiceName)
+                    .focused($isTextFieldFocused)
                     .padding(.horizontal, 12)
                     .frame(height: 54)
                     .background(.clear)
@@ -434,6 +436,9 @@ struct NamingStepView: View {
             .padding(.horizontal, 40)
         }
         .padding(.vertical, 30)
+        .onAppear {
+            isTextFieldFocused = true
+        }
     }
 }
 
