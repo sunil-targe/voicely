@@ -7,6 +7,7 @@ struct ClonedVoice: Identifiable, Codable, Equatable {
     let name: String
     let voiceID: String // The voice_id returned from Replicate API
     let audioData: Data // Original recording data for playback preview
+    let firebaseFileName: String // Firebase Storage file name for cleanup
     let createdAt: Date
     var emotion: String = "auto"
     var language: String = "Automatic"
@@ -51,13 +52,26 @@ class ClonedVoiceStorage: ObservableObject {
     }
     
     func deleteClonedVoice(_ clonedVoice: ClonedVoice) {
+        // Delete from Firebase Storage
+        Task {
+            do {
+                try await FirebaseStorageService().deleteAudioFile(fileName: clonedVoice.firebaseFileName)
+                print("ClonedVoiceStorage: Firebase file deleted: \(clonedVoice.firebaseFileName)")
+            } catch {
+                print("ClonedVoiceStorage: Failed to delete Firebase file: \(error)")
+                // Continue with local deletion even if Firebase deletion fails
+            }
+        }
+        
+        // Delete from local storage
         clonedVoices.removeAll { $0.id == clonedVoice.id }
         saveToFile()
     }
     
     func deleteClonedVoice(withID id: UUID) {
-        clonedVoices.removeAll { $0.id == id }
-        saveToFile()
+        if let clonedVoice = clonedVoices.first(where: { $0.id == id }) {
+            deleteClonedVoice(clonedVoice)
+        }
     }
     
     private func saveToFile() {

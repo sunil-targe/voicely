@@ -4,8 +4,52 @@ import AVFoundation
 class CloneService {
     private let apiKey = AppSecrets.apiKey
     private let endpoint = "https://api.replicate.com/v1/predictions"
+    private let firebaseStorageService: FirebaseStorageServiceProtocol
     
-    func cloneVoice(audioData: Data, completion: @escaping (Result<String, Error>) -> Void) {
+    init(firebaseStorageService: FirebaseStorageServiceProtocol = FirebaseStorageService()) {
+        self.firebaseStorageService = firebaseStorageService
+    }
+    
+    func cloneVoice(audioData: Data, voiceName: String, completion: @escaping (Result<String, Error>) -> Void) {
+        // Validate audio data
+        guard audioData.count > 0 else {
+            completion(.failure(CloneServiceError.invalidAudioData))
+            return
+        }
+        
+        // Check if audio data is too large (Replicate has limits)
+        let maxSize = 50 * 1024 * 1024 // 50MB limit
+        guard audioData.count <= maxSize else {
+            completion(.failure(CloneServiceError.audioTooLarge))
+            return
+        }
+        
+        print("CloneService: Audio data size: \(audioData.count) bytes")
+        
+        // Generate unique file name
+        let fileName = AudioFileNameGenerator.generateFileName(for: voiceName)
+        print("CloneService: Generated file name: \(fileName)")
+        
+        // Upload to Firebase Storage first
+        Task {
+            do {
+                let publicURL = try await firebaseStorageService.uploadAudioFile(audioData, fileName: fileName)
+                print("CloneService: Audio uploaded to Firebase: \(publicURL)")
+                
+                // Now call the voice cloning API with the public URL
+                await MainActor.run {
+                    self.callVoiceCloningAPI(voiceFileURL: publicURL, completion: completion)
+                }
+            } catch {
+                print("CloneService: Firebase upload failed: \(error)")
+                await MainActor.run {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+    
+    private func callVoiceCloningAPI(voiceFileURL: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: endpoint) else {
             completion(.failure(CloneServiceError.invalidURL))
             return
@@ -16,16 +60,17 @@ class CloneService {
         request.setValue("Token \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // Convert audio data to base64 for API
-        let base64Audio = audioData.base64EncodedString()
-        let audioDataURI = "data:audio/wav;base64,\(base64Audio)"
-        
         let body: [String: Any] = [
             "version": "aa25ee1296b5c036b003ef80d32c83983c522e8c7d6f108460bbb0af97ebe93a", // version hash from Replicate
             "input": [
-                "voice_file": audioDataURI
+                "voice_file": voiceFileURL,
+                "accuracy": 0.7,
+                "need_noise_reduction": false,
+                "need_volume_normalization": false
             ]
         ]
+        
+        print("CloneService: Voice cloning request body: \(body)")
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -132,6 +177,8 @@ enum CloneServiceError: LocalizedError {
     case invalidURL
     case noData
     case cloningFailed
+    case invalidAudioData
+    case audioTooLarge
     
     var errorDescription: String? {
         switch self {
@@ -141,6 +188,10 @@ enum CloneServiceError: LocalizedError {
             return "No data received from server"
         case .cloningFailed:
             return "Voice cloning failed"
+        case .invalidAudioData:
+            return "Invalid audio data provided"
+        case .audioTooLarge:
+            return "Audio file is too large (max 50MB)"
         }
     }
 }

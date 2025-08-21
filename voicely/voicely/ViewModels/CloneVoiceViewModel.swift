@@ -161,26 +161,37 @@ class CloneVoiceViewModel: NSObject, ObservableObject {
         }
         
         isCloning = true
-        cloneProgress = "Uploading your voice..."
+        cloneProgress = "Uploading your voice to Firebase..."
         
-        cloneService.cloneVoice(audioData: audioData) { [weak self] result in
+        let voiceName = clonedVoiceName.trimmingCharacters(in: .whitespacesAndNewlines)
+        cloneService.cloneVoice(audioData: audioData, voiceName: voiceName) { [weak self] result in
             DispatchQueue.main.async {
                 self?.handleCloneResult(result)
             }
+        }
+        
+        // Update progress message after Firebase upload
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.cloneProgress = "Processing your voice with AI..."
         }
     }
     
     private func handleCloneResult(_ result: Result<String, Error>) {
         switch result {
         case .success(let voiceID):
-            cloneProgress = "Voice cloned successfully!"
+            cloneProgress = "Voice cloned successfully! Your voice is ready to use."
+            
+            // Generate the Firebase file name that was used
+            let voiceName = clonedVoiceName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let firebaseFileName = AudioFileNameGenerator.generateFileName(for: voiceName)
             
             // Create cloned voice object
             let clonedVoice = ClonedVoice(
                 id: UUID(),
-                name: clonedVoiceName.trimmingCharacters(in: .whitespacesAndNewlines),
+                name: voiceName,
                 voiceID: voiceID,
                 audioData: recordedAudioData ?? Data(),
+                firebaseFileName: firebaseFileName,
                 createdAt: Date()
             )
             

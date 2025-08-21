@@ -152,6 +152,7 @@ struct ClonedVoiceGridItem: View {
             name: "My Voice",
             voiceID: "test_voice_id",
             audioData: Data(),
+            firebaseFileName: "test",
             createdAt: Date()
         ),
         isSelected: false,
