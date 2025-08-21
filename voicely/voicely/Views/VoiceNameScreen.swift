@@ -224,8 +224,7 @@ struct VoiceNameScreen: View {
                                         .padding(.horizontal, 16)
                                     
                                     VoiceCloneEntryPoint {
-                                        playHapticFeedback()
-                                        viewModel.showVoiceClone = true
+                                        startVoiceClone()
                                     }
                                     .padding(.horizontal, 10)
                                 }
@@ -243,8 +242,7 @@ struct VoiceNameScreen: View {
                                         Spacer()
                                         
                                         Button(action: {
-                                            playHapticFeedback()
-                                            viewModel.showVoiceClone = true
+                                            startVoiceClone()
                                         }) {
                                             HStack(spacing: 4) {
                                                 Image(systemName: "plus.circle.fill")
@@ -416,6 +414,11 @@ struct VoiceNameScreen: View {
         }
     }
     
+    private func startVoiceClone() {
+        playHapticFeedback()
+        viewModel.stopPreview()
+        viewModel.showVoiceClone = true
+    }
     private func getEmotionDisplayValue(_ emotion: String) -> String {
         let emoji = emotions.first { $0.0 == emotion }?.1 ?? "🎭"
         return "\(emoji) \(emotion.capitalized)"

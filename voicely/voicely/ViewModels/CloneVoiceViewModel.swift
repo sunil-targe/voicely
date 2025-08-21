@@ -141,7 +141,7 @@ class CloneVoiceViewModel: NSObject, ObservableObject {
         isRecording = false
         
         // Load recorded audio data
-        if let audioRecorder = audioRecorder {
+        if let audioRecorder {
             do {
                 recordedAudioData = try Data(contentsOf: audioRecorder.url)
                 hasRecordedAudio = true

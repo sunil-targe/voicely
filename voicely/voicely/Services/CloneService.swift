@@ -80,12 +80,12 @@ class CloneService {
         }
         
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
+            if let error {
                 completion(.failure(error))
                 return
             }
             
-            guard let data = data else {
+            guard let data else {
                 completion(.failure(CloneServiceError.noData))
                 return
             }
@@ -122,12 +122,12 @@ class CloneService {
         
         func poll() {
             URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
+                if let error {
                     completion(.failure(error))
                     return
                 }
                 
-                guard let data = data else {
+                guard let data else {
                     completion(.failure(CloneServiceError.noData))
                     return
                 }

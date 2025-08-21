@@ -189,6 +189,7 @@ struct InstructionRow: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon).imageScale(.medium)
                 .foregroundColor(.white.opacity(0.8))
+                .offset(y: 3)
             
             Text(text)
                 .font(.body)
