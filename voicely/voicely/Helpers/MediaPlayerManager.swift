@@ -10,12 +10,16 @@ class MediaPlayerManager: ObservableObject {
     @Published var currentTime: Double = 0
     @Published var duration: Double = 0
     @Published var currentSoundscape: SoundscapesView.SoundscapeType = .mute
+    @Published var sleepTimerRemainingSeconds: TimeInterval? = nil
     
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var nowPlayingInfo: [String: Any] = [:]
     private var soundscapePlayer: AVPlayer?
     private var soundscapeLoopObserver: Any?
+    private var sleepTimer: DispatchSourceTimer?
+    private var sleepTimerEndDate: Date?
+    private let sleepTimerQueue = DispatchQueue(label: "MediaPlayerManager.sleepTimer")
     
     private init() {
         setupRemoteCommandCenter()
@@ -234,6 +238,7 @@ class MediaPlayerManager: ObservableObject {
         // Stop only the story player, keep soundscape playing
         cleanup()
         print("MediaPlayerManager: Stopped story audio only, soundscape continues")
+        cancelSleepTimer()
     }
     
     func adjustSoundscapeVolumeForStoryPlayback() {
@@ -258,6 +263,51 @@ class MediaPlayerManager: ObservableObject {
         if scPlayer.timeControlStatus != .playing {
             scPlayer.play()
         }
+    }
+    
+    // MARK: - Sleep Timer
+    func setSleepTimer(seconds: TimeInterval) {
+        cancelSleepTimer()
+        let endDate = Date().addingTimeInterval(seconds)
+        sleepTimerEndDate = endDate
+        DispatchQueue.main.async { self.sleepTimerRemainingSeconds = seconds }
+        
+        let timer = DispatchSource.makeTimerSource(queue: sleepTimerQueue)
+        timer.schedule(deadline: .now() + seconds, repeating: .never)
+        timer.setEventHandler { [weak self] in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.sleepTimerRemainingSeconds = nil
+                // When timer fires, pause story and stop white noise completely
+                self.pauseStory()
+                self.stopCurrentSoundscape()
+                self.currentSoundscape = .mute
+                // Deactivate audio session since everything is stopped
+                AudioSessionManager.shared.deactivateAudioSession()
+            }
+        }
+        sleepTimer = timer
+        timer.resume()
+        
+        // Ticker to update remaining seconds (optional)
+        let ticker = DispatchSource.makeTimerSource(queue: sleepTimerQueue)
+        ticker.schedule(deadline: .now() + 1, repeating: 1)
+        ticker.setEventHandler { [weak self] in
+            guard let self = self, let end = self.sleepTimerEndDate else { return }
+            let remaining = end.timeIntervalSinceNow
+            if remaining <= 0 {
+                ticker.cancel()
+            }
+            DispatchQueue.main.async { self.sleepTimerRemainingSeconds = max(0, remaining) }
+        }
+        ticker.resume()
+    }
+    
+    func cancelSleepTimer() {
+        sleepTimer?.cancel()
+        sleepTimer = nil
+        sleepTimerEndDate = nil
+        DispatchQueue.main.async { self.sleepTimerRemainingSeconds = nil }
     }
     
     private func getSoundscapeFileName(for soundscape: SoundscapesView.SoundscapeType) -> String {
