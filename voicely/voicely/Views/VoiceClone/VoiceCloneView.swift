@@ -323,7 +323,7 @@ struct PreviewStepView: View {
             }
             
             // Preview controls
-            VStack(spacing: 20) {
+            VStack(spacing: 16) {
                 Text("Listen to your recording:")
                     .font(.headline)
                     .foregroundColor(.white.opacity(0.9))
@@ -333,8 +333,8 @@ struct PreviewStepView: View {
                     viewModel.playRecordedAudio()
                 }) {
                     HStack {
-                        Image(systemName: "play.fill")
-                        Text("Play Recording")
+                        Image(systemName: viewModel.isPlayingRecording ? "stop.fill" : "play.fill")
+                        Text(viewModel.isPlayingRecording ? "Playing" : "Play Recording")
                     }
                     .font(.headline)
                     .foregroundColor(.white)
@@ -410,6 +410,7 @@ struct NamingStepView: View {
                             .stroke(Color.white.opacity(0.5), lineWidth: 1)
                     )
                     .font(.title2)
+                    .tint(.white)
             }
             .padding(.horizontal, 40)
             

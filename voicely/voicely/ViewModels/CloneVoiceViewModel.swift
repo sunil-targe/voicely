@@ -11,11 +11,13 @@ class CloneVoiceViewModel: NSObject, ObservableObject {
     @Published var showError = false
     @Published var errorMessage = ""
     @Published var hasRecordedAudio = false
+    @Published var isPlayingRecording = false
     @Published var showPermissionDenied = false
     @Published var cloneSuccess = false
     @Published var clonedVoiceName = ""
     
     private var audioRecorder: AVAudioRecorder?
+    private var audioPlayer: AVAudioPlayer?
     private var recordingTimer: Timer?
     private var scriptTimer: Timer?
     private var recordedAudioData: Data?
@@ -38,6 +40,7 @@ class CloneVoiceViewModel: NSObject, ObservableObject {
     
     deinit {
         stopRecording()
+        stopPlayback()
         recordingTimer?.invalidate()
         scriptTimer?.invalidate()
     }
@@ -214,17 +217,29 @@ class CloneVoiceViewModel: NSObject, ObservableObject {
     func playRecordedAudio() {
         guard let audioData = recordedAudioData else { return }
         
+        // Stop any existing playback
+        stopPlayback()
+        
         do {
-            let audioPlayer = try AVAudioPlayer(data: audioData)
-            audioPlayer.play()
+            audioPlayer = try AVAudioPlayer(data: audioData)
+            audioPlayer?.delegate = self
+            audioPlayer?.play()
+            isPlayingRecording = true
         } catch {
             showError(message: "Failed to play recorded audio: \(error.localizedDescription)")
         }
     }
     
+    func stopPlayback() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+        isPlayingRecording = false
+    }
+    
     // MARK: - Reset
     func resetRecording() {
         stopRecording()
+        stopPlayback()
         recordedAudioData = nil
         hasRecordedAudio = false
         recordingTime = 0
@@ -263,5 +278,22 @@ extension CloneVoiceViewModel: AVAudioRecorderDelegate {
         if let error = error {
             showError(message: "Recording error: \(error.localizedDescription)")
         }
+    }
+}
+
+// MARK: - AVAudioPlayerDelegate
+extension CloneVoiceViewModel: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        // Clean up the player when playback finishes
+        audioPlayer = nil
+        isPlayingRecording = false
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            showError(message: "Playback error: \(error.localizedDescription)")
+        }
+        audioPlayer = nil
+        isPlayingRecording = false
     }
 }
