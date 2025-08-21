@@ -211,6 +211,8 @@ struct InstructionRow: View {
 // MARK: - Recording Step View
 struct RecordingStepView: View {
     @ObservedObject var viewModel: CloneVoiceViewModel
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
     let onContinue: () -> Void
     
     var body: some View {
@@ -279,7 +281,7 @@ struct RecordingStepView: View {
                 if viewModel.hasRecordedAudio {
                     Button(action: {
                         playHapticFeedback()
-                        onContinue()
+                        validateAndContinue()
                     }) {
                         HStack {
                             Text("Continue")
@@ -298,6 +300,25 @@ struct RecordingStepView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
+        }
+        .alert("Recording Validation", isPresented: $showValidationAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(validationMessage)
+        }
+    }
+    
+    private func validateAndContinue() {
+        let recordingDuration = viewModel.recordingTime
+        
+        if recordingDuration < 10 {
+            validationMessage = "Recording is too short. Please record at least 10 seconds of audio."
+            showValidationAlert = true
+        } else if recordingDuration > 120 { // 2 minutes = 120 seconds
+            validationMessage = "Recording is too long. Please record between 10 seconds and 2 minutes."
+            showValidationAlert = true
+        } else {
+            onContinue()
         }
     }
 }
