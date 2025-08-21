@@ -29,7 +29,7 @@ class CloneVoiceViewModel: NSObject, ObservableObject {
         "Hi there,",
         "I'm recording a short voice sample,",
         "and in just a moment,",
-        "my voice will begin reading a story out loud",
+        "my cloned voice will begin reading any story out loud",
         "with the help of Voicely."
     ]
     

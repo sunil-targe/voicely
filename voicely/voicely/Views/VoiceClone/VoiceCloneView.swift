@@ -211,27 +211,32 @@ struct RecordingStepView: View {
     var body: some View {
         VStack(spacing: 30) {
             // Script display
-            VStack(spacing: 10) {
-                ForEach(Array(viewModel.cloneScript.enumerated()), id: \.offset) { index, text in
-                    Text(text)
-                        .font(.title3)
-                        .fontWeight(index == viewModel.currentScriptIndex ? .semibold : .regular)
-                        .foregroundColor(index == viewModel.currentScriptIndex ? .white : .white.opacity(0.6))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(viewModel.cloneScript.enumerated()), id: \.offset) { index, text in
+                        ZStack {
+                            HStack {
+                                Text(text)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(index == viewModel.currentScriptIndex ? .white : .white.opacity(0.6))
+                                    .multilineTextAlignment(.leading)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 16)
+                                Spacer()
+                            }
+                        }
                         .background(
                             index == viewModel.currentScriptIndex ?
-                            RoundedRectangle(cornerRadius: 8)
+                            RoundedRectangle(cornerRadius: 0)
                                 .fill(Color.white.opacity(0.2))
-                                .padding(.horizontal, -8)
-                                .padding(.vertical, -4)
                             : nil
                         )
                         .animation(.easeInOut(duration: 0.3), value: viewModel.currentScriptIndex)
+                    }
                 }
+                .padding(.vertical, 30)
             }
-            .padding(.vertical, 30)
             
             Spacer()
             
