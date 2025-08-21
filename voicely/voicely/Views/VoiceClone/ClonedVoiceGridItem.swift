@@ -16,24 +16,6 @@ struct ClonedVoiceGridItem: View {
             
             VStack(spacing: 12) {
                 ZStack {
-                    // Circular text animation
-                    let text = "• YOUR VOICE •"
-                    let characters = Array(text)
-                    let radius: CGFloat = 58
-                    let angle = 100.0 / Double(characters.count)
-
-                    ForEach(0..<characters.count, id: \.self) { i in
-                        let charAngle = Angle(degrees: Double(i) * angle - 190)
-                        let xOffset = CGFloat(cos(charAngle.radians)) * radius
-                        let yOffset = CGFloat(sin(charAngle.radians)) * radius
-
-                        Text(String(characters[i]))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(Color(red: 0.6, green: 0.8, blue: 1.0))
-                            .rotationEffect(charAngle + Angle(degrees: 90))
-                            .offset(x: xOffset, y: yOffset)
-                    }
 
                     if isSelected {
                         Circle()
@@ -89,44 +71,6 @@ struct ClonedVoiceGridItem: View {
                 }
             }
             .padding(.vertical)
-            
-            // More button (top right)
-            VStack {
-                HStack {
-                    Spacer()
-                    Menu {
-                        Button(action: {
-                            showDeleteAlert = true
-                        }) {
-                            Label("Delete Voice", systemImage: "trash")
-                        }
-                        .foregroundColor(.red)
-                    } label: {
-                        Image(systemName: "ellipsis.circle.fill")
-                            .imageScale(.large)
-                            .foregroundColor(.white)
-                            .padding(8)
-                    }
-                }
-                Spacer()
-            }
-            
-            // Clone badge (top left)
-            VStack {
-                HStack {
-                    Text("CLONE")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(width: 40, height: 20)
-                        .background(Color(red: 0.6, green: 0.8, blue: 1.0))
-                        .cornerRadius(4)
-                        .padding(.leading, 8)
-                        .padding(.top, 8)
-                    Spacer()
-                }
-                Spacer()
-            }
         }
         .frame(width: 160, height: 160) // Fixed size for horizontal scrolling
         .contentShape(Rectangle())
@@ -140,6 +84,21 @@ struct ClonedVoiceGridItem: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("Are you sure you want to delete '\(clonedVoice.name)'? This action cannot be undone.")
+        }
+        .overlay(alignment: .topTrailing) {
+            Menu {
+                Button(action: {
+                    showDeleteAlert = true
+                }) {
+                    Label("Delete Voice", systemImage: "trash")
+                }
+                .foregroundColor(.red)
+            } label: {
+                Image(systemName: "ellipsis.circle.fill")
+                    .imageScale(.large)
+                    .foregroundColor(.white)
+                    .padding(8)
+            }
         }
     }
 }
