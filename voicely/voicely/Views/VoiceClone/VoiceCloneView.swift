@@ -135,33 +135,32 @@ struct IntroStepView: View {
     var body: some View {
         VStack(spacing: 30) {
             // Title
-            Text("Let's Get Ready")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
+            HStack {
+                Text("Let's Get Ready")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                Spacer()
+            }
             
             // Instructions with icons
-            VStack(spacing: 20) {
+            VStack(spacing: 16) {
                 InstructionRow(
-                    number: 1,
                     text: "Find a quiet place",
                     icon: "speaker.wave.2.fill"
                 )
                 
                 InstructionRow(
-                    number: 2,
                     text: "Speak aloud and natural",
                     icon: "mic.fill"
                 )
                 
                 InstructionRow(
-                    number: 3,
                     text: "Use iPhone microphone or\nwired headphones",
                     icon: "headphones"
                 )
             }
-            .padding(.horizontal, 40)
             
             // Continue button
             Button(action: {
@@ -177,33 +176,26 @@ struct IntroStepView: View {
                     .background(Color(red: 0.2, green: 0.3, blue: 0.8))
                     .cornerRadius(16)
             }
-            .padding(.horizontal, 40)
         }
+        .padding(.horizontal, 36)
     }
 }
 
 struct InstructionRow: View {
-    let number: Int
     let text: String
     let icon: String
     
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            Text("\(number).")
+            Image(systemName: icon).imageScale(.medium)
+                .foregroundColor(.white.opacity(0.8))
+            
+            Text(text)
                 .font(.body)
                 .foregroundColor(.white)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(text)
-                    .font(.body)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.leading)
-            }
+                .multilineTextAlignment(.leading)
             
             Spacer()
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(.white.opacity(0.8))
         }
     }
 }
