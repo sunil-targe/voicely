@@ -132,10 +132,10 @@ private struct PlayerControlsView: View {
                     Button("5 minutes") { setSleep(minutes: 5) }
                     if mediaPlayerManager.sleepTimerRemainingSeconds != nil {
                         Divider()
-                        Button("Cancel Timer") { mediaPlayerManager.cancelSleepTimer() }
+                        Button("Cancel Sleep Timer") { mediaPlayerManager.cancelSleepTimer() }
                     }
                 } label: {
-                    Label("Sleep Time", systemImage: "moon")
+                    Label(getSleepTimerDisplayText(), systemImage: "moon")
                 }
             } label: {
                 Circle()
@@ -208,6 +208,21 @@ private struct PlayerControlsView: View {
     private func setSleep(minutes: Int) {
         let seconds = TimeInterval(minutes * 60)
         mediaPlayerManager.setSleepTimer(seconds: seconds)
+    }
+    
+    private func getSleepTimerDisplayText() -> String {
+        guard let remainingSeconds = mediaPlayerManager.sleepTimerRemainingSeconds else {
+            return "Sleep Time"
+        }
+        
+        let minutes = Int(remainingSeconds) / 60
+        let seconds = Int(remainingSeconds) % 60
+        
+        if minutes > 0 {
+            return "\(minutes)m \(seconds)s"
+        } else {
+            return "\(seconds)s"
+        }
     }
 }
 

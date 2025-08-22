@@ -18,11 +18,16 @@ class MediaPlayerManager: ObservableObject {
     private var soundscapePlayer: AVPlayer?
     private var soundscapeLoopObserver: Any?
     private var sleepTimer: DispatchSourceTimer?
+    private var sleepTimerTicker: DispatchSourceTimer?
     private var sleepTimerEndDate: Date?
     private let sleepTimerQueue = DispatchQueue(label: "MediaPlayerManager.sleepTimer")
     
     private init() {
         setupRemoteCommandCenter()
+    }
+    
+    deinit {
+        cancelSleepTimer()
     }
     
     func setupRemoteCommandCenter() {
@@ -154,6 +159,9 @@ class MediaPlayerManager: ObservableObject {
         // Clear now playing info
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         
+        // Cancel any active sleep timers
+        cancelSleepTimer()
+        
         // Reset state
         isPlaying = false
         currentTime = 0
@@ -272,6 +280,7 @@ class MediaPlayerManager: ObservableObject {
         sleepTimerEndDate = endDate
         DispatchQueue.main.async { self.sleepTimerRemainingSeconds = seconds }
         
+        // Main sleep timer
         let timer = DispatchSource.makeTimerSource(queue: sleepTimerQueue)
         timer.schedule(deadline: .now() + seconds, repeating: .never)
         timer.setEventHandler { [weak self] in
@@ -289,23 +298,27 @@ class MediaPlayerManager: ObservableObject {
         sleepTimer = timer
         timer.resume()
         
-        // Ticker to update remaining seconds (optional)
+        // Ticker to update remaining seconds (optimized to update less frequently)
         let ticker = DispatchSource.makeTimerSource(queue: sleepTimerQueue)
-        ticker.schedule(deadline: .now() + 1, repeating: 1)
+        ticker.schedule(deadline: .now() + 5, repeating: 5) // Update every 5 seconds instead of 1
         ticker.setEventHandler { [weak self] in
             guard let self = self, let end = self.sleepTimerEndDate else { return }
             let remaining = end.timeIntervalSinceNow
             if remaining <= 0 {
-                ticker.cancel()
+                self.cancelSleepTimer()
+            } else {
+                DispatchQueue.main.async { self.sleepTimerRemainingSeconds = max(0, remaining) }
             }
-            DispatchQueue.main.async { self.sleepTimerRemainingSeconds = max(0, remaining) }
         }
+        sleepTimerTicker = ticker
         ticker.resume()
     }
     
     func cancelSleepTimer() {
         sleepTimer?.cancel()
         sleepTimer = nil
+        sleepTimerTicker?.cancel()
+        sleepTimerTicker = nil
         sleepTimerEndDate = nil
         DispatchQueue.main.async { self.sleepTimerRemainingSeconds = nil }
     }
