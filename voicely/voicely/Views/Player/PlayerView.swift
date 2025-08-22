@@ -107,6 +107,7 @@ private struct PlayerControlsView: View {
     let onTogglePlay: () -> Void
     let onSeekForward: () -> Void
     let onToggleSpeed: () -> Void
+    @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
     
     var body: some View {
         HStack(spacing: 30) {
@@ -122,6 +123,19 @@ private struct PlayerControlsView: View {
                                 .frame(width: 24, height: 24)
                         }
                     }
+                }
+                // Sleep Timer submenu
+                Menu {
+                    Button("30 minutes") { setSleep(minutes: 30) }
+                    Button("20 minutes") { setSleep(minutes: 20) }
+                    Button("10 minutes") { setSleep(minutes: 10) }
+                    Button("5 minutes") { setSleep(minutes: 5) }
+                    if mediaPlayerManager.sleepTimerRemainingSeconds != nil {
+                        Divider()
+                        Button("Cancel Sleep Timer") { mediaPlayerManager.cancelSleepTimer() }
+                    }
+                } label: {
+                    Label(getSleepTimerDisplayText(), systemImage: "moon")
                 }
             } label: {
                 Circle()
@@ -189,6 +203,26 @@ private struct PlayerControlsView: View {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = docs.appendingPathComponent(filename)
         return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
+    }
+    
+    private func setSleep(minutes: Int) {
+        let seconds = TimeInterval(minutes * 60)
+        mediaPlayerManager.setSleepTimer(seconds: seconds)
+    }
+    
+    private func getSleepTimerDisplayText() -> String {
+        guard let remainingSeconds = mediaPlayerManager.sleepTimerRemainingSeconds else {
+            return "Sleep Time"
+        }
+        
+        let minutes = Int(remainingSeconds) / 60
+        let seconds = Int(remainingSeconds) % 60
+        
+        if minutes > 0 {
+            return "\(minutes)m \(seconds)s"
+        } else {
+            return "\(seconds)s"
+        }
     }
 }
 
