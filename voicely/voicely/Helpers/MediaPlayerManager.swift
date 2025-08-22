@@ -285,7 +285,7 @@ class MediaPlayerManager: ObservableObject {
         timer.schedule(deadline: .now() + seconds, repeating: .never)
         timer.setEventHandler { [weak self] in
             DispatchQueue.main.async {
-                guard let self = self else { return }
+                guard let self else { return }
                 self.sleepTimerRemainingSeconds = nil
                 // When timer fires, pause story and stop white noise completely
                 self.pauseStory()
