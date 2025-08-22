@@ -379,9 +379,6 @@ struct ContentView: View {
             }
         }
     }
-    
-
-
 }
 
 struct AddStoryCard: View {
