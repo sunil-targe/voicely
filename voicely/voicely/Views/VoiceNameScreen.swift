@@ -639,31 +639,25 @@ struct VoiceGridItem: View {
 
 
                     if isSelected {
-                        if isPlaying {
-                            AnimatedBackground()
-                        }
                         Circle()
                             .stroke(Color.white, lineWidth: 3)
                             .frame(width: 96, height: 96)
                     }
-//                    
+                    
                     ZStack(alignment: .bottomTrailing) {
                         Image(voice.voice_id)
                             .resizable()
                             .scaledToFill()
                             .frame(width: 90, height: 90)
                         
-                        if isPlaying {
-                            Image(systemName: "waveform.circle.fill")
-                                .imageScale(.medium)
-                                .foregroundColor(.white)
-                                .offset(x: 12, y: 6)
-                        } else {
-                            Image(systemName: "mic.circle.fill")
-                                .imageScale(.medium)
-                                .foregroundColor(.white)
-                                .offset(x: 12, y: 6)
-                        }
+                        Image(systemName: "mic.circle.fill")
+                            .imageScale(.medium)
+                            .foregroundColor(.white)
+                            .offset(x: 12, y: 6)
+                    }
+                }.background {
+                    if isSelected, isPlaying {
+                        AnimatedBackground()
                     }
                 }
                 
