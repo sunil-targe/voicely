@@ -8,6 +8,7 @@
 import SwiftUI
 import RevenueCat
 import Amplitude
+import FirebaseCore
 
 @main
 struct voicelyApp: App {
@@ -18,6 +19,7 @@ struct voicelyApp: App {
     @StateObject private var favoritesManager = FavoritesManager()
 
     init() {
+        FirebaseApp.configure()
         Purchases.configure(
             with: Configuration.Builder(withAPIKey: "appl_HvoyfCcPNsFvyReUbXgmoTSbOWx")
                 .with(storeKitVersion: .storeKit2)
