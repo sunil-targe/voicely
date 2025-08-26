@@ -41,6 +41,12 @@ class VoiceNameViewModel: ObservableObject {
             return true
         }
         
+        // Check if this is a cloned voice (cloned voices are always free)
+        let isClonedVoice = clonedVoices.contains { $0.voiceID == voice.voice_id }
+        if isClonedVoice {
+            return true
+        }
+        
         // Only "Grandma Willow" and "Thunder Bear" are free for non-premium users
         return ["Wise_Woman", "Deep_Voice_Man"].contains(voice.voice_id)
     }
