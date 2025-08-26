@@ -13,11 +13,15 @@ class VoiceNameViewModel: ObservableObject {
     @Published var globalLanguage: String = "Automatic"
     @Published var globalChannel: String = "mono"
     @Published var showPaywall: Bool = false
+    @Published var showVoiceClone: Bool = false
+    @Published var clonedVoices: [ClonedVoice] = []
     private var audioPlayer: AVAudioPlayer?
     let purchaseVM = PurchaseViewModel.shared
+    private let clonedVoiceStorage = ClonedVoiceStorage.shared
 
     init() {
         selectedVoice = voices.first
+        loadClonedVoices()
     }
     
     func selectVoice(_ voice: Voice) {
@@ -64,6 +68,30 @@ class VoiceNameViewModel: ObservableObject {
         audioPlayer?.stop()
         audioPlayer = nil
         currentlyPlayingVoiceID = nil
+    }
+    
+    func loadClonedVoices() {
+        clonedVoices = clonedVoiceStorage.clonedVoices
+    }
+    
+    func deleteClonedVoice(_ clonedVoice: ClonedVoice) {
+        clonedVoiceStorage.deleteClonedVoice(clonedVoice)
+        loadClonedVoices()
+    }
+    
+    func playClonedVoicePreview(for clonedVoice: ClonedVoice) {
+        stopPreview()
+        
+        // Configure audio session for preview playback
+        AudioSessionManager.shared.configureAudioSession()
+        
+        do {
+            audioPlayer = try AVAudioPlayer(data: clonedVoice.audioData)
+            audioPlayer?.play()
+            currentlyPlayingVoiceID = clonedVoice.voiceID
+        } catch {
+            print("Failed to play cloned voice preview: \(error)")
+        }
     }
 }
 
@@ -181,33 +209,112 @@ struct VoiceNameScreen: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
-                // Voice grid
+                // Voice sections
                 VStack(spacing: 12) {
-                    // Voice count header
                     ScrollView {
-                        LazyVGrid(columns: [
-                            GridItem(.flexible(), spacing: 6),
-                            GridItem(.flexible(), spacing: 6)
-                        ], spacing: 6) {
-                        ForEach(viewModel.voices) { voice in
-                            VoiceGridItem(
-                                voice: voice,
-                                isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == voice.voice_id,
-                                isPlaying: viewModel.currentlyPlayingVoiceID == voice.voice_id,
-                                isFree: viewModel.isVoiceFree(voice),
-                                isPremium: viewModel.purchaseVM.isPremium,
-                                onTap: {
-                                    playHapticFeedback()
-                                    // Do not open paywall on tap. Just select temporarily and preview
-                                    tempSelectedVoice = voice
-                                    viewModel.showSelectButton = true
-                                    viewModel.playPreview(for: voice)
+                        VStack(spacing: 16) {
+                            // Clone voice entry point section (show if no cloned voices exist)
+                            if viewModel.clonedVoices.isEmpty {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Create Your Voice")
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                    
+                                    VoiceCloneEntryPoint {
+                                        startVoiceClone()
+                                    }
+                                    .padding(.horizontal, 10)
                                 }
-                            )
+                            }
+                            
+                            // Cloned voices section (show if they exist)
+                            if !viewModel.clonedVoices.isEmpty {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Text("Your Cloned Voices")
+                                            .font(.headline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.white)
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: {
+                                            startVoiceClone()
+                                        }) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "plus.circle.fill")
+                                                    .font(.caption)
+                                                Text("Clone More")
+                                                    .font(.caption)
+                                                    .fontWeight(.medium)
+                                            }
+                                            .foregroundColor(Color(red: 0.6, green: 0.8, blue: 1.0))
+                                        }
+                                    }
+                                    .padding(.horizontal, 16)
+                                    
+                                    LazyVGrid(columns: [
+                                        GridItem(.flexible(), spacing: 6),
+                                        GridItem(.flexible(), spacing: 6)
+                                    ], spacing: 6) {
+                                        ForEach(viewModel.clonedVoices) { clonedVoice in
+                                            ClonedVoiceGridItem(
+                                                clonedVoice: clonedVoice,
+                                                isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == clonedVoice.voiceID,
+                                                isPlaying: viewModel.currentlyPlayingVoiceID == clonedVoice.voiceID,
+                                                onTap: {
+                                                    playHapticFeedback()
+                                                    let voice = clonedVoice.toVoice()
+                                                    tempSelectedVoice = voice
+                                                    viewModel.showSelectButton = true
+                                                    viewModel.playClonedVoicePreview(for: clonedVoice)
+                                                },
+                                                onDelete: {
+                                                    playHapticFeedback()
+                                                    viewModel.deleteClonedVoice(clonedVoice)
+                                                }
+                                            )
+                                        }
+                                    }
+                                    .padding(.horizontal, 10)
+                                }
+                            }
+                            
+                            // Regular voices section
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Available Voices")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                
+                                LazyVGrid(columns: [
+                                    GridItem(.flexible(), spacing: 6),
+                                    GridItem(.flexible(), spacing: 6)
+                                ], spacing: 6) {
+                                    ForEach(viewModel.voices) { voice in
+                                        VoiceGridItem(
+                                            voice: voice,
+                                            isSelected: (tempSelectedVoice?.voice_id ?? selectedVoice.voice_id) == voice.voice_id,
+                                            isPlaying: viewModel.currentlyPlayingVoiceID == voice.voice_id,
+                                            isFree: viewModel.isVoiceFree(voice),
+                                            isPremium: viewModel.purchaseVM.isPremium,
+                                            onTap: {
+                                                playHapticFeedback()
+                                                // Do not open paywall on tap. Just select temporarily and preview
+                                                tempSelectedVoice = voice
+                                                viewModel.showSelectButton = true
+                                                viewModel.playPreview(for: voice)
+                                            }
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, 10)
+                            }
                         }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.bottom, 10)
+                        .padding(.bottom, 10)
                     }
                 }
                 
@@ -277,6 +384,9 @@ struct VoiceNameScreen: View {
                 
                 // Refresh purchase status to ensure UI is up to date
                 viewModel.purchaseVM.fetchPremiumStatus()
+                
+                // Load cloned voices
+                viewModel.loadClonedVoices()
             }
             .onDisappear {
                 viewModel.stopPreview()
@@ -295,8 +405,19 @@ struct VoiceNameScreen: View {
         } content: {
             PaywallView()
         }
+        .fullScreenCover(isPresented: $viewModel.showVoiceClone) {
+            // Refresh cloned voices when voice clone view is dismissed
+            viewModel.loadClonedVoices()
+        } content: {
+            VoiceCloneView()
+        }
     }
     
+    private func startVoiceClone() {
+        playHapticFeedback()
+        viewModel.stopPreview()
+        viewModel.showVoiceClone = true
+    }
     private func getEmotionDisplayValue(_ emotion: String) -> String {
         let emoji = emotions.first { $0.0 == emotion }?.1 ?? "🎭"
         return "\(emoji) \(emotion.capitalized)"
