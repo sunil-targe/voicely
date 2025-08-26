@@ -101,7 +101,7 @@ struct VoiceNameScreen: View {
     @StateObject private var viewModel = VoiceNameViewModel()
     @State private var tempSelectedVoice: Voice?
     @State private var showVoiceSettingsGuidelines = false
-    
+
     private let emotions = [
         ("auto", "🎭"),
         ("neutral", "😐"),
@@ -611,7 +611,7 @@ struct VoiceGridItem: View {
     let isFree: Bool
     let isPremium: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         ZStack {
             Color(.secondarySystemBackground)
@@ -637,12 +637,14 @@ struct VoiceGridItem: View {
                             .offset(x: xOffset, y: yOffset)
                     }
 
+
                     if isSelected {
-                        Circle()
-                            .stroke(Color.white, lineWidth: 3)
-                            .frame(width: 96, height: 96)
+                        AnimatedBackground()
+//                        Circle()
+//                            .stroke(Color.white, lineWidth: 3)
+//                            .frame(width: 96, height: 96)
                     }
-                    
+//                    
                     ZStack(alignment: .bottomTrailing) {
                         Image(voice.voice_id)
                             .resizable()
@@ -701,6 +703,146 @@ struct VoiceGridItem: View {
     }
 }
 
+// MARK: - Morphing Blob Shape
+struct BlobShape: Shape {
+    var phase: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let base = min(rect.width, rect.height) * 0.45
+        let waves = 1.0
+        let steps = 60
+
+        var path = Path()
+        var first = true
+
+        for i in 0...steps {
+            let t = Double(i) / Double(steps) * 2 * .pi
+            let offset = sin(waves * t + Double(phase)) * 8
+            let radius = base + CGFloat(offset)
+
+            let x = center.x + radius * cos(t)
+            let y = center.y + radius * sin(t)
+
+            if first {
+                path.move(to: CGPoint(x: x, y: y))
+                first = false
+            } else {
+                path.addLine(to: CGPoint(x: x, y: y))
+            }
+        }
+        path.closeSubpath()
+        return path
+    }
+
+    var animatableData: CGFloat {
+        get { phase }
+        set { phase = newValue }
+    }
+}
+
+struct AnimatedBackground: View {
+    @State private var phase: CGFloat = 0
+    @State private var pulse: CGFloat = 1
+
+    var body: some View {
+        ZStack {
+            BlobShape(phase: phase)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            .green,
+                            .blue,
+                            .orange,
+                            .red
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .blur(radius: 10)
+                .scaleEffect(pulse)
+        }
+        .frame(width: 110, height: 110)
+        .onAppear {
+            withAnimation(.linear(duration: 6).repeatForever(autoreverses: false)) {
+                phase = .pi * 2
+            }
+            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                pulse = 1.08
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+//struct AnimatedBackground: View {
+//    @State private var phase: CGFloat = 0
+//    @State private var pulse: CGFloat = 1
+//    @State private var bounce: CGFloat = 0
+//
+//    var body: some View {
+//        ZStack {
+//            BlobShape(phase: phase)
+//                .fill(
+//                    LinearGradient(
+//                        colors: [
+//                            Color.pink.opacity(0.6),
+//                            Color.purple.opacity(0.5)
+//                        ],
+//                        startPoint: .topLeading,
+//                        endPoint: .bottomTrailing
+//                    )
+//                )
+//                .scaleEffect(pulse)
+//                .offset(y: bounce)
+//        }
+//        .frame(width: 110, height: 110)
+//        .clipShape(Circle()) // <-- Match avatar’s shape
+//        .onAppear {
+//            withAnimation(.linear(duration: 6).repeatForever(autoreverses: false)) {
+//                phase = .pi * 2
+//            }
+//            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+//                pulse = 1.1
+//            }
+//            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+//                bounce = -6
+//            }
+//        }
+//    }
+//}
+
+//
+//struct AnimatedBackground: View {
+//    @State private var animate = false
+//    
+//    var body: some View {
+//        ZStack {
+//            Circle()
+//                .stroke(Color.white.opacity(0.6), lineWidth: 2)
+//                .scaleEffect(animate ? 1.1 : 0.9)
+//                .opacity(animate ? 0.3 : 0.1)
+//                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: animate)
+//            
+//            Circle()
+//                .stroke(Color.purple.opacity(0.5), lineWidth: 2)
+//                .scaleEffect(animate ? 1.2 : 1.0)
+//                .opacity(animate ? 0.4 : 0.1)
+//                .animation(.easeInOut(duration: 3).repeatForever(autoreverses: true), value: animate)
+//            
+//            Circle()
+//                .stroke(Color.blue.opacity(0.4), lineWidth: 2)
+//                .scaleEffect(animate ? 1.4 : 1.2)
+//                .opacity(animate ? 0.5 : 0.2)
+//                .animation(.easeInOut(duration: 4).repeatForever(autoreverses: true), value: animate)
+//        }
+//        .frame(width: 90, height: 90)
+//        .onAppear {
+//            animate = true
+//        }
+//    }
+//}
 
 #if DEBUG
 #Preview {
