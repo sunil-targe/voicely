@@ -371,6 +371,7 @@ struct PreviewStepView: View {
             VStack(spacing: 12) {
                 Button(action: {
                     playHapticFeedback()
+                    viewModel.stopPlayback()
                     onContinue()
                 }) {
                     Text("Sounds Good!")
