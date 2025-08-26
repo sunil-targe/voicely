@@ -40,16 +40,14 @@ struct ClonedVoiceGridItem: View {
                                     .foregroundColor(.white)
                             )
                         
-                        if isPlaying {
-                            Image(systemName: "waveform.circle.fill")
-                                .imageScale(.medium)
-                                .foregroundColor(.white)
-                                .offset(x: 12, y: 6)
-                        } else {
-                            Image(systemName: "mic.circle.fill")
-                                .imageScale(.medium)
-                                .foregroundColor(.white)
-                                .offset(x: 12, y: 6)
+                        Image(systemName: "mic.circle.fill")
+                            .imageScale(.medium)
+                            .foregroundColor(.white)
+                            .offset(x: 12, y: 6)
+                    }
+                    .background {
+                        if isSelected, isPlaying {
+                            AnimatedBackground()
                         }
                     }
                 }
@@ -62,7 +60,7 @@ struct ClonedVoiceGridItem: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
                     
-                    Text("Your cloned voice")
+                    Text("My cloned voice")
                         .font(.caption)
                         .foregroundColor(Color(.systemGray2))
                         .multilineTextAlignment(.center)

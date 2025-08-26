@@ -41,6 +41,12 @@ class VoiceNameViewModel: ObservableObject {
             return true
         }
         
+        // Check if this is a cloned voice (cloned voices are always free)
+        let isClonedVoice = clonedVoices.contains { $0.voiceID == voice.voice_id }
+        if isClonedVoice {
+            return true
+        }
+        
         // Only "Grandma Willow" and "Thunder Bear" are free for non-premium users
         return ["Wise_Woman", "Deep_Voice_Man"].contains(voice.voice_id)
     }
@@ -101,7 +107,7 @@ struct VoiceNameScreen: View {
     @StateObject private var viewModel = VoiceNameViewModel()
     @State private var tempSelectedVoice: Voice?
     @State private var showVoiceSettingsGuidelines = false
-    
+
     private let emotions = [
         ("auto", "🎭"),
         ("neutral", "😐"),
@@ -611,7 +617,7 @@ struct VoiceGridItem: View {
     let isFree: Bool
     let isPremium: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         ZStack {
             Color(.secondarySystemBackground)
@@ -637,6 +643,7 @@ struct VoiceGridItem: View {
                             .offset(x: xOffset, y: yOffset)
                     }
 
+
                     if isSelected {
                         Circle()
                             .stroke(Color.white, lineWidth: 3)
@@ -649,17 +656,14 @@ struct VoiceGridItem: View {
                             .scaledToFill()
                             .frame(width: 90, height: 90)
                         
-                        if isPlaying {
-                            Image(systemName: "waveform.circle.fill")
-                                .imageScale(.medium)
-                                .foregroundColor(.white)
-                                .offset(x: 12, y: 6)
-                        } else {
-                            Image(systemName: "mic.circle.fill")
-                                .imageScale(.medium)
-                                .foregroundColor(.white)
-                                .offset(x: 12, y: 6)
-                        }
+                        Image(systemName: "mic.circle.fill")
+                            .imageScale(.medium)
+                            .foregroundColor(.white)
+                            .offset(x: 12, y: 6)
+                    }
+                }.background {
+                    if isSelected, isPlaying {
+                        AnimatedBackground()
                     }
                 }
                 
@@ -701,6 +705,76 @@ struct VoiceGridItem: View {
     }
 }
 
+// MARK: - Morphing Blob Shape
+struct BlobShape: Shape {
+    var phase: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let base = min(rect.width, rect.height) * 0.45
+        let waves = 1.0
+        let steps = 60
+
+        var path = Path()
+        var first = true
+
+        for i in 0...steps {
+            let t = Double(i) / Double(steps) * 2 * .pi
+            let offset = sin(waves * t + Double(phase)) * 8
+            let radius = base + CGFloat(offset)
+
+            let x = center.x + radius * cos(t)
+            let y = center.y + radius * sin(t)
+
+            if first {
+                path.move(to: CGPoint(x: x, y: y))
+                first = false
+            } else {
+                path.addLine(to: CGPoint(x: x, y: y))
+            }
+        }
+        path.closeSubpath()
+        return path
+    }
+
+    var animatableData: CGFloat {
+        get { phase }
+        set { phase = newValue }
+    }
+}
+
+struct AnimatedBackground: View {
+    @State private var phase: CGFloat = 0
+    @State private var pulse: CGFloat = 1
+
+    var body: some View {
+        ZStack {
+            BlobShape(phase: phase)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            .indigo,
+                            .orange
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .blur(radius: 12)
+                .scaleEffect(pulse)
+        }
+        .frame(width: 110, height: 110)
+        .onAppear {
+            withAnimation(.linear(duration: 6).repeatForever(autoreverses: true)) {
+                phase = .pi * 2
+            }
+            withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                pulse = 1.08
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
 
 #if DEBUG
 #Preview {

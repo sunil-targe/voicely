@@ -131,35 +131,80 @@ struct ProgressStepView: View {
 // MARK: - Intro Step View
 struct IntroStepView: View {
     let onContinue: () -> Void
+    @State private var quietPlaceChecked = false
+    @State private var speakNaturalChecked = false
+    @State private var useMicrophoneChecked = false
+    
+    var allChecked: Bool {
+        quietPlaceChecked && speakNaturalChecked && useMicrophoneChecked
+    }
     
     var body: some View {
-        VStack(spacing: 30) {
-            // Title
-            HStack {
-                Text("Let's Get Ready")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
+        VStack {
+            ScrollView {
+                // Illustration
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.1),
+                                    Color.white.opacity(0.05)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 140, height: 140)
+                    // Microphone icon
+                    Image(systemName: "person.wave.2.fill")
+                        .font(.system(size: 64, weight: .thin))
+                        .foregroundColor(.white)
+                }
+                .padding(.vertical)
+                
+                // Title
+                HStack {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Let's Get Ready")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
+                        
+                        // Subheader
+                        Text("Follow the instructions below to record your voice. Ensure a quiet environment for the best quality.")
+                            .font(.headline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white.opacity(0.8))
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.bottom)
+                .padding(.horizontal, 36)
+
+                
+                // Instructions with checkboxes
+                VStack(spacing: 16) {
+                    CheckableInstructionRow(
+                        text: "Find a quiet place",
+                        isChecked: $quietPlaceChecked
+                    )
+                    
+                    CheckableInstructionRow(
+                        text: "Speak clearly and naturally",
+                        isChecked: $speakNaturalChecked
+                    )
+                    
+                    CheckableInstructionRow(
+                        text: "Avoid background noise",
+                        isChecked: $useMicrophoneChecked
+                    )
+                }
+                .padding(.vertical)
+                .padding(.horizontal, 36)
                 Spacer()
-            }
-            
-            // Instructions with icons
-            VStack(spacing: 16) {
-                InstructionRow(
-                    text: "Find a quiet place",
-                    icon: "speaker.wave.2.fill"
-                )
-                
-                InstructionRow(
-                    text: "Speak aloud and natural",
-                    icon: "mic.fill"
-                )
-                
-                InstructionRow(
-                    text: "Use iPhone microphone or\nwired headphones",
-                    icon: "headphones"
-                )
             }
             
             // Continue button
@@ -170,14 +215,53 @@ struct IntroStepView: View {
                 Text("Record voice")
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(allChecked ? .white : .white.opacity(0.4))
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(red: 0.2, green: 0.3, blue: 0.8))
+                    .background(allChecked ? Color(red: 0.2, green: 0.3, blue: 0.8) : Color(red: 0.2, green: 0.3, blue: 0.8).opacity(0.3))
                     .cornerRadius(16)
             }
+            .disabled(!allChecked)
+            .padding(.horizontal, 36)
         }
-        .padding(.horizontal, 36)
+    }
+}
+
+struct CheckableInstructionRow: View {
+    let text: String
+    @Binding var isChecked: Bool
+    
+    var body: some View {
+        Button(action: {
+            playHapticFeedback()
+            isChecked.toggle()
+        }) {
+            HStack(alignment: .center, spacing: 12) {
+                // Checkbox
+                ZStack {
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 2)
+                        .frame(width: 20, height: 20)
+                    
+                    if isChecked {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                
+                // Text
+                Text(text)
+                    .font(.headline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -371,6 +455,7 @@ struct PreviewStepView: View {
             VStack(spacing: 12) {
                 Button(action: {
                     playHapticFeedback()
+                    viewModel.stopPlayback()
                     onContinue()
                 }) {
                     Text("Sounds Good!")
