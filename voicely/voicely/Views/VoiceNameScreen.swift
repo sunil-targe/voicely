@@ -639,10 +639,12 @@ struct VoiceGridItem: View {
 
 
                     if isSelected {
-                        AnimatedBackground()
-//                        Circle()
-//                            .stroke(Color.white, lineWidth: 3)
-//                            .frame(width: 96, height: 96)
+                        if isPlaying {
+                            AnimatedBackground()
+                        }
+                        Circle()
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: 96, height: 96)
                     }
 //                    
                     ZStack(alignment: .bottomTrailing) {
@@ -751,98 +753,28 @@ struct AnimatedBackground: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            .green,
-                            .blue,
-                            .orange,
-                            .red
+                            .indigo,
+                            .orange
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
-                .blur(radius: 10)
+                .blur(radius: 12)
                 .scaleEffect(pulse)
         }
         .frame(width: 110, height: 110)
         .onAppear {
-            withAnimation(.linear(duration: 6).repeatForever(autoreverses: false)) {
+            withAnimation(.linear(duration: 6).repeatForever(autoreverses: true)) {
                 phase = .pi * 2
             }
-            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+            withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
                 pulse = 1.08
             }
         }
         .accessibilityHidden(true)
     }
 }
-
-//struct AnimatedBackground: View {
-//    @State private var phase: CGFloat = 0
-//    @State private var pulse: CGFloat = 1
-//    @State private var bounce: CGFloat = 0
-//
-//    var body: some View {
-//        ZStack {
-//            BlobShape(phase: phase)
-//                .fill(
-//                    LinearGradient(
-//                        colors: [
-//                            Color.pink.opacity(0.6),
-//                            Color.purple.opacity(0.5)
-//                        ],
-//                        startPoint: .topLeading,
-//                        endPoint: .bottomTrailing
-//                    )
-//                )
-//                .scaleEffect(pulse)
-//                .offset(y: bounce)
-//        }
-//        .frame(width: 110, height: 110)
-//        .clipShape(Circle()) // <-- Match avatar’s shape
-//        .onAppear {
-//            withAnimation(.linear(duration: 6).repeatForever(autoreverses: false)) {
-//                phase = .pi * 2
-//            }
-//            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-//                pulse = 1.1
-//            }
-//            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-//                bounce = -6
-//            }
-//        }
-//    }
-//}
-
-//
-//struct AnimatedBackground: View {
-//    @State private var animate = false
-//    
-//    var body: some View {
-//        ZStack {
-//            Circle()
-//                .stroke(Color.white.opacity(0.6), lineWidth: 2)
-//                .scaleEffect(animate ? 1.1 : 0.9)
-//                .opacity(animate ? 0.3 : 0.1)
-//                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: animate)
-//            
-//            Circle()
-//                .stroke(Color.purple.opacity(0.5), lineWidth: 2)
-//                .scaleEffect(animate ? 1.2 : 1.0)
-//                .opacity(animate ? 0.4 : 0.1)
-//                .animation(.easeInOut(duration: 3).repeatForever(autoreverses: true), value: animate)
-//            
-//            Circle()
-//                .stroke(Color.blue.opacity(0.4), lineWidth: 2)
-//                .scaleEffect(animate ? 1.4 : 1.2)
-//                .opacity(animate ? 0.5 : 0.2)
-//                .animation(.easeInOut(duration: 4).repeatForever(autoreverses: true), value: animate)
-//        }
-//        .frame(width: 90, height: 90)
-//        .onAppear {
-//            animate = true
-//        }
-//    }
-//}
 
 #if DEBUG
 #Preview {
