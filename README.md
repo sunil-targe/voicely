@@ -1,2 +1,2 @@
 # voicely
-ai voice generator
+Kids storytelling app with cloned voice
