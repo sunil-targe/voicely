@@ -52,6 +52,7 @@ extension VoicelyPlayer {
         @State private var showFullText = false
         @State private var showSpeedControl = false
         @StateObject private var speedManager = PlaybackSpeedManager()
+        @State private var speedMonitorTimer: Timer?
         
         var body: some View {
             VStack(spacing: 0) {
@@ -129,6 +130,13 @@ extension VoicelyPlayer {
             player.seek(to: CMTime(seconds: newTime, preferredTimescale: 600))
             currentTime = newTime
             mediaPlayerManager.seek(to: newTime)
+            
+            // Ensure speed is maintained after seeking
+            if isPlaying {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+            }
         }
         
         private func seekBackward() {
@@ -137,6 +145,13 @@ extension VoicelyPlayer {
             player.seek(to: CMTime(seconds: newTime, preferredTimescale: 600))
             currentTime = newTime
             mediaPlayerManager.seek(to: newTime)
+            
+            // Ensure speed is maintained after seeking
+            if isPlaying {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+            }
         }
         
         private func setupPlayer() {
@@ -236,6 +251,9 @@ extension VoicelyPlayer {
             isPlaying = true
             duration = item.asset.duration.seconds
             mediaPlayerManager.playStory()
+            
+            // Start speed monitoring to ensure speed persists
+            startSpeedMonitoring()
         }
         
         private func cleanupPlayer() {
@@ -244,6 +262,9 @@ extension VoicelyPlayer {
                 timeObserver = nil
             }
             statusObserver.invalidate()
+            
+            // Stop speed monitoring
+            stopSpeedMonitoring()
             
             // Restore soundscape volume before stopping story audio
             mediaPlayerManager.restoreSoundscapeVolume()
@@ -270,6 +291,7 @@ extension VoicelyPlayer {
             if isPlaying {
                 player.pause()
                 mediaPlayerManager.pauseStory()
+                stopSpeedMonitoring()
                 
                 // Restore soundscape volume when story is paused
                 mediaPlayerManager.restoreSoundscapeVolume()
@@ -288,8 +310,29 @@ extension VoicelyPlayer {
                 } else {
                     player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
                 }
+                
+                // Start playing first
                 player.play()
+                
+                // Apply the speed immediately after play() call
                 player.rate = Float(speedManager.currentSpeed)
+                
+                // Double-check the rate is applied with multiple attempts
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+                
+                // Start continuous speed monitoring
+                startSpeedMonitoring()
+                
                 mediaPlayerManager.playStory()
                 
                 // Adjust soundscape volume when story resumes
@@ -312,6 +355,13 @@ extension VoicelyPlayer {
                 player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
                 mediaPlayerManager.seek(to: currentTime)
                 
+                // Ensure speed is maintained after seeking
+                if isPlaying {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        player.rate = Float(self.speedManager.currentSpeed)
+                    }
+                }
+                
                 if #available(iOS 16.1, *) {
                     DynamicIslandManager.shared.updateActivity(
                         isPlaying: isPlaying,
@@ -320,6 +370,33 @@ extension VoicelyPlayer {
                     )
                 }
             }
+        }
+        
+        // MARK: - Speed Monitoring Methods
+        
+        private func startSpeedMonitoring() {
+            // Stop any existing timer first
+            stopSpeedMonitoring()
+            
+            // Create a timer that continuously ensures the speed is applied
+            speedMonitorTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+                guard let player = self.player,
+                      self.isPlaying else { return }
+                
+                // Only apply speed if it's different from current rate
+                let currentRate = player.rate
+                let targetRate = Float(self.speedManager.currentSpeed)
+                
+                if abs(currentRate - targetRate) > 0.01 {
+                    player.rate = targetRate
+                    print("SpeedMonitor: Applied speed \(targetRate)x (was \(currentRate)x)")
+                }
+            }
+        }
+        
+        private func stopSpeedMonitoring() {
+            speedMonitorTimer?.invalidate()
+            speedMonitorTimer = nil
         }
     }
     

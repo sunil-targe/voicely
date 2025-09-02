@@ -105,7 +105,9 @@ class MediaPlayerManager: ObservableObject {
     
     private func updateNowPlayingInfo() {
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+        // Use actual player rate if available, otherwise default to 1.0
+        let playbackRate = isPlaying ? (player?.rate ?? 1.0) : 0.0
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = playbackRate
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
         
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
