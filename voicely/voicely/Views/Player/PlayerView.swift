@@ -28,204 +28,6 @@ class PlayerItemStatusObserver: NSObject, ObservableObject {
     }
 }
 
-// MARK: - Player Subviews
-
-private struct PlayerHeaderView: View {
-    @EnvironmentObject var mainVM: MainViewModel
-    
-    let style: VoicelyPlayer.Style
-    let voice: Voice
-    let localAudioFilename: String?
-    let onClose: (() -> Void)?
-        
-    var body: some View {
-        HStack {
-            VoiceSelectionButton(
-                color: voice.color.color,
-                title: voice.name,
-                style: .plain
-            )
-            
-            Spacer()
-            
-            if onClose != nil {
-                Button(action: {
-                    playHapticFeedback()
-                    withAnimation {
-                        onClose?()
-                    }
-                }) {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.gray)
-                        .frame(width: 32, height: 32)
-                }
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-    }
-}
-
-private struct PlayerProgressView: View {
-    @Binding var currentTime: Double
-    let duration: Double
-    let onSliderChanged: (Bool) -> Void
-    
-    var body: some View {
-        HStack {
-            Text(timeString(currentTime))
-                .font(.caption)
-                .foregroundColor(.gray)
-            
-            Slider(value: $currentTime, in: 0...duration, onEditingChanged: onSliderChanged)
-                .accentColor(.blue)
-            
-            Text(timeString(duration))
-                .font(.caption)
-                .foregroundColor(.gray)
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-    }
-    
-    private func timeString(_ seconds: Double) -> String {
-        guard seconds.isFinite else { return "00:00" }
-        let intSec = Int(seconds)
-        let min = intSec / 60
-        let sec = intSec % 60
-        return String(format: "%02d:%02d", min, sec)
-    }
-}
-
-private struct PlayerControlsView: View {
-    let playerStatus: AVPlayerItem.Status
-    @Binding var isPlaying: Bool
-    let speedText: String
-    let localAudioFilename: String?
-    
-    let onSeekBackward: () -> Void
-    let onTogglePlay: () -> Void
-    let onSeekForward: () -> Void
-    let onToggleSpeed: () -> Void
-    @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
-    
-    var body: some View {
-        HStack(spacing: 30) {
-            // Menu button
-            Menu {
-                if let filename = localAudioFilename,
-                   let fileURL = getLocalFileURL(for: filename) {
-                    ShareLink(item: fileURL) {
-                        HStack{
-                            Text("Share Audio")
-                            Image("ic_share")
-                                .resizable()
-                                .frame(width: 24, height: 24)
-                        }
-                    }
-                }
-                // Sleep Timer submenu
-                Menu {
-                    Button("30 minutes") { setSleep(minutes: 30) }
-                    Button("20 minutes") { setSleep(minutes: 20) }
-                    Button("10 minutes") { setSleep(minutes: 10) }
-                    Button("5 minutes") { setSleep(minutes: 5) }
-                    if mediaPlayerManager.sleepTimerRemainingSeconds != nil {
-                        Divider()
-                        Button("Cancel Sleep Timer") { mediaPlayerManager.cancelSleepTimer() }
-                    }
-                } label: {
-                    Label(getSleepTimerDisplayText(), systemImage: "moon")
-                }
-            } label: {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: "ellipsis")
-                            .foregroundColor(.white)
-                            .font(.system(size: 16))
-                    )
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            // Rewind 10s
-            Button(action: {
-                playHapticFeedback()
-                onSeekBackward()
-            }) {
-                Image(systemName: "gobackward.10")
-                    .foregroundColor(.white)
-                    .font(.title2)
-            }
-            
-            // Play/Pause button
-            Button(action: {
-                playHapticFeedback()
-                onTogglePlay()
-            }) {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    .foregroundColor(.white)
-                    .font(.title)
-                    .frame(width: 60, height: 60)
-                    .background(Circle().fill(Color.blue))
-            }
-            .disabled(playerStatus != .readyToPlay)
-            
-            // Fast forward 10s
-            Button(action: {
-                playHapticFeedback()
-                onSeekForward()
-            }) {
-                Image(systemName: "goforward.10")
-                    .foregroundColor(.white)
-                    .font(.title2)
-            }
-            
-            // Speed control
-            Button(action: {
-                playHapticFeedback()
-                onToggleSpeed()
-            }) {
-                Text(speedText)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
-                    .background(Circle().fill(Color.gray.opacity(0.3)))
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 20)
-    }
-    
-    private func getLocalFileURL(for filename: String) -> URL? {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let fileURL = docs.appendingPathComponent(filename)
-        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
-    }
-    
-    private func setSleep(minutes: Int) {
-        let seconds = TimeInterval(minutes * 60)
-        mediaPlayerManager.setSleepTimer(seconds: seconds)
-    }
-    
-    private func getSleepTimerDisplayText() -> String {
-        guard let remainingSeconds = mediaPlayerManager.sleepTimerRemainingSeconds else {
-            return "Sleep Time"
-        }
-        
-        let minutes = Int(remainingSeconds) / 60
-        let seconds = Int(remainingSeconds) % 60
-        
-        if minutes > 0 {
-            return "\(minutes)m \(seconds)s"
-        } else {
-            return "\(seconds)s"
-        }
-    }
-}
-
 extension VoicelyPlayer {
     struct PlayerView: View {
         @EnvironmentObject var mainVM: MainViewModel
@@ -247,8 +49,10 @@ extension VoicelyPlayer {
         @EnvironmentObject var mediaPlayerManager: MediaPlayerManager
         @State private var showErrorAlert = false
         @State private var errorMessage = ""
-        @State private var playbackSpeed: Double = 1.0
         @State private var showFullText = false
+        @State private var showSpeedControl = false
+        @StateObject private var speedManager = PlaybackSpeedManager()
+        @State private var speedMonitorTimer: Timer?
         
         var body: some View {
             VStack(spacing: 0) {
@@ -295,29 +99,29 @@ extension VoicelyPlayer {
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
+            .sheet(isPresented: $showSpeedControl) {
+                SpeedControlModal(
+                    currentSpeed: $speedManager.currentSpeed,
+                    isPresented: $showSpeedControl,
+                    onSpeedChanged: { newSpeed in
+                        speedManager.updateSpeed(newSpeed)
+                        player?.rate = Float(newSpeed)
+                    },
+                    originalDuration: duration
+                )
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+            }
         }
         
         // MARK: - Computed Properties
         private var speedText: String {
-            return String(format: "%.1fx", playbackSpeed)
+            return String(format: "%.1fx", speedManager.currentSpeed)
         }
         
         // MARK: - Player Control Methods
         private func togglePlaybackSpeed() {
-            switch playbackSpeed {
-            case 0.5:
-                playbackSpeed = 1.0
-            case 1.0:
-                playbackSpeed = 1.5
-            case 1.5:
-                playbackSpeed = 2.0
-            case 2.0:
-                playbackSpeed = 0.5
-            default:
-                playbackSpeed = 1.0
-            }
-            
-            player?.rate = Float(playbackSpeed)
+            showSpeedControl = true
         }
         
         private func seekForward() {
@@ -326,6 +130,13 @@ extension VoicelyPlayer {
             player.seek(to: CMTime(seconds: newTime, preferredTimescale: 600))
             currentTime = newTime
             mediaPlayerManager.seek(to: newTime)
+            
+            // Ensure speed is maintained after seeking
+            if isPlaying {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+            }
         }
         
         private func seekBackward() {
@@ -334,6 +145,13 @@ extension VoicelyPlayer {
             player.seek(to: CMTime(seconds: newTime, preferredTimescale: 600))
             currentTime = newTime
             mediaPlayerManager.seek(to: newTime)
+            
+            // Ensure speed is maintained after seeking
+            if isPlaying {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+            }
         }
         
         private func setupPlayer() {
@@ -429,10 +247,13 @@ extension VoicelyPlayer {
             }
             
             player.play()
-            player.rate = Float(playbackSpeed)
+            player.rate = Float(speedManager.currentSpeed)
             isPlaying = true
             duration = item.asset.duration.seconds
             mediaPlayerManager.playStory()
+            
+            // Start speed monitoring to ensure speed persists
+            startSpeedMonitoring()
         }
         
         private func cleanupPlayer() {
@@ -441,6 +262,9 @@ extension VoicelyPlayer {
                 timeObserver = nil
             }
             statusObserver.invalidate()
+            
+            // Stop speed monitoring
+            stopSpeedMonitoring()
             
             // Restore soundscape volume before stopping story audio
             mediaPlayerManager.restoreSoundscapeVolume()
@@ -467,6 +291,7 @@ extension VoicelyPlayer {
             if isPlaying {
                 player.pause()
                 mediaPlayerManager.pauseStory()
+                stopSpeedMonitoring()
                 
                 // Restore soundscape volume when story is paused
                 mediaPlayerManager.restoreSoundscapeVolume()
@@ -485,8 +310,29 @@ extension VoicelyPlayer {
                 } else {
                     player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
                 }
+                
+                // Start playing first
                 player.play()
-                player.rate = Float(playbackSpeed)
+                
+                // Apply the speed immediately after play() call
+                player.rate = Float(speedManager.currentSpeed)
+                
+                // Double-check the rate is applied with multiple attempts
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    player.rate = Float(self.speedManager.currentSpeed)
+                }
+                
+                // Start continuous speed monitoring
+                startSpeedMonitoring()
+                
                 mediaPlayerManager.playStory()
                 
                 // Adjust soundscape volume when story resumes
@@ -509,6 +355,13 @@ extension VoicelyPlayer {
                 player.seek(to: CMTime(seconds: currentTime, preferredTimescale: 600))
                 mediaPlayerManager.seek(to: currentTime)
                 
+                // Ensure speed is maintained after seeking
+                if isPlaying {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        player.rate = Float(self.speedManager.currentSpeed)
+                    }
+                }
+                
                 if #available(iOS 16.1, *) {
                     DynamicIslandManager.shared.updateActivity(
                         isPlaying: isPlaying,
@@ -517,6 +370,33 @@ extension VoicelyPlayer {
                     )
                 }
             }
+        }
+        
+        // MARK: - Speed Monitoring Methods
+        
+        private func startSpeedMonitoring() {
+            // Stop any existing timer first
+            stopSpeedMonitoring()
+            
+            // Create a timer that continuously ensures the speed is applied
+            speedMonitorTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+                guard let player = self.player,
+                      self.isPlaying else { return }
+                
+                // Only apply speed if it's different from current rate
+                let currentRate = player.rate
+                let targetRate = Float(self.speedManager.currentSpeed)
+                
+                if abs(currentRate - targetRate) > 0.01 {
+                    player.rate = targetRate
+                    print("SpeedMonitor: Applied speed \(targetRate)x (was \(currentRate)x)")
+                }
+            }
+        }
+        
+        private func stopSpeedMonitoring() {
+            speedMonitorTimer?.invalidate()
+            speedMonitorTimer = nil
         }
     }
     
