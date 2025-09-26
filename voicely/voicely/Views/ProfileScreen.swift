@@ -25,7 +25,6 @@ struct ProfileScreen: View {
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
                             .foregroundColor(.gray)
-                            .padding(.trailing, 6)
                     }
                 }
                 ToolbarItem(placement: .topBarLeading) {

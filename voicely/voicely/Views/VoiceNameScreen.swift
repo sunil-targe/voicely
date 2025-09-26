@@ -377,7 +377,6 @@ struct VoiceNameScreen: View {
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
                             .foregroundColor(.gray)
-                            .padding(.trailing, 6)
                     }
                 }
             }

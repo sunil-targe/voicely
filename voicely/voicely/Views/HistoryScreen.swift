@@ -214,7 +214,6 @@ struct HistoryScreen: View {
                             Text(isEditing ? "Done" : "Edit")
                                 .fontWeight(.semibold)
                                 .foregroundColor(.gray)
-                                .padding(.leading, 6)
                         }
                     }
                 }
@@ -225,7 +224,6 @@ struct HistoryScreen: View {
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
                             .foregroundColor(.gray)
-                            .padding(.trailing, 6)
                     }
                 }
             }

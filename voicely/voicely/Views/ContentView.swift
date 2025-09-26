@@ -48,7 +48,6 @@ struct ContentView: View {
                     .easeOut(duration: 0.1),
                     value: mediaPlayerManager.currentSoundscape
                 )
-                .padding(.leading, 6)
         }
     }
     
@@ -268,7 +267,6 @@ struct ContentView: View {
                     }) {
                         Image("ic_user")
                             .foregroundStyle(.gray)
-                            .padding(.trailing, 6)
                     }
                 }
             }

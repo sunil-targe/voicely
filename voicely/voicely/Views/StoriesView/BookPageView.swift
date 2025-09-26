@@ -186,7 +186,6 @@ struct BookPageView: View {
                                 .easeOut(duration: 0.1),
                                 value: mediaPlayerManager.currentSoundscape
                             )
-                            .padding(.leading, 6)
                     }
                 }
             }

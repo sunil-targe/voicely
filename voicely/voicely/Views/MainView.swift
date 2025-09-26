@@ -152,7 +152,6 @@ struct MainView: View {
                         Image(systemName: "xmark")
                             .imageScale(.medium)
                             .foregroundColor(.gray)
-                            .padding(.leading, 6)
                     }
                 }
                 

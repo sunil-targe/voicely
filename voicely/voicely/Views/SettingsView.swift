@@ -56,7 +56,6 @@ struct SettingsView: View {
                     }) {
                         Image(systemName: "xmark").imageScale(.medium)
                             .foregroundColor(.white)
-                            .padding(.trailing, 6)
                     }
                 }
             }
