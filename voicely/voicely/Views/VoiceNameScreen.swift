@@ -420,8 +420,12 @@ struct VoiceNameScreen: View {
     
     private func startVoiceClone() {
         playHapticFeedback()
-        viewModel.stopPreview()
-        viewModel.showVoiceClone = true
+        if viewModel.purchaseVM.isPremium {
+            viewModel.stopPreview()
+            viewModel.showVoiceClone = true
+        } else {
+            viewModel.showPaywall = true
+        }
     }
     private func getEmotionDisplayValue(_ emotion: String) -> String {
         let emoji = emotions.first { $0.0 == emotion }?.1 ?? "🎭"
