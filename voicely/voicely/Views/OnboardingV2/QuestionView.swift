@@ -30,9 +30,29 @@ struct QuestionView: View {
             Color.black
                 .ignoresSafeArea()
             
+            HStack {
+                // Clouds positioned at fixed positions from top
+                Image("left_cloud")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 153)
+                    .padding(.leading, 0)
+                
+                Spacer()
+                
+                Image("right_cloud")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 134)
+                    .padding(.trailing, 0)
+                    .offset(y: -60)
+            }
+            .padding(.top, 40)
+            .padding(.horizontal, 0)
+            
             VStack(spacing: 0) {
                 AnimatedView(
-                    name: "parent_head",
+                    name: "child_head",
                     loop: .loop
                 )
                 .aspectRatio(contentMode: .fit)
