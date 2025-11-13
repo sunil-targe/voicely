@@ -9,6 +9,7 @@ import SwiftUI
 
 struct QuestionView: View {
     @State private var selectedOptions: Set<String> = []
+    @State private var showMainApp = false
     
     private let options = [
         "Kindness",
@@ -24,7 +25,7 @@ struct QuestionView: View {
     }
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             // Dark background
             Color.black
                 .ignoresSafeArea()
@@ -46,8 +47,7 @@ struct QuestionView: View {
                 // Next Button
                 VStack(spacing: 16) {
                     Button(action: {
-                        let selectedArray = Array(selectedOptions).sorted()
-                        print("Selected options: \(selectedArray)")
+                        completeOnboarding()
                     }) {
                         HStack(spacing: 8) {
                             Text("Next")
@@ -56,21 +56,27 @@ struct QuestionView: View {
                                 .font(.system(size: 14, weight: .bold))
                         }
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 100)
                         .frame(height: 56)
                         .background(
                             Group {
                                 if isNextButtonEnabled {
-                                    LinearGradient(
-                                        colors: [
-                                            Color(hex: "#A734BD"),
-                                            Color(hex: "#FF006A")
-                                        ],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
+                                    ZStack(alignment: .center) {
+                                        RadialGradient(
+                                            gradient: Gradient(colors: [
+                                                Color(hex: "7701FF"),
+                                                Color(hex: "C189FE")
+                                            ]),
+                                            center: .center,
+                                            startRadius: 10,
+                                            endRadius: 250
+                                        )
+                                        
+                                        Image("cta_background_dots")
+                                            .scaledToFit()
+                                    }
                                 } else {
-                                    Color.gray.opacity(0.3)
+                                    Color.white.opacity(0.1)
                                 }
                             }
                         )
@@ -80,7 +86,7 @@ struct QuestionView: View {
                     
                     // "I will do it later" link
                     Button(action: {
-                        // Handle later action
+                        completeOnboarding()
                     }) {
                         Text("I will do it later")
                             .font(.system(size: 14, weight: .regular))
@@ -91,6 +97,22 @@ struct QuestionView: View {
                 .padding(.bottom, 40)
             }
         }
+        .fullScreenCover(isPresented: $showMainApp) {
+            ContentView()
+                .environmentObject(PurchaseViewModel.shared)
+        }
+    }
+    
+    private func completeOnboarding() {
+        // Save the selected options to UserDefaults
+        let selectedArray = Array(selectedOptions).sorted()
+        UserDefaults.standard.set(selectedArray, forKey: "onboarding_story_preferences")
+        
+        // Mark onboarding as completed
+        AppStorageManager.shared.markOnboardingCompleted()
+        
+        // Show main app
+        showMainApp = true
     }
 }
 

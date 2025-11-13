@@ -37,7 +37,7 @@ struct voicelyApp: App {
                     .environmentObject(mediaPlayerManager)
                     .environmentObject(favoritesManager)
             } else {
-                OnboardingView()
+                QuestionView()
                     .environmentObject(purchaseVM)
                     .environmentObject(mainVM)
                     .environmentObject(mediaPlayerManager)
