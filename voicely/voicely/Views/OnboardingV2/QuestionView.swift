@@ -30,25 +30,8 @@ struct QuestionView: View {
             Color.black
                 .ignoresSafeArea()
             
-            HStack {
-                // Clouds positioned at fixed positions from top
-                Image("left_cloud")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 153)
-                    .padding(.leading, 0)
-                
-                Spacer()
-                
-                Image("right_cloud")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 134)
-                    .padding(.trailing, 0)
-                    .offset(y: -60)
-            }
-            .padding(.top, 40)
-            .padding(.horizontal, 0)
+            // Clouds positioned at fixed positions from top
+            clouds.padding(.top, 40)
             
             VStack(spacing: 0) {
                 AnimatedView(
@@ -139,6 +122,26 @@ struct QuestionView: View {
         
         // Show main app
         showMainApp = true
+    }
+    
+    private var clouds: some View {
+        HStack {
+            Image("left_cloud")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 153)
+                .padding(.leading, 0)
+            
+            Spacer()
+            
+            Image("right_cloud")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 134)
+                .padding(.trailing, 0)
+                .offset(y: -60)
+        }
+        .padding(.horizontal, 0)
     }
 }
 
