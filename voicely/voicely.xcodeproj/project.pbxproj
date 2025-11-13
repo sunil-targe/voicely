@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		38069B6A2EC601DB0021063D /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 38069B692EC601DB0021063D /* Lottie */; };
 		3876376C2E37A8E5002C05F3 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 3876376B2E37A8E5002C05F3 /* DesignSystem */; };
 		387637F12E37AAED002C05F3 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 387637F02E37AAED002C05F3 /* DesignSystem */; };
 		387F2D712E1126E900BA8681 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 387F2D702E1126E900BA8681 /* RevenueCat */; };
@@ -53,6 +54,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				38BE2ECA2E5611B700CED126 /* FirebaseAppCheck in Frameworks */,
+				38069B6A2EC601DB0021063D /* Lottie in Frameworks */,
 				38BE2EC82E5611B700CED126 /* FirebaseAnalytics in Frameworks */,
 				387637F12E37AAED002C05F3 /* DesignSystem in Frameworks */,
 				38A57AF52E18F8F70082F442 /* Amplitude in Frameworks */,
@@ -120,6 +122,7 @@
 				38BE2ECF2E5611B700CED126 /* FirebaseDatabase */,
 				38BE2ED12E5611B700CED126 /* FirebaseFirestore */,
 				38BE2ED32E5611B700CED126 /* FirebaseStorage */,
+				38069B692EC601DB0021063D /* Lottie */,
 			);
 			productName = voicely;
 			productReference = 387F29DF2E0BC11500BA8681 /* voicely.app */;
@@ -154,6 +157,7 @@
 				38A57AF32E18F8F70082F442 /* XCRemoteSwiftPackageReference "Amplitude-iOS" */,
 				F4DF49602E3DD709006C7625 /* XCLocalSwiftPackageReference "DesignSystem/DesignSystem" */,
 				38BE2EC62E5611B700CED126 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				38069B682EC601DB0021063D /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 387F29E02E0BC11500BA8681 /* Products */;
@@ -412,6 +416,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		38069B682EC601DB0021063D /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
 		387F2D6F2E1126E900BA8681 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
@@ -439,6 +451,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		38069B692EC601DB0021063D /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38069B682EC601DB0021063D /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
 		3876376B2E37A8E5002C05F3 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DesignSystem;

@@ -31,7 +31,13 @@ struct QuestionView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                Spacer()
+                AnimatedView(
+                    name: "parent_head",
+                    loop: .loop
+                )
+                .aspectRatio(contentMode: .fit)
+                .padding(.horizontal)
+                .offset(y: -50)
                 
                 // Tag Selection View
                 TagSelectionView(
