@@ -30,6 +30,8 @@ struct QuestionView: View {
             Color.black
                 .ignoresSafeArea()
             
+            cloudBackground
+            
             // Clouds positioned at fixed positions from top
             clouds.padding(.top, 40)
             
@@ -50,6 +52,7 @@ struct QuestionView: View {
                     selectedOptions: $selectedOptions
                 )
                 .padding(.horizontal, 24)
+                .offset(y: -100)
                 
                 Spacer()
                 
@@ -122,6 +125,19 @@ struct QuestionView: View {
         
         // Show main app
         showMainApp = true
+    }
+    
+    private var cloudBackground: some View {
+        GeometryReader { geometry in
+            Image("que_background_blue")
+                .resizable()
+                .scaledToFill()
+                .frame(width: geometry.size.width)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .clipped()
+                .ignoresSafeArea(edges: .top)
+                .offset(y: -190)
+        }
     }
     
     private var clouds: some View {
