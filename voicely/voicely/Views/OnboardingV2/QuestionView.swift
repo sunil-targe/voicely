@@ -8,20 +8,30 @@
 import SwiftUI
 
 struct QuestionView: View {
-    @State private var selectedOptions: Set<String> = []
-    @State private var showMainApp = false
+    let title: String
+    let subtitle: String
+    let options: [String]
+    let onNext: ([String]) -> Void
+    let onSkip: () -> Void
     
-    private let options = [
-        "Kindness",
-        "Courage",
-        "Curiosity",
-        "Calmness",
-        "Gratitude",
-        "Creativity"
-    ]
+    @State private var selectedOptions: Set<String> = []
     
     private var isNextButtonEnabled: Bool {
         !selectedOptions.isEmpty
+    }
+    
+    init(
+        title: String,
+        subtitle: String,
+        options: [String],
+        onNext: @escaping ([String]) -> Void,
+        onSkip: @escaping () -> Void
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.options = options
+        self.onNext = onNext
+        self.onSkip = onSkip
     }
     
     var body: some View {
@@ -46,8 +56,8 @@ struct QuestionView: View {
                 
                 // Tag Selection View
                 TagSelectionView(
-                    title: "What do you want your child to take away from stories?",
-                    subtitle: "Select their story preference",
+                    title: title,
+                    subtitle: subtitle,
                     options: options,
                     selectedOptions: $selectedOptions
                 )
@@ -59,7 +69,8 @@ struct QuestionView: View {
                 // Next Button
                 VStack(spacing: 16) {
                     Button(action: {
-                        completeOnboarding()
+                        let selectedArray = Array(selectedOptions).sorted()
+                        onNext(selectedArray)
                     }) {
                         HStack(spacing: 8) {
                             Text("Next")
@@ -98,7 +109,7 @@ struct QuestionView: View {
                     
                     // "I will do it later" link
                     Button(action: {
-                        completeOnboarding()
+                        onSkip()
                     }) {
                         Text("I will do it later")
                             .font(.system(size: 14, weight: .regular))
@@ -109,22 +120,6 @@ struct QuestionView: View {
                 .padding(.bottom, 40)
             }
         }
-        .fullScreenCover(isPresented: $showMainApp) {
-            ContentView()
-                .environmentObject(PurchaseViewModel.shared)
-        }
-    }
-    
-    private func completeOnboarding() {
-        // Save the selected options to UserDefaults
-        let selectedArray = Array(selectedOptions).sorted()
-        UserDefaults.standard.set(selectedArray, forKey: "onboarding_story_preferences")
-        
-        // Mark onboarding as completed
-        AppStorageManager.shared.markOnboardingCompleted()
-        
-        // Show main app
-        showMainApp = true
     }
     
     private var cloudBackground: some View {
@@ -161,6 +156,81 @@ struct QuestionView: View {
     }
 }
 
+// MARK: - Onboarding Flow Container
+
+struct OnboardingFlowView: View {
+    @State private var currentQuestion = 0
+    @State private var showMainApp = false
+    @State private var answers: [String: [String]] = [:]
+    
+    private let questions: [(title: String, subtitle: String, options: [String], key: String)] = [
+        (
+            title: "What do you want your child to take away from stories?",
+            subtitle: "Select their story preference",
+            options: ["Kindness", "Courage", "Curiosity", "Calmness", "Gratitude", "Creativity"],
+            key: "story_preferences"
+        ),
+        (
+            title: "Which stories make your child's eyes light up?",
+            subtitle: "Select their story preference",
+            options: ["Animals", "Space", "Fairytales", "Nature", "Magic Worlds", "None"],
+            key: "story_types"
+        )
+    ]
+    
+    private func completeOnboarding() {
+        // Save all answers to UserDefaults
+        for (key, values) in answers {
+            UserDefaults.standard.set(values, forKey: "onboarding_\(key)")
+        }
+        
+        // Mark onboarding as completed
+        AppStorageManager.shared.markOnboardingCompleted()
+        
+        // Show main app
+        showMainApp = true
+    }
+    
+    var body: some View {
+        ZStack {
+            if currentQuestion < questions.count {
+                QuestionView(
+                    title: questions[currentQuestion].title,
+                    subtitle: questions[currentQuestion].subtitle,
+                    options: questions[currentQuestion].options,
+                    onNext: { selectedOptions in
+                        answers[questions[currentQuestion].key] = selectedOptions
+                        if currentQuestion < questions.count - 1 {
+                            currentQuestion += 1
+                        } else {
+                            completeOnboarding()
+                        }
+                    },
+                    onSkip: {
+                        completeOnboarding()
+                    }
+                )
+            } else {
+                Color.black
+                    .ignoresSafeArea()
+                    .onAppear {
+                        completeOnboarding()
+                    }
+            }
+        }
+        .fullScreenCover(isPresented: $showMainApp) {
+            ContentView()
+                .environmentObject(PurchaseViewModel.shared)
+        }
+    }
+}
+
 #Preview {
-    QuestionView()
+    QuestionView(
+        title: "What do you want your child to take away from stories?",
+        subtitle: "Select their story preference",
+        options: ["Kindness", "Courage", "Curiosity", "Calmness", "Gratitude", "Creativity"],
+        onNext: { _ in },
+        onSkip: { }
+    )
 }
