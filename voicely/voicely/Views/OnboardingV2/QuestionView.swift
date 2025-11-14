@@ -13,10 +13,12 @@ struct QuestionView: View {
     let options: [String]
     let animationName: String
     let backgroundImageName: String
+    let backgroundOffset: CGFloat
     let onNext: ([String]) -> Void
     let onSkip: () -> Void
     
     @State private var selectedOptions: Set<String> = []
+    @State private var animatedBackgroundOffset: CGFloat = -190
     
     private var isNextButtonEnabled: Bool {
         !selectedOptions.isEmpty
@@ -28,6 +30,7 @@ struct QuestionView: View {
         options: [String],
         animationName: String,
         backgroundImageName: String,
+        backgroundOffset: CGFloat,
         onNext: @escaping ([String]) -> Void,
         onSkip: @escaping () -> Void
     ) {
@@ -36,6 +39,7 @@ struct QuestionView: View {
         self.options = options
         self.animationName = animationName
         self.backgroundImageName = backgroundImageName
+        self.backgroundOffset = backgroundOffset
         self.onNext = onNext
         self.onSkip = onSkip
     }
@@ -59,6 +63,22 @@ struct QuestionView: View {
                 .aspectRatio(contentMode: .fit)
                 .padding(.horizontal)
                 .offset(y: -50)
+                .onAppear {
+                    // Only animate if this is the second question (offset is -350)
+                    if backgroundOffset == -350 {
+                        // Start from initial position
+                        animatedBackgroundOffset = -190
+                        // Animate background offset change with delay after view transition
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            withAnimation(.easeInOut(duration: 0.8)) {
+                                animatedBackgroundOffset = backgroundOffset
+                            }
+                        }
+                    } else {
+                        // First question - set immediately without animation
+                        animatedBackgroundOffset = backgroundOffset
+                    }
+                }
                 
                 // Tag Selection View
                 TagSelectionView(
@@ -137,7 +157,7 @@ struct QuestionView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .clipped()
                 .ignoresSafeArea(edges: .top)
-                .offset(y: -190)
+                .offset(y: animatedBackgroundOffset)
         }
     }
     
@@ -206,6 +226,7 @@ struct OnboardingFlowView: View {
                     options: questions[currentQuestion].options,
                     animationName: currentQuestion == 0 ? "parent_head" : "child_head",
                     backgroundImageName: currentQuestion == 0 ? "que_background_blue" : "que_background_pink",
+                    backgroundOffset: currentQuestion == 0 ? -190 : -350,
                     onNext: { selectedOptions in
                         answers[questions[currentQuestion].key] = selectedOptions
                         if currentQuestion < questions.count - 1 {
@@ -247,6 +268,7 @@ struct OnboardingFlowView: View {
         options: ["Kindness", "Courage", "Curiosity", "Calmness", "Gratitude", "Creativity"],
         animationName: "parent_head",
         backgroundImageName: "que_background_blue",
+        backgroundOffset: -190,
         onNext: { _ in },
         onSkip: { }
     )
