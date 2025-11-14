@@ -11,6 +11,8 @@ struct QuestionView: View {
     let title: String
     let subtitle: String
     let options: [String]
+    let animationName: String
+    let backgroundImageName: String
     let onNext: ([String]) -> Void
     let onSkip: () -> Void
     
@@ -24,12 +26,16 @@ struct QuestionView: View {
         title: String,
         subtitle: String,
         options: [String],
+        animationName: String,
+        backgroundImageName: String,
         onNext: @escaping ([String]) -> Void,
         onSkip: @escaping () -> Void
     ) {
         self.title = title
         self.subtitle = subtitle
         self.options = options
+        self.animationName = animationName
+        self.backgroundImageName = backgroundImageName
         self.onNext = onNext
         self.onSkip = onSkip
     }
@@ -47,7 +53,7 @@ struct QuestionView: View {
             
             VStack(spacing: 0) {
                 AnimatedView(
-                    name: "child_head",
+                    name: animationName,
                     loop: .loop
                 )
                 .aspectRatio(contentMode: .fit)
@@ -124,7 +130,7 @@ struct QuestionView: View {
     
     private var cloudBackground: some View {
         GeometryReader { geometry in
-            Image("que_background_blue")
+            Image(backgroundImageName)
                 .resizable()
                 .scaledToFill()
                 .frame(width: geometry.size.width)
@@ -198,10 +204,14 @@ struct OnboardingFlowView: View {
                     title: questions[currentQuestion].title,
                     subtitle: questions[currentQuestion].subtitle,
                     options: questions[currentQuestion].options,
+                    animationName: currentQuestion == 0 ? "parent_head" : "child_head",
+                    backgroundImageName: currentQuestion == 0 ? "que_background_blue" : "que_background_pink",
                     onNext: { selectedOptions in
                         answers[questions[currentQuestion].key] = selectedOptions
                         if currentQuestion < questions.count - 1 {
-                            currentQuestion += 1
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                currentQuestion += 1
+                            }
                         } else {
                             completeOnboarding()
                         }
@@ -210,6 +220,11 @@ struct OnboardingFlowView: View {
                         completeOnboarding()
                     }
                 )
+                .id(currentQuestion)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing),
+                    removal: .move(edge: .leading)
+                ))
             } else {
                 Color.black
                     .ignoresSafeArea()
@@ -230,6 +245,8 @@ struct OnboardingFlowView: View {
         title: "What do you want your child to take away from stories?",
         subtitle: "Select their story preference",
         options: ["Kindness", "Courage", "Curiosity", "Calmness", "Gratitude", "Creativity"],
+        animationName: "parent_head",
+        backgroundImageName: "que_background_blue",
         onNext: { _ in },
         onSkip: { }
     )
