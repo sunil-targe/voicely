@@ -100,7 +100,7 @@ struct QuestionView: View {
                     }) {
                         HStack(spacing: 8) {
                             Text("Next")
-                                .font(.system(size: 16, weight: .bold))
+                                .font(.nunitoBold(size: 16))
                             Image(systemName: "arrow.right")
                                 .font(.system(size: 14, weight: .bold))
                         }
@@ -138,7 +138,7 @@ struct QuestionView: View {
                         onSkip()
                     }) {
                         Text("I will do it later")
-                            .font(.system(size: 14, weight: .regular))
+                            .font(.nunitoSemiBold(size: 16))
                             .foregroundColor(.white.opacity(0.7))
                     }
                 }

@@ -18,12 +18,12 @@ struct TagSelectionView: View {
             // Title and subtitle
             VStack(spacing: 10) {
                 Text(title)
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.nunitoExtraBold(size: 24))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                 
                 Text(subtitle)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.nunitoRegular(size: 14))
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
             }
@@ -57,7 +57,7 @@ private struct TagButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 14, weight: .medium))
+                .font(.nunitoRegular(size: 16))
                 .foregroundColor(isSelected ? .white : .white.opacity(0.8))
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)

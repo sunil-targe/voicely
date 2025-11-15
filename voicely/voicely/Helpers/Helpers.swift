@@ -72,6 +72,73 @@ extension Color {
     }
 }
 
+// MARK: - Font Extension
+
+extension Font {
+    // MARK: - Nunito Regular
+    static func nunitoRegular(size: CGFloat) -> Font {
+        .custom("Nunito-Regular", size: size)
+    }
+    
+    static func nunitoItalic(size: CGFloat) -> Font {
+        .custom("Nunito-Italic", size: size)
+    }
+    
+    // MARK: - Nunito Light
+    static func nunitoLight(size: CGFloat) -> Font {
+        .custom("Nunito-Light", size: size)
+    }
+    
+    static func nunitoLightItalic(size: CGFloat) -> Font {
+        .custom("Nunito-LightItalic", size: size)
+    }
+    
+    // MARK: - Nunito ExtraLight
+    static func nunitoExtraLight(size: CGFloat) -> Font {
+        .custom("Nunito-ExtraLight", size: size)
+    }
+    
+    static func nunitoExtraLightItalic(size: CGFloat) -> Font {
+        .custom("Nunito-ExtraLightItalic", size: size)
+    }
+    
+    // MARK: - Nunito Bold
+    static func nunitoBold(size: CGFloat) -> Font {
+        .custom("Nunito-Bold", size: size)
+    }
+    
+    static func nunitoBoldItalic(size: CGFloat) -> Font {
+        .custom("Nunito-BoldItalic", size: size)
+    }
+    
+    // MARK: - Nunito SemiBold
+    static func nunitoSemiBold(size: CGFloat) -> Font {
+        .custom("Nunito-SemiBold", size: size)
+    }
+    
+    static func nunitoSemiBoldItalic(size: CGFloat) -> Font {
+        .custom("Nunito-SemiBoldItalic", size: size)
+    }
+    
+    // MARK: - Nunito ExtraBold
+    static func nunitoExtraBold(size: CGFloat) -> Font {
+        .custom("Nunito-ExtraBold", size: size)
+    }
+    
+    static func nunitoExtraBoldItalic(size: CGFloat) -> Font {
+        .custom("Nunito-ExtraBoldItalic", size: size)
+    }
+    
+    // MARK: - Nunito Black
+    static func nunitoBlack(size: CGFloat) -> Font {
+        .custom("Nunito-Black", size: size)
+    }
+    
+    static func nunitoBlackItalic(size: CGFloat) -> Font {
+        .custom("Nunito-BlackItalic", size: size)
+    }
+}
+
 enum AppSecrets {
     private static func aesDecrypt(base64Encoded input: String, key: String) -> String? {
         guard let data = Data(base64Encoded: input),
