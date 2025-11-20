@@ -255,7 +255,7 @@ struct OnboardingFlowView: View {
             }
         }
         .fullScreenCover(isPresented: $showMainApp) {
-            ContentView()
+            MainTabView()
                 .environmentObject(PurchaseViewModel.shared)
         }
     }

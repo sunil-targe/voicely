@@ -31,7 +31,7 @@ struct voicelyApp: App {
     var body: some Scene {
         WindowGroup {
             if AppStorageManager.shared.isOnboardingCompleted() {
-                ContentView()
+                MainTabView()
                     .environmentObject(purchaseVM)
                     .environmentObject(mainVM)
                     .environmentObject(mediaPlayerManager)
