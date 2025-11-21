@@ -56,13 +56,14 @@ struct QuestionView: View {
             clouds.padding(.top, 40)
             
             VStack(spacing: 0) {
+                Spacer()
                 AnimatedView(
                     name: animationName,
                     loop: .loop
                 )
-                .aspectRatio(contentMode: .fit)
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 140, height: 140)
                 .padding(.horizontal)
-                .offset(y: -50)
                 .onAppear {
                     // Only animate if this is the second question (offset is -350)
                     if backgroundOffset == -350 {
@@ -88,7 +89,6 @@ struct QuestionView: View {
                     selectedOptions: $selectedOptions
                 )
                 .padding(.horizontal, 24)
-                .offset(y: -100)
                 
                 Spacer()
                 
